@@ -31,10 +31,16 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "expo-dev-client"
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "5ded67ed-bc64-4b2a-9781-8d74ed58082f"
+      }
     }
   }
 }
