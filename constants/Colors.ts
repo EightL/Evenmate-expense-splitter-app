@@ -16,4 +16,6 @@ export default {
     tabIconDefault: '#ccc',
     tabIconSelected: tintColorDark,
   },
+  iconColor: '#223328',
+  mateBackground: '#D4F0DD',
 };
