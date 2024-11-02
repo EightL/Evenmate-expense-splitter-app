@@ -8,7 +8,7 @@ import { handleUpdateBalances } from '@/api/updateBalances'; // Adjust the impor
 export default function GetEvenInput() {
   const [amount, setAmount] = useState('');
   const router = useRouter();
-  const { name, mateId } = useLocalSearchParams();
+  const { name, mateId: mateId } = useLocalSearchParams();
 
   const handleAdd = async () => {
     if (amount.trim() !== '') {
@@ -31,6 +31,7 @@ export default function GetEvenInput() {
         const currentUserId = user.id;
 
         // Update balances
+        console.log("MATE ID:", mateId)
         await handleUpdateBalances({
           currentUserId,
           mateIds: [mateId],

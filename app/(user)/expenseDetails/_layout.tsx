@@ -5,7 +5,7 @@ import { Stack, useRouter } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import { supabase } from '@/lib/supabase'; // Ensure this path is correct
 
-export default function MatesStack() {
+export default function ExpenseStack() {
   const router = useRouter(); // Initialize the router
   
   // Handle Logout Function
@@ -40,7 +40,7 @@ export default function MatesStack() {
 
   const handleAccount = () => {
     // Navigate to the account screen
-    router.push('/friendDetails/account');
+    router.push('/expenseDetails/account');
   };
 
   return (
@@ -48,7 +48,7 @@ export default function MatesStack() {
       <Stack.Screen
         name="index"
         options={{
-          title: 'Mates',
+          title: 'Add expense',
           headerLeft: () => (
             <Pressable
               onPress={handleLogout} // Use the handleLogout function
@@ -83,18 +83,6 @@ export default function MatesStack() {
               />
             </Pressable>
           ),
-        }}
-      />
-      <Stack.Screen
-        name="getEvenMate"
-        options={{
-          title: 'Get Even',
-        }}
-      />
-      <Stack.Screen
-        name="expense"
-        options={{
-          headerShown: false,
         }}
       />
     </Stack>

@@ -1,56 +1,66 @@
 // app/(user)/friendDetails/index.tsx
-import React from 'react';
-import { View, Text, FlatList, StyleSheet, Pressable } from 'react-native';
-import { Link } from 'expo-router';
+import React, {useMemo} from 'react';
+import { View, Text, FlatList, StyleSheet, Pressable, ActivityIndicator, Alert } from 'react-native';
+import { Link, useRouter, useLocalSearchParams } from 'expo-router';
 import Colors from '@/constants/Colors';
-import { useRouter } from 'expo-router';
-import { Alert} from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useMatesList } from '@/api/mates';
 
-// Mock Data for mates
-export const matesData = [
-  { name: 'Jakub Lůčný', balance: -125.25, group: 'Italy Trip', bankAccount: 'CZ1234567890', email: 'jakub@example.com' },
-  { name: 'Dejv Kotásek', balance: -125.25, group: 'No group', bankAccount: 'CZ0987654321', email: 'dejv@example.com' },
-  { name: 'Lukáš Doleža', balance: 102.25, group: 'Italy Trip', bankAccount: 'CZ1122334455', email: 'lukas@example.com' },
-  { name: 'Lukáš Dolež', balance: 102.25, group: 'Italy Trip', bankAccount: 'CZ1122334455', email: 'lukas@example.com' },
-  { name: 'Lukáš Dole', balance: 102.25, group: 'Italy Trip', bankAccount: 'CZ1122334455', email: 'lukas@example.com' },
-  { name: 'Lukáš Dol', balance: 102.25, group: 'Italy Trip', bankAccount: 'CZ1122334455', email: 'lukas@example.com' },
-];
-
-type Mate = {
-  name: string;
-  balance: number;
-  group: string;
-  bankAccount: string;
-  email: string;
-};
 
 export default function MatesScreen() {
   const router = useRouter(); // Initialize the router
+
+  const { data: matesData, error, isLoading} = useMatesList();
+
+  // Calculate total balance using useMemo
+  const totalBalance = useMemo(() => {
+    return matesData?.reduce((sum, item) => sum + (item.balance || 0), 0) || 0;
+  }, [matesData]);
+
+  if (isLoading) {
+    return <ActivityIndicator />;
+  }
+  
+  if (error) {
+    return <Text> Failed to load mates </Text>;
+  }
+  
+  type Mate = {
+    balance: number;
+    user1: string;
+    user2: string;
+    profiles: {
+      username: string;
+      email: string;
+      bank_account: string;
+    };
+    groups: {
+      id: string;
+      name: string;
+    };
+  };
 
   const renderItem = ({ item }: { item: Mate }) => (
     <Pressable
       style={styles.shadowWrapper}
       onPress={() =>
         router.push({
-          pathname: `/friendDetails/${encodeURIComponent(item.name)}`,
+          pathname: `/friendDetails/${encodeURIComponent(item.user2)}`,
           params: {
-            balance: item.balance,
-            group: encodeURIComponent(item.group),
-            bankAccount: encodeURIComponent(item.bankAccount),
-            email: encodeURIComponent(item.email),
+            mateId: item.user2,
+            name: item.profiles.username,
+            balance: item.balance.toFixed(2),
+            // group: encodeURIComponent(item.name),
+            bankAccount: item.profiles.bank_account,
+            email: item.profiles.email,
           },
         })
       }
     >
-      <View style={styles.mateContainer}>
-        <View style={styles.leftSection}>
-          <Text style={styles.name}>{item.name}</Text>
-          <Text style={item.balance > 0 ? styles.positiveBalance : styles.negativeBalance}>
-            {item.balance > 0 ? `You lent: ${item.balance} CZK` : `You owe: ${item.balance} CZK`}
-          </Text>
-        </View>
-        <Text style={styles.group}>{item.group}</Text>
+        <View style={styles.mateContainer}>
+        <Text style={styles.name}>{item.profiles.username}</Text>
+        <Text style={item.balance >= 0 ? styles.positiveBalance : styles.negativeBalance}>
+          {item.balance > 0 ? `You lent: ${item.balance.toFixed(2)} CZK` : `You owe: ${-item.balance.toFixed(2)} CZK`}
+        </Text>
       </View>
     </Pressable>
   );
@@ -61,10 +71,10 @@ export default function MatesScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Balance: 1000 CZK</Text>
+      <Text style={styles.title}>Balance: {totalBalance.toFixed(2)} CZK</Text>
       <FlatList
         data={matesData}
-        keyExtractor={(item) => item.name}
+        keyExtractor={(item) => item.profiles.username}
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
       />
@@ -90,32 +100,24 @@ const styles = StyleSheet.create({
     marginTop: 10,
     textAlign: 'center',
   },
-  // Shadow Wrapper for iOS and Android
   shadowWrapper: {
-    width: '95%', // Controls the width of the shadow and container
     marginBottom: 20,
     borderRadius: 20,
-    // Shadow for iOS
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    // Elevation for Android
     elevation: 10,
+    width: '100%', // Ensuring the shadow wrapper takes full width
   },
   mateContainer: {
-    alignItems: 'center',
-    justifyContent: 'space-between', // Distribute space between left and right
-    flexDirection: 'row',
-    width: '100%',
-    padding: 15,
+    alignItems: 'flex-start', // Align items to the left
+    flexDirection: 'column',
+    width: '100%', // Full width of the parent container
+    padding: 20,
+    paddingHorizontal: 95,
     borderRadius: 10,
     backgroundColor: '#D4F0DD',
-  },
-  leftSection: {
-    flex: 1, // Take up available space
-    flexDirection: 'column',
-    alignItems: 'flex-start',
   },
   group: {
     fontSize: 14,
@@ -134,22 +136,20 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 16,
     marginBottom: 15,
-    backgroundColor: '#4CAF50', // Green background
+    backgroundColor: '#4CAF50',
     paddingVertical: 15,
     paddingHorizontal: 25,
     borderRadius: 10,
     alignItems: 'center',
-    width: '90%', // Make button full-width
-    // Add shadow for iOS
+    width: '90%',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    // Elevation for Android
     elevation: 5,
   },
   buttonText: {
-    color: '#fff', // White text
+    color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
   },

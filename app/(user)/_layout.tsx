@@ -63,9 +63,10 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="getEven"
+        name="expenseDetails"
         options={{
           title: 'Add expense',
+          headerShown: false,
           tabBarIcon: ({ color }) => <View style={{
             backgroundColor: '#5AC07C', // Change this to any background color
             padding: 6, // Adjust padding to your liking
@@ -78,9 +79,10 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="groups"
+        name="groupDetails"
         options={{
           title: 'Groups',
+          headerShown: false,
           tabBarIcon: ({ color }) => <FontAwesome name="group" size={24} color={Colors.iconColor} />,
         }}
       />
