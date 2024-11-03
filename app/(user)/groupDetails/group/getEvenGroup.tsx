@@ -15,7 +15,7 @@ export default function GetEvenGroupScreen() {
   type GroupMember = {
     id: string;
     profiles: {
-      id : string;
+      userid : string;
       username: string;
     };
   };
@@ -24,10 +24,11 @@ export default function GetEvenGroupScreen() {
     console.log("MateId: ", mateId);
     console.log("MateName: ", memberName);
     router.push({
-      pathname: '/groupDetails/getEvenMate',
+      pathname: '/groupDetails/group/getEvenMate',
       params: {
         name: memberName,
         mateId: mateId,
+        groupId: groupId,
       },
     });
   };
@@ -43,13 +44,12 @@ export default function GetEvenGroupScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Get Even for Group</Text>
-      <Text style={styles.groupName}>{name}</Text>
-      <Text style={styles.groupId}>Group ID: {groupId}</Text>
+      <Text style={styles.groupName}>Get Even for Group</Text>
+      <Text style={styles.title}>{name}</Text>
 
       <FlatList
         data={groupMembers}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.userid}
         renderItem={renderMemberItem}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContainer}
@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#f0f4f8',
+    backgroundColor: '#fff',
   },
   title: {
     fontSize: 24,
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   memberContainer: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#D4F0DD',
     padding: 15,
     borderRadius: 8,
     marginVertical: 8,

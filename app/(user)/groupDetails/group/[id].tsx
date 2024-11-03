@@ -1,13 +1,12 @@
 // app/(user)/groupDetails/[id].tsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { View, Text, StyleSheet, Pressable, ActivityIndicator, FlatList } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Stack } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { useSharedGroups } from '@/api/Rel_inGroup';
-import { useExpensesList } from '@/api/expenses';
-import { useGroupMembers } from '@/api/groups';
-
+import { useGroupExpensesList } from '@/api/expenses';
+import { useGroupMembersWithBalance } from '@/api/groups';
 
 export default function GroupDetailScreen() {
   const router = useRouter();
@@ -15,7 +14,7 @@ export default function GroupDetailScreen() {
 
   const handleGetEven = () => {
     router.push({
-      pathname: '/groupDetails/getEvenGroup',
+      pathname: '/groupDetails/group/getEvenGroup',
       params: {
         groupId,
         name,
@@ -24,18 +23,28 @@ export default function GroupDetailScreen() {
   };
 
   const handleNotes = () => {
-    router.push('/groupsDetails/groupNotes');
+    router.push('/groupsDetails/group/groupNotes');
   };
 
   const handleOverview = () => {
-    router.push('/groupsDetails/groupOverview');
+    router.push('/groupsDetails/group/groupOverview');
   };
 
+  const { data: expensesData, error, isLoading: isLoadingExpenses} = useGroupExpensesList(groupId);
+  const { data: groupMembers, error: error2, isLoading: isLoadingBalances} = useGroupMembersWithBalance(groupId);
 
-  const { data: expensesData, error, isLoading} = useExpensesList();
-  const { data: groupMembers, error: error2} = useGroupMembers(groupId);
+  console.log('groupMembers', groupMembers);
+  console.log('expensesData', expensesData);
 
-  if (isLoading) {
+  const totalBalance = useMemo(() => {
+    return groupMembers?.reduce((sum, item) => sum + item.balance, 0) || 0;
+  }, [groupMembers]);
+
+  if (isLoadingExpenses) {
+    return <ActivityIndicator />;
+  }
+
+  if (isLoadingBalances) {
     return <ActivityIndicator />;
   }
   
@@ -49,7 +58,7 @@ export default function GroupDetailScreen() {
   
   type groupMember = {
     username: string;
-    id: string;
+    userid: string;
     profiles: {
       username: string;
     }
@@ -70,7 +79,7 @@ export default function GroupDetailScreen() {
       style={styles.expenseContainer}
       onPress={() =>
         router.push({
-          pathname: `/groupDetails/expense/${encodeURIComponent(item.id)}`,
+          pathname: `/groupDetails/group/expense/${encodeURIComponent(item.id)}`,
           params: {
             expid: item.id,
             name: item.name,
@@ -89,7 +98,17 @@ export default function GroupDetailScreen() {
 
 
   const renderMembers = ({ item }: { item: groupMember }) => (
-    <Text style={styles.expenseName}>{item.profiles.username}</Text>
+    <View style={styles.memberContainer}>
+      <Text>
+        <Text style={styles.username}>{item.profiles.username}</Text>
+        <Text style={styles.blackText}>
+          {item.balance > 0 ? ' owes you ' : ' lent you '}
+        </Text>
+        <Text style={item.balance >= 0 ? styles.positiveBalance : styles.negativeBalance}>
+          {item.balance > 0 ? `${item.balance.toFixed(2)} CZK` : `${(-item.balance).toFixed(2)} CZK`}
+        </Text>
+      </Text>
+    </View>
   );
 
 
@@ -109,12 +128,12 @@ export default function GroupDetailScreen() {
         </Pressable>
       </ View>
 
-      <Text style={styles.sectionTitle}>Your balance</Text>
+      <Text style={styles.sectionTitle}>Your group balance: {totalBalance.toFixed(2)} </Text>
       <View style={styles.balanceContainer}>
         {groupMembers && groupMembers.length > 0 ? (
           <FlatList
             data={groupMembers}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item) => String(item.userid)}
             renderItem={renderMembers}
             showsVerticalScrollIndicator={false}
           />
@@ -126,7 +145,7 @@ export default function GroupDetailScreen() {
       <Text style={styles.sectionTitle}>Expenses</Text>
       <FlatList
         data={expensesData}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => String(item.id)}
         renderItem={renderExpenses}
         showsVerticalScrollIndicator={false}
       />
@@ -206,5 +225,18 @@ const styles = StyleSheet.create({
   expenseDetail: {
     fontSize: 14,
     color: '#555',
+  },
+  positiveBalance: {
+    color: 'green',
+    fontSize: 16,
+  },
+  negativeBalance: {
+    color: 'red',
+    fontSize: 16,
+  },
+  username: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'black',
   },
 });

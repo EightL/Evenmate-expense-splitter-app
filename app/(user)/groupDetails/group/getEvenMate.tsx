@@ -3,12 +3,16 @@ import React, { useState } from 'react';
 import { View, TextInput, Text, Pressable, StyleSheet, Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { supabase } from '@/lib/supabase';
-import { handleUpdateBalances } from '@/api/updateBalances'; // Adjust the import path if necessary
+import { handleUpdateBalances } from '@/api/updateBalances';
+import { useQueryClient, InvalidateQueryFilters  } from '@tanstack/react-query';
+
 
 export default function GetEvenInput() {
   const [amount, setAmount] = useState('');
   const router = useRouter();
-  const { name, mateId: mateId } = useLocalSearchParams();
+  const { name, mateId: mateId, groupId } = useLocalSearchParams();
+
+  const queryClient = useQueryClient();
 
   const handleAdd = async () => {
     if (amount.trim() !== '') {
@@ -38,7 +42,12 @@ export default function GetEvenInput() {
           share: numericAmount,
         });
 
-        Alert.alert('Success', 'Balance updated successfully.');
+        queryClient.invalidateQueries({ queryKey: ['mates'] });
+        queryClient.invalidateQueries({ queryKey: ['groupMembersWithBalance', groupId] });
+        queryClient.invalidateQueries({ queryKey: ['groupMembers', groupId] });
+
+
+        // Alert.alert('Success', 'Balance updated successfully.');
         // Optionally, navigate back or reset the input
         router.back();
       } catch (error: any) {

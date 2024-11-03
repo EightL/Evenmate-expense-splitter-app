@@ -3,9 +3,13 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, Pressable, Alert, ActivityIndicator } from 'react-native';
 import { useRouter, Stack } from 'expo-router';
 import { supabase } from '@/lib/supabase';
+import { useQueryClient, InvalidateQueryFilters  } from '@tanstack/react-query';
+
 
 export default function AddNewMateScreen() {
   const router = useRouter();
+
+  const queryClient = useQueryClient(); // Initialize the query client
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -54,7 +58,7 @@ export default function AddNewMateScreen() {
       }
 
       if (existingProfile) {
-        // Optional: Check if the relationship already exists to prevent duplicates
+        // Check if the relationship already exists to prevent duplicates
         const { data: existingRelationship, error: relError } = await supabase
           .from('rel_uubalance')
           .select('*')
@@ -71,7 +75,9 @@ export default function AddNewMateScreen() {
           Alert.alert('Info', 'You are already mates with this user.');
         } else {
           // Create a new mate relationship
-          await createMateRelationship(existingProfile.id, userId);
+            // Update queries
+            const filters: InvalidateQueryFilters = { queryKey: ['mates'] };
+            queryClient.invalidateQueries(filters);
           Alert.alert('Success', 'Mate added successfully.');
         }
       } else {
@@ -82,6 +88,7 @@ export default function AddNewMateScreen() {
         );
         // Optionally, implement invite functionality here
       }
+
 
       // Navigate back to the Mates screen after adding
       router.back();

@@ -106,7 +106,7 @@ export default function ExpenseDetailScreen() {
       />
       <Pressable
         style={styles.editButton}
-        onPress={() => router.push(`/groupDetails/expense/editExpense/${id}`)}
+        onPress={() => router.push(`/groupDetails/group/expense/editExpense/${id}`)}
       >
         <Text style={styles.editButtonText}>Edit Expense</Text>
       </Pressable>

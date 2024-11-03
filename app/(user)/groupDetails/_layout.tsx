@@ -85,6 +85,12 @@ export default function GroupsStack() {
           ),
         }}
       />
+        <Stack.Screen
+        name="group"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }

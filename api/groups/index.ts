@@ -66,6 +66,70 @@ export const useGroupMembers = (currentGroupId : string) => {
     });
 }
 
+
+
+export const useGroupMembersWithBalance = (currentGroupId: string) => {
+  return useQuery({
+    queryKey: ['groupMembersWithBalance', currentGroupId],
+    queryFn: async () => {
+      // Retrieve the current user ID
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
+
+      if (sessionError) {
+        throw new Error(sessionError.message);
+      }
+
+      const currentUserId = session?.user.id;
+
+      // First query: Get group members excluding the current user
+      const { data: groupMembers, error: groupError } = await supabase
+        .from('rel_ingroup')
+        .select(`
+          userid,
+          profiles!userid(*)
+        `)
+        .eq('groupid', currentGroupId)
+        .neq('userid', currentUserId);
+
+      if (groupError) {
+        throw new Error(groupError.message);
+      }
+
+      // Extract userids from the group members
+      const userIds = groupMembers.map((member) => member.userid);
+
+      // Second query: Find balances between current user and each group member
+      const { data: balances, error: balanceError } = await supabase
+        .from('rel_uubalance')
+        .select('*')
+        .eq('user1', currentUserId)
+        .in('user2', userIds);
+
+      if (balanceError) {
+        throw new Error(balanceError.message);
+      }
+
+      // Combine group members with their balances
+      const membersWithBalances = groupMembers.map((member) => {
+        const balanceInfo = balances.find((balance) => balance.user2 === member.userid);
+        return {
+          ...member,
+          balance: balanceInfo?.balance || 0, // default balance to 0 if not found
+        };
+      });
+
+      console.log("Returned data:", membersWithBalances);
+
+      return membersWithBalances;
+    },
+  });
+};
+
+
+
 // Returns All the group members including CurrentUser
 // export const useGroupMembers = (currentGroupId : string) => {
 //     return useQuery({

@@ -13,10 +13,13 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { handleUpdateBalances } from '@/api/updateBalances'; // Import the function
 import { supabase } from '@/lib/supabase'; // Ensure supabase is imported
 // import { useAddExpense } from '@/api/addExpense';
+import { useQueryClient, InvalidateQueryFilters  } from '@tanstack/react-query';
 
 export default function AddExpenseScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
+
+  const queryClient = useQueryClient();
 
   // Initialize state with params if available
   const [expenseName, setExpenseName] = useState(params.expenseName || '');
@@ -109,7 +112,7 @@ export default function AddExpenseScreen() {
       });
   
       // Create the expense and get the expense ID
-      const expenseId = await createExpense(expenseName, numericCost, currentUserId, participantCount);
+      const expenseId = await createExpense(expenseName, numericCost, currentUserId, params.groupId, participantCount);
   
       // Insert into Rel_owesFor for each mate
       await insertRelOwesFor(expenseId, mateIds);
@@ -121,7 +124,16 @@ export default function AddExpenseScreen() {
         selectedMates,
       });
   
-      // Alert.alert('Success', 'Expense added successfully.');
+      // const filters: InvalidateQueryFilters = { queryKey: ['mates'] };
+      queryClient.invalidateQueries({ queryKey: ['mates'] });
+
+      queryClient.invalidateQueries({ queryKey: ['groupExpenses', params.groupId] });
+
+      for (const mate of selectedMates) {
+        queryClient.invalidateQueries({ queryKey: ['mateExpenses', currentUserId, mate] });
+      }
+      
+
   
       // Reset the form if needed
       setExpenseName('');
@@ -134,7 +146,7 @@ export default function AddExpenseScreen() {
   };
 
   // Function to create an expense with correct field names and retrieve the inserted ID
-  const createExpense = async (expenseName: string, cost: number, currentUserId: string, participantCount: number): Promise<string> => {
+  const createExpense = async (expenseName: string, cost: number, currentUserId: string, groupId: string, participantCount: number): Promise<string> => {
     const { data, error } = await supabase
       .from('Expenses')
       .insert([
@@ -143,6 +155,7 @@ export default function AddExpenseScreen() {
           amount: cost,
           paid_by: currentUserId,
           created_at: new Date().toISOString(),
+          in_group: groupId || null,
           involved_people: participantCount,
         },
       ])
@@ -205,10 +218,10 @@ export default function AddExpenseScreen() {
       <Pressable
         style={[
           styles.submitButton,
-          (!expenseName || !cost) && styles.submitButtonDisabled,
+          (!expenseName || !cost || selectedMates.length === 0) && styles.submitButtonDisabled,
         ]}
         onPress={handleSubmitExpense}
-        disabled={!expenseName || !cost}
+        disabled={!expenseName || !cost || selectedMates.length === 0}
       >
         <Text style={styles.submitButtonText}>Submit Expense</Text>
       </Pressable>
@@ -279,7 +292,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   submitButton: {
-    backgroundColor: '#5AC07C',
+    backgroundColor: '#4CAF50',
     paddingVertical: 15,
     borderRadius: 10,
     alignItems: 'center',

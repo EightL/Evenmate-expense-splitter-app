@@ -1,76 +1,66 @@
-// app/(user)/groups/createGroup.tsx
-import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  StyleSheet, 
-  Pressable, 
-  Alert, 
-  ActivityIndicator, 
-  ScrollView 
+// app/(user)/groupDetails/joinGroup.tsx
+
+import React, { useState, useEffect } from 'react';
+import {
+  ScrollView,
+  Text,
+  TextInput,
+  Pressable,
+  Alert,
+  ActivityIndicator,
+  StyleSheet,
+  View,
+  Modal,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
+import { BarCodeScanner } from 'expo-barcode-scanner';
+import * as Clipboard from 'expo-clipboard';
+import { useQueryClient, InvalidateQueryFilters  } from '@tanstack/react-query';
 
-export default function CreateGroupScreen() {
+const JoinGroup = () => {
   const router = useRouter();
-
   const [groupId, setGroupId] = useState('');
   const [loading, setLoading] = useState(false);
+  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+  const [isScannerVisible, setScannerVisible] = useState(false);
+  const [scanned, setScanned] = useState(false); // New state
 
-  const handleJoinGroup = async () => {
-    // Input Validation
-    if (!groupId.trim()) {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await BarCodeScanner.requestPermissionsAsync();
+      setHasPermission(status === 'granted');
+    })();
+  }, []);
+
+  const handleJoinGroup = async (enteredGroupId?: string) => {
+    const finalGroupId = enteredGroupId ?? groupId;
+
+    if (!finalGroupId.trim()) {
       Alert.alert('Validation Error', 'Please enter a Group ID.');
       return;
     }
 
-    const parsedGroupId = parseInt(groupId, 10);
-    if (isNaN(parsedGroupId) || parsedGroupId <= 0) {
-      Alert.alert('Validation Error', 'Please enter a valid positive number for Group ID.');
-      return;
-    }
-
     setLoading(true);
-
     try {
-      // Fetch the group to ensure it exists
-      const { data: groupData, error: groupError } = await supabase
-        .from('groups')
-        .select('*')
-        .eq('id', parsedGroupId)
-        .single();
+      // Fetch the current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-      if (groupError) {
-        if (groupError.code === 'PGRST116') { // No rows found
-          Alert.alert('Group Not Found', `No group found with ID ${parsedGroupId}.`);
-        } else {
-          throw groupError;
-        }
-        return;
+      if (userError || !user) {
+        throw new Error('User not authenticated.');
       }
 
-      // Get current user's ID
-      const { data: { session } } = await supabase.auth.getSession();
-      const userId = session?.user.id;
+      const userId = user.id;
 
-      if (!userId) {
-        Alert.alert('Authentication Error', 'You must be logged in to join a group.');
-        return;
-      }
-
-      // Check if the user is already a member of the group
-      const { data: existingMembership, error: membershipError } = await supabase
+      // Check existing membership
+      const { data: existingMembership, error: fetchError } = await supabase
         .from('rel_ingroup')
         .select('*')
         .eq('userid', userId)
-        .eq('groupid', parsedGroupId)
+        .eq('groupid', finalGroupId.trim())
         .single();
-
-      if (membershipError && membershipError.code !== 'PGRST116') { // Ignore no rows found
-        throw membershipError;
-      }
 
       if (existingMembership) {
         Alert.alert('Already a Member', 'You are already a member of this group.');
@@ -78,21 +68,22 @@ export default function CreateGroupScreen() {
       }
 
       // Insert a new membership
-      const { error: insertError } = await supabase
-        .from('rel_ingroup')
-        .insert([
-          {
-            userid: userId,
-            groupid: parsedGroupId,
-            joined_at: new Date().toISOString(),
-          },
-        ]);
+      const { error: insertError } = await supabase.from('rel_ingroup').insert([
+        {
+          userid: userId,
+          groupid: finalGroupId.trim(),
+          joined_at: new Date().toISOString(),
+        },
+      ]);
 
       if (insertError) {
         throw insertError;
       }
 
-      Alert.alert('Success', `You have successfully joined Group ID ${parsedGroupId}.`);
+      queryClient.invalidateQueries({ queryKey: ['groupslist'] });
+
+
+      Alert.alert('Success', `You have successfully joined Group ID ${finalGroupId.trim()}.`);
       router.back(); // Navigate back to the previous screen
     } catch (error: any) {
       console.error('Error joining group:', error.message);
@@ -101,6 +92,39 @@ export default function CreateGroupScreen() {
       setLoading(false);
     }
   };
+
+  const handleBarCodeScanned = ({ data }: { type: string; data: string }) => {
+    if (scanned) return; // Prevent multiple handles
+
+    setScanned(true);
+    setScannerVisible(false);
+    setGroupId(data);
+    Alert.alert('Group ID Scanned', `Group ID: ${data}`, [
+      { text: 'OK', onPress: () => handleJoinGroup(data) },
+    ]);
+  };
+
+  const handleScanPress = () => {
+    setScannerVisible(true);
+    setScanned(false); // Allow scanning again
+  };
+
+  if (hasPermission === null) {
+    return (
+      <View style={styles.container}>
+        <Text>Requesting camera permission...</Text>
+      </View>
+    );
+  }
+  if (hasPermission === false) {
+    return (
+      <View style={styles.container}>
+        <Text style={{ textAlign: 'center' }}>
+          No access to camera. Please enable camera permissions in your device settings.
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -111,61 +135,88 @@ export default function CreateGroupScreen() {
         placeholder="Group ID"
         value={groupId}
         onChangeText={setGroupId}
-        keyboardType="numeric"
+        keyboardType="default"
+        autoCapitalize="none"
       />
+
+      <Pressable style={styles.scanButton} onPress={handleScanPress}>
+        <Text style={styles.buttonText}>Scan QR Code</Text>
+      </Pressable>
 
       {loading ? (
         <ActivityIndicator size="large" color="#4CAF50" />
       ) : (
-        <Pressable style={styles.button} onPress={handleJoinGroup}>
+        <Pressable style={styles.button} onPress={() => handleJoinGroup()}>
           <Text style={styles.buttonText}>Join Group</Text>
         </Pressable>
       )}
+
+      {/* QR Code Scanner Modal */}
+      <Modal visible={isScannerVisible} animationType="slide">
+        <View style={styles.scannerContainer}>
+          <BarCodeScanner
+            onBarCodeScanned={scanned ? undefined : handleBarCodeScanned} // Conditionally set handler
+            style={StyleSheet.absoluteFillObject}
+          />
+          <Pressable style={styles.cancelButton} onPress={() => setScannerVisible(false)}>
+            <Text style={styles.buttonText}>Cancel</Text>
+          </Pressable>
+        </View>
+      </Modal>
     </ScrollView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     padding: 20,
     backgroundColor: '#fff',
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 30,
-    marginTop: 10,
     textAlign: 'center',
+    marginBottom: 20,
   },
   input: {
-    width: '100%',
-    height: 50,
-    borderColor: '#4CAF50',
     borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 15,
     borderRadius: 10,
-    paddingHorizontal: 15,
-    marginBottom: 20,
-    fontSize: 16,
+    marginBottom: 15,
+  },
+  scanButton: {
+    backgroundColor: '#2196F3',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginBottom: 10,
   },
   button: {
     backgroundColor: '#4CAF50',
-    paddingVertical: 15,
-    paddingHorizontal: 25,
+    padding: 15,
     borderRadius: 10,
     alignItems: 'center',
-    width: '100%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
     marginTop: 10,
   },
   buttonText: {
     color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  scannerContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  cancelButton: {
+    backgroundColor: '#FF3B30',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    margin: 20,
   },
 });
+
+export default JoinGroup;

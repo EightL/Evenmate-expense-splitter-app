@@ -30,7 +30,10 @@ export default function SelectMatesScreen() {
   const groupIds = groupsData ? groupsData.map(group => group.groupid) : [];
 
   // Fetch group members for all group IDs
-  const { data: groupMembers, error: errorGroupsMembers } = useGroupMembers(groupIds);
+  // const { data: groupMembers, error: errorGroupsMembers } = useGroupMembers(groupIds);
+  const { data: groupMembers, error: errorGroupsMembers, isLoading: isLoadingGroupMembers } = useGroupMembers(expandedGroups, {
+    enabled: !!expandedGroups, // Fetch only when a group is selected
+  });
 
   useEffect(() => {
     if (Platform.OS === 'android') {
@@ -48,7 +51,7 @@ export default function SelectMatesScreen() {
     );
   }
 
-  if (errorMates || errorGroups || errorGroupsMembers) {
+  if (errorMates || errorGroups) {
     return (
       <View style={styles.centered}>
         <Text style={styles.errorText}>Error loading data.</Text>
@@ -69,9 +72,12 @@ export default function SelectMatesScreen() {
   const toggleGroupExpansion = (groupId: string) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     if (expandedGroups.includes(groupId)) {
-      setExpandedGroups(expandedGroups.filter((id) => id !== groupId));
+      // Collapse if the clicked group is already expanded
+      setExpandedGroups([]);
     } else {
-      setExpandedGroups([...expandedGroups, groupId]);
+      // Set the expanded group to only the clicked groupId
+      setExpandedGroups([groupId]);
+      // const { data: groupMembers, error: errorGroupsMembers } = useGroupMembers(groupId);
     }
   };
 
@@ -94,6 +100,7 @@ export default function SelectMatesScreen() {
         cost,
         mateIds: selectedMates,
         mateNames: selectedMateNames,
+        groupId: expandedGroups,
       },
     });
   };

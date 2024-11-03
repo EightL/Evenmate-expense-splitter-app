@@ -16,14 +16,33 @@ export const useExpensesList = () => {
     });
 }
 
+export const useGroupExpensesList = (groupId: string) => {
+  return useQuery({
+      queryKey: ['groupExpenses', groupId],
+      queryFn: async () => {
+          const { data, error } = await supabase
+          .from('Expenses')
+          .select('*')
+          .eq('in_group', groupId);
+          if(error) {
+              throw new Error(error.message);
+          }
+          console.log("UseGroupExpense data:", data);
+          return data;
+      },
+      enabled: !!groupId,
+  });
+}
+
 export const useMateExpenses = (currentUserId: string, mateId: string) => {
     return useQuery({
       queryKey: ['mateExpenses', currentUserId, mateId],
       queryFn: async () => {
         try {
 
+              // kinda sus, if anything is broken look here
             if (!currentUserId || !mateId) {
-                throw new Error("currentUserId or mateId is undefined");
+              return null;
             }
   
           const { data: userExpenses, error: userError } = await supabase

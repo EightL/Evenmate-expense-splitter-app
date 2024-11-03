@@ -4,11 +4,15 @@ import { View, TextInput, Text, Pressable, StyleSheet, Alert } from 'react-nativ
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { handleUpdateBalances } from '@/api/updateBalances'; // Adjust the import path if necessary
+import { useQueryClient, InvalidateQueryFilters  } from '@tanstack/react-query';
+
 
 export default function GetEvenInput() {
   const [amount, setAmount] = useState('');
   const router = useRouter();
   const { name, mateId } = useLocalSearchParams();
+
+  const queryClient = useQueryClient();
 
   const handleAdd = async () => {
     if (amount.trim() !== '') {
@@ -36,6 +40,9 @@ export default function GetEvenInput() {
           mateIds: [mateId],
           share: numericAmount,
         });
+
+        const filters: InvalidateQueryFilters = { queryKey: ['mates'] };
+        queryClient.invalidateQueries(filters);
 
         Alert.alert('Success', 'Balance updated successfully.');
         // Optionally, navigate back or reset the input

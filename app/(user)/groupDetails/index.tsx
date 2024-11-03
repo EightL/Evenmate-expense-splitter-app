@@ -35,7 +35,7 @@ export default function GroupsScreen() {
       style={styles.itemContainer}
       onPress={() =>
         router.push({
-          pathname: `./groupDetails/${encodeURIComponent(item.groups.id)}`,
+          pathname: `./groupDetails/group/${encodeURIComponent(item.groups.id)}`,
           params: {
             name: item.groups.name,
             notes: item.groups.notes,
@@ -49,11 +49,11 @@ export default function GroupsScreen() {
   );
 
   const handleCreateNewGroup = () => {
-    router.push('./groupDetails/createGroup');
+    router.push('/groupDetails/createGroup');
   };
 
   const handleJoinGroup = () => {
-    router.push('./groupDetails/joinGroup');
+    router.push('/groupDetails/joinGroup');
   };
 
   return (
