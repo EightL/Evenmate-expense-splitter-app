@@ -1,15 +1,34 @@
 // app/(user)/friendDetails/index.tsx
-import React, {useMemo} from 'react';
+import React, {useMemo, useEffect, useState} from 'react';
 import { View, Text, FlatList, StyleSheet, Pressable, ActivityIndicator, Alert } from 'react-native';
 import { Link, useRouter, useLocalSearchParams } from 'expo-router';
 import Colors from '@/constants/Colors';
 import { useMatesList } from '@/api/mates';
+import { supabase } from '@/lib/supabase';
 
 
 export default function MatesScreen() {
+
   const router = useRouter(); // Initialize the router
 
-  const { data: matesData, error, isLoading} = useMatesList();
+  // State to store the current user ID
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  // Retrieve the current user ID once on component mount
+  useEffect(() => {
+    const fetchSession = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error) {
+        console.error('Error fetching session:', error.message);
+        return;
+      }
+      setCurrentUserId(session?.user.id || null);
+    };
+
+    fetchSession();
+  }, []);
+
+  const { data: matesData, error, isLoading} = useMatesList(currentUserId);
 
   // Calculate total balance using useMemo
   const totalBalance = useMemo(() => {

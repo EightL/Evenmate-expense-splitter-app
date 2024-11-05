@@ -1,3 +1,8 @@
+import React, { useEffect } from 'react';
+import { Alert } from 'react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router'; // Adjust based on your router setup
+import { supabase } from '@/lib/supabase'; // Ensure supabase is correctly imported
+
 export default function ConfirmExpenseScreen() {
     const router = useRouter();
     const { expenseName, cost, mateIds } = useLocalSearchParams();

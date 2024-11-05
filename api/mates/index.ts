@@ -1,11 +1,11 @@
 // api/mates/index.ts
 import { supabase } from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
-import { useGetCurrentUserId } from '@/api/getCurrentUserId';
+// import { useGetCurrentUserId } from '@/api/getCurrentUserId';
 
-export const useMatesList = () => {
+export const useMatesList = (currentUserId: string | null) => {
     return useQuery({
-        queryKey: ['mates'],
+        queryKey: ['mates', currentUserId],
         queryFn: async () => {
             // Retrieve the current user ID
             const {

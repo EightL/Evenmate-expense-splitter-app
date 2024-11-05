@@ -1,6 +1,8 @@
 import { supabase } from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
 
+
+// DONT USE, DOESTN HAVE UNIQUE QUERY KEY
 export const useExpensesList = () => {
     return useQuery({
         queryKey: ['expenses'],
@@ -27,7 +29,7 @@ export const useGroupExpensesList = (groupId: string) => {
           if(error) {
               throw new Error(error.message);
           }
-          console.log("UseGroupExpense data:", data);
+          // console.log("UseGroupExpense data:", data);
           return data;
       },
       enabled: !!groupId,
@@ -54,7 +56,7 @@ export const useMateExpenses = (currentUserId: string, mateId: string) => {
             `)
             .or(`userid.eq.${currentUserId},userid.eq.${mateId}`);
   
-          console.log("UserExpenses: ", userExpenses);
+          // console.log("UserExpenses: ", userExpenses);
   
           if (userError) {
             throw new Error(userError.message);
@@ -68,7 +70,7 @@ export const useMateExpenses = (currentUserId: string, mateId: string) => {
             .select('*')
             .or(`paid_by.eq.${currentUserId},paid_by.eq.${mateId}`);
   
-          console.log("paidByExpenses: ", paidByExpenses);
+          // console.log("paidByExpenses: ", paidByExpenses);
   
           if (paidByError) {
             throw new Error(paidByError.message);
@@ -78,7 +80,7 @@ export const useMateExpenses = (currentUserId: string, mateId: string) => {
           const userExpenseIds = new Set(userExpenses.map(exp => exp.expenseid));
           const intersection = paidByExpenses.filter(exp => userExpenseIds.has(exp.id));
   
-          console.log("intersection: ", intersection);
+          // console.log("intersection: ", intersection);
           
           return intersection;
         } catch (error) {

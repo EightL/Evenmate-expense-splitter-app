@@ -12,12 +12,16 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
+import { useQueryClient, InvalidateQueryFilters  } from '@tanstack/react-query';
+
 
 export default function CreateGroupScreen() {
   const router = useRouter();
   const [groupName, setGroupName] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
+
 
   const handleCreateGroup = async () => {
     if (!groupName.trim()) {
@@ -40,7 +44,7 @@ export default function CreateGroupScreen() {
         .from('groups')
         .insert({
           name: groupName,
-          notes: description,
+          // notes: description,
           creator_id: userId,
           created_at: new Date().toISOString(),
         })
@@ -63,6 +67,9 @@ export default function CreateGroupScreen() {
         throw membershipError;
       }
 
+      // console.log("USERID in CreateGroup: ", userId);
+      queryClient.invalidateQueries({ queryKey: ['groupslist', userId] });
+
       Alert.alert('Success', 'Group created successfully.');
       router.back();
     } catch (error: any) {
@@ -83,14 +90,14 @@ export default function CreateGroupScreen() {
         onChangeText={setGroupName}
         autoCapitalize="words"
       />
-      <TextInput
+      {/* <TextInput
         style={[styles.input, { height: 100 }]}
         placeholder="Description"
         value={description}
         onChangeText={setDescription}
         multiline
         textAlignVertical="top"
-      />
+      /> */}
       {loading ? (
         <ActivityIndicator size="large" color="#4CAF50" />
       ) : (

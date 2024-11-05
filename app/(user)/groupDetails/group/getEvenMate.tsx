@@ -35,7 +35,7 @@ export default function GetEvenInput() {
         const currentUserId = user.id;
 
         // Update balances
-        console.log("MATE ID:", mateId)
+        // console.log("MATE ID:", mateId)
         await handleUpdateBalances({
           currentUserId,
           mateIds: [mateId],

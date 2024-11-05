@@ -1,12 +1,32 @@
 // app/(user)/groupDetails/index.tsx
 import React from 'react';
+import { useState, useEffect } from 'react';
 import { StyleSheet, ActivityIndicator, FlatList, View, Text, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
+import { supabase } from '@/lib/supabase';
 import { useGroupsList } from '@/api/groups';
 
 export default function GroupsScreen() {
   const router = useRouter();
-  const { data: groupsData, error, isLoading } = useGroupsList();
+
+  // State to store the current user ID
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  // Retrieve the current user ID once on component mount
+  useEffect(() => {
+    const fetchSession = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error) {
+        console.error('Error fetching session:', error.message);
+        return;
+      }
+      setCurrentUserId(session?.user.id || null);
+    };
+
+    fetchSession();
+  }, []);
+  
+  const { data: groupsData, error, isLoading } = useGroupsList(currentUserId);
 
   if (isLoading) {
     return (
@@ -44,7 +64,7 @@ export default function GroupsScreen() {
       }
     >
       <Text style={styles.groupName}>{item.groups.name}</Text>
-      <Text style={styles.description}>{item.groups.notes}</Text>
+      {/* <Text style={styles.description}>{item.groups.notes}</Text> */}
     </Pressable>
   );
 
@@ -58,9 +78,9 @@ export default function GroupsScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Balance: 1000 CZK</Text>
+      <Text style={styles.title}>Your groups</Text>
       <FlatList
-        data={groupsData}
+        data={groupsData || []}
         keyExtractor={(item) => item.groups.id} // Assuming 'id' is unique
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}

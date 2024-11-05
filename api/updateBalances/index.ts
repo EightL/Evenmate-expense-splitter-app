@@ -30,7 +30,7 @@ export const handleUpdateBalances = async ({
       }
 
       if (data && data.length > 0) {
-        console.log('Updating balances');
+        // console.log('Updating balances');
         // Relationship exists, update each balance record
         for (const balanceRecord of data) {
           if (balanceRecord.user1 === currentUserId && balanceRecord.user2 === mateId) {
@@ -48,7 +48,7 @@ export const handleUpdateBalances = async ({
           }
         }
       } else {
-        console.log('Creating new balance records');
+        // console.log('Creating new balance records');
         // No existing record, insert both pairs
         const { error: insertError } = await supabase
           .from('rel_uubalance')

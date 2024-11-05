@@ -3,11 +3,13 @@ import { supabase } from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
 
 
-export const useGroupsList = () => {
+export const useGroupsList = (currentUser: string | null) => {
     return useQuery({
-        queryKey: ['groupslist'],
+        queryKey: ['groupslist', currentUser],
         queryFn: async () => {
             // Retrieve the current user ID
+            // console.log("USERID in API function: ", currentUser);
+
             const {
                 data: { session },
                 error: sessionError,
@@ -121,7 +123,7 @@ export const useGroupMembersWithBalance = (currentGroupId: string) => {
         };
       });
 
-      console.log("Returned data:", membersWithBalances);
+      // console.log("Returned data:", membersWithBalances);
 
       return membersWithBalances;
     },
@@ -152,7 +154,7 @@ export const useGroupMembersWithBalance = (currentGroupId: string) => {
 // }
 
 
-
+// DONT USE, DOESNT HAVE UNIQUE QUERY KEY
 export const useGroupInfo = () => {
     return useQuery({
         queryKey: ['groupsinfo'],

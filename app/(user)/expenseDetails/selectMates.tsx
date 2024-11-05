@@ -17,6 +17,7 @@ import {
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useMatesList } from '@/api/mates';
 import { useGroupsList, useGroupMembers } from '@/api/groups';
+import { supabase } from '@/lib/supabase';
 
 
 export default function SelectMatesScreen() {
@@ -25,8 +26,25 @@ export default function SelectMatesScreen() {
   const [selectedMates, setSelectedMates] = useState<string[]>([]);
   const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
 
-  const { data: matesData, isLoading: isLoadingMates, error: errorMates } = useMatesList();
-  const { data: groupsData, error: errorGroups } = useGroupsList();
+  // State to store the current user ID
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  // Retrieve the current user ID once on component mount
+  useEffect(() => {
+    const fetchSession = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error) {
+        console.error('Error fetching session:', error.message);
+        return;
+      }
+      setCurrentUserId(session?.user.id || null);
+    };
+
+    fetchSession();
+  }, []);
+
+  const { data: matesData, isLoading: isLoadingMates, error: errorMates } = useMatesList(currentUserId);
+  const { data: groupsData, error: errorGroups } = useGroupsList(currentUserId);
   const groupIds = groupsData ? groupsData.map(group => group.groupid) : [];
 
   // Fetch group members for all group IDs

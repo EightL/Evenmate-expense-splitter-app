@@ -23,18 +23,29 @@ export default function GroupDetailScreen() {
   };
 
   const handleNotes = () => {
-    router.push('/groupsDetails/group/groupNotes');
+    router.push({
+      pathname: '/groupDetails/group/groupNotes',
+      params: {
+        id: groupId,
+        name: name,
+      },
+    });
   };
 
   const handleOverview = () => {
-    router.push('/groupsDetails/group/groupOverview');
+    router.push({
+      pathname: '/groupDetails/group/groupOverview',
+      params: {
+        id: groupId,
+        name: name,
+      },
+    });
   };
-
   const { data: expensesData, error, isLoading: isLoadingExpenses} = useGroupExpensesList(groupId);
   const { data: groupMembers, error: error2, isLoading: isLoadingBalances} = useGroupMembersWithBalance(groupId);
 
-  console.log('groupMembers', groupMembers);
-  console.log('expensesData', expensesData);
+  // console.log('groupMembers', groupMembers);
+  // console.log('expensesData', expensesData);
 
   const totalBalance = useMemo(() => {
     return groupMembers?.reduce((sum, item) => sum + item.balance, 0) || 0;
@@ -62,6 +73,7 @@ export default function GroupDetailScreen() {
     profiles: {
       username: string;
     }
+    balance: string;
   };
   
 

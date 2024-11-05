@@ -97,12 +97,12 @@ export default function AddExpenseScreen() {
       }
       
       const currentUserId = user.id;
-      console.log('Current User ID:', currentUserId);
+      // console.log('Current User ID:', currentUserId);
   
       const participantCount = selectedMates.length + 1; // Including the current user
       const share = numericCost / participantCount;
       const mateIds = selectedMates.map((mate) => mate.id);
-      console.log('Mate IDs:', mateIds);
+      // console.log('Mate IDs:', mateIds);
   
       // Update balances
       await handleUpdateBalances({
@@ -118,14 +118,14 @@ export default function AddExpenseScreen() {
       await insertRelOwesFor(expenseId, mateIds);
   
       // Log and reset
-      console.log('Expense Submitted:', {
-        expenseName,
-        cost: numericCost,
-        selectedMates,
-      });
+      // console.log('Expense Submitted:', {
+      //   expenseName,
+      //   cost: numericCost,
+      //   selectedMates,
+      // });
   
       // const filters: InvalidateQueryFilters = { queryKey: ['mates'] };
-      queryClient.invalidateQueries({ queryKey: ['mates'] });
+      queryClient.invalidateQueries({ queryKey: ['mates', currentUserId] });
 
       queryClient.invalidateQueries({ queryKey: ['groupExpenses', params.groupId] });
 
@@ -173,7 +173,7 @@ export default function AddExpenseScreen() {
   // Function to insert into Rel_owesFor with correct column names
   const insertRelOwesFor = async (expenseId: string, mateIds: string[]) => {
     for (const mateId of mateIds) {
-      console.log('Inserting Rel_owesFor with mateId:', mateId, 'and expenseId:', expenseId);
+      // console.log('Inserting Rel_owesFor with mateId:', mateId, 'and expenseId:', expenseId);
       
       const { error } = await supabase
         .from('Rel_owesFor')
@@ -187,7 +187,7 @@ export default function AddExpenseScreen() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <View style={styles.container}>
       <Text style={styles.title}>Add Expense</Text>
       <TextInput
         style={styles.input}
@@ -225,7 +225,7 @@ export default function AddExpenseScreen() {
       >
         <Text style={styles.submitButtonText}>Submit Expense</Text>
       </Pressable>
-    </ScrollView>
+    </View>
   );
 }
 
