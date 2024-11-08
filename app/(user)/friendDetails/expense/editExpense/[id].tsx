@@ -3,6 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { View, TextInput, Text, Pressable, StyleSheet, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { supabase } from '@/lib/supabase';
+import { useQueryClient, InvalidateQueryFilters  } from '@tanstack/react-query';
+import { useExpenseInfo, updateExpense } from '@/api/expenses';
+import { useGetCurrentUserId } from '@/api/getCurrentUserId';
 
 type Expense = {
   id: string;
@@ -14,33 +17,26 @@ type Expense = {
 
 export default function EditExpenseScreen() {
   const router = useRouter();
-  const { id } = useLocalSearchParams();
+  const { id, mateid} = useLocalSearchParams<{ id: string }>();
   const [expenseName, setExpenseName] = useState('');
   const [cost, setCost] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const { data: currentUserId, error: currentUserIdError } = useGetCurrentUserId();
+
+  // Use the custom hook to fetch expense data
+  const {
+    data: expense,
+    isLoading,
+    isError,
+    error,
+  } = useExpenseInfo(id);
 
   useEffect(() => {
-    const fetchExpense = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('Expenses')
-          .select('*')
-          .eq('id', id)
-          .single();
-
-        if (error) throw error;
-        setExpenseName(data.name);
-        setCost(data.amount.toString());
-      } catch (error: any) {
-        console.error('Error fetching expense:', error.message);
-        Alert.alert('Error', error.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchExpense();
-  }, [id]);
+    if (expense) {
+      setExpenseName(expense.name);
+      setCost(expense.amount.toString());
+    }
+  }, [expense]);
 
   const handleUpdateExpense = async () => {
     if (!expenseName.trim() || !cost.trim()) {
@@ -54,22 +50,19 @@ export default function EditExpenseScreen() {
       return;
     }
 
-    try {
-      const { error } = await supabase
-        .from('Expenses')
-        .update({
-          name: expenseName,
-          amount: numericCost,
-        })
-        .eq('id', id);
+    const result = await updateExpense(id, expenseName, numericCost);
 
-      if (error) throw error;
-
+    if (result.success) {
       Alert.alert('Success', 'Expense updated successfully.');
       router.back();
-    } catch (error: any) {
+      // queryClient.invalidateQueries({ queryKey: ['mateExpenses', currentUserId, mateid] });
+      // console.log("CURRENT USER ID: ", currentUserId);
+      await queryClient.invalidateQueries();
+      queryClient.invalidateQueries({ queryKey: ['mates', currentUserId] });
+
+    } else {
       console.error('Error updating expense:', error.message);
-      Alert.alert('Error', error.message);
+      Alert.alert('Error', result.message);
     }
   };
 

@@ -1,47 +1,12 @@
 // app/(user)/friendDetails/_layout.tsx
 import React from 'react';
-import { Pressable, Alert, StyleSheet } from 'react-native';
+import { Pressable, StyleSheet } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
-import { supabase } from '@/lib/supabase'; // Ensure this path is correct
+import { handleLogout, handleAccount } from '@/lib/auth'; // Import the functions
 
 export default function ExpenseStack() {
   const router = useRouter(); // Initialize the router
-  
-  // Handle Logout Function
-  const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Yes',
-          onPress: async () => {
-            try {
-              const { error } = await supabase.auth.signOut();
-              if (error) {
-                // Handle sign-out error
-                Alert.alert('Error', error.message);
-              } else {
-                // Navigate to the sign-in screen
-                router.push('/sign-in');
-              }
-            } catch (err) {
-              // Handle unexpected errors
-              Alert.alert('Error', 'Failed to logout. Please try again.');
-            }
-          },
-        },
-      ],
-      { cancelable: true }
-    );
-  };
-
-  const handleAccount = () => {
-    // Navigate to the account screen
-    router.push('/expenseDetails/account');
-  };
 
   return (
     <Stack>
@@ -51,7 +16,7 @@ export default function ExpenseStack() {
           title: 'Add expense',
           headerLeft: () => (
             <Pressable
-              onPress={handleLogout} // Use the handleLogout function
+              onPress={() => handleLogout(router)} // Wrap in an anonymous function
               style={({ pressed }) => [
                 styles.logoutButton,
                 pressed && styles.pressedButton,
@@ -68,7 +33,7 @@ export default function ExpenseStack() {
           ),
           headerRight: () => (
             <Pressable
-              onPress={handleAccount}
+              onPress={() => handleAccount(router)} // Wrap in an anonymous function
               style={({ pressed }) => [
                 styles.accountButton,
                 pressed && styles.pressedButton,

@@ -21,8 +21,6 @@ export default function GetEvenGroupScreen() {
   };
 
   const handleGetEven = (mateId, memberName) => {
-    // console.log("MateId: ", mateId);
-    // console.log("MateName: ", memberName);
     router.push({
       pathname: '/groupDetails/group/getEvenMate',
       params: {

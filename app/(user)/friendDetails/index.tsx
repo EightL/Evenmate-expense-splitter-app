@@ -1,10 +1,11 @@
 // app/(user)/friendDetails/index.tsx
 import React, {useMemo, useEffect, useState} from 'react';
-import { View, Text, FlatList, StyleSheet, Pressable, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Pressable, ActivityIndicator, Alert, RefreshControl } from 'react-native';
 import { Link, useRouter, useLocalSearchParams } from 'expo-router';
 import Colors from '@/constants/Colors';
 import { useMatesList } from '@/api/mates';
 import { supabase } from '@/lib/supabase';
+import { useGetCurrentUserId } from '@/api/getCurrentUserId';
 
 
 export default function MatesScreen() {
@@ -12,21 +13,10 @@ export default function MatesScreen() {
   const router = useRouter(); // Initialize the router
 
   // State to store the current user ID
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
-  // Retrieve the current user ID once on component mount
-  useEffect(() => {
-    const fetchSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (error) {
-        console.error('Error fetching session:', error.message);
-        return;
-      }
-      setCurrentUserId(session?.user.id || null);
-    };
-
-    fetchSession();
-  }, []);
+  // Retrieve the current user ID
+  const { data: currentUserId, error: currentUserError } = useGetCurrentUserId();
 
   const { data: matesData, error, isLoading} = useMatesList(currentUserId);
 

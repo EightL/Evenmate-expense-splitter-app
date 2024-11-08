@@ -3,20 +3,61 @@ import { useQuery } from '@tanstack/react-query';
 
 
 // DONT USE, DOESTN HAVE UNIQUE QUERY KEY
-export const useExpensesList = () => {
-    return useQuery({
-        queryKey: ['expenses'],
-        queryFn: async () => {
-            const { data, error } = await supabase
-            .from('Expenses')
-            .select('*');
-            if(error) {
-                throw new Error(error.message);
-            }
-            return data;
-        },
-    });
+// export const useExpensesList = () => {
+//     return useQuery({
+//         queryKey: ['expenses'],
+//         queryFn: async () => {
+//             const { data, error } = await supabase
+//             .from('Expenses')
+//             .select('*');
+//             if(error) {
+//                 throw new Error(error.message);
+//             }
+//             return data;
+//         },
+//     });
+// }
+
+// Retrieve all info of specific expense
+export const useExpenseInfo = (expenseId: string | null) => {
+  return useQuery({
+      queryKey: ['expenseinfo', expenseId],
+      queryFn: async () => {
+          const { data, error } = await supabase
+          .from('Expenses')
+          .select('*')
+          .eq('id', expenseId)
+          .single();
+          if(error) {
+              throw new Error(error.message);
+          }
+          
+          return data;
+      },
+  });
 }
+
+export const updateExpense = async (id: string, expenseName: string, numericCost: number) => {
+  try {
+    const { error } = await supabase
+      .from('Expenses')
+      .update({
+        name: expenseName,
+        amount: numericCost,
+      })
+      .eq('id', id);
+
+    if (error) {
+      throw new Error('Error updating expense: ' + error.message);
+    }
+
+    return { success: true };
+  } catch (error: any) {
+    console.error(error);
+    return { success: false, message: error.message };
+  }
+};
+
 
 export const useGroupExpensesList = (groupId: string) => {
   return useQuery({
@@ -89,4 +130,56 @@ export const useMateExpenses = (currentUserId: string, mateId: string) => {
         }
       },
     });
+  };
+
+  type CreateExpenseParams = {
+    expenseName: string;
+    numericCost: number;
+    currentUserId: string;
+    groupId: string;
+    participantCount: number;
+  };
+  
+  export const createExpense = async ({
+    expenseName,
+    numericCost,
+    currentUserId,
+    groupId,
+    participantCount,
+  }: CreateExpenseParams): Promise<string> => {
+    const { data, error } = await supabase
+      .from('Expenses')
+      .insert([
+        {
+          name: expenseName,
+          amount: numericCost,
+          created_at: new Date().toISOString(),
+          paid_by: currentUserId,
+          in_group: groupId,
+          involved_people: participantCount,
+        },
+      ])
+      .select()
+      .single();
+  
+    if (error) {
+      throw new Error(error.message);
+    }
+  
+    return data.id;
+  };
+  
+  export const insertRelOwesFor = async (expenseId: string, mateIds: string[]) => {
+    const { error } = await supabase
+      .from('Rel_owesFor')
+      .insert(
+        mateIds.map((mateId) => ({
+          expenseid: expenseId,
+          userid: mateId,
+        }))
+      );
+  
+    if (error) {
+      throw new Error(error.message);
+    }
   };

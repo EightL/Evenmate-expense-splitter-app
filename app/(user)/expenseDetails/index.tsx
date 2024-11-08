@@ -12,8 +12,9 @@ import {
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { handleUpdateBalances } from '@/api/updateBalances'; // Import the function
 import { supabase } from '@/lib/supabase'; // Ensure supabase is imported
-// import { useAddExpense } from '@/api/addExpense';
 import { useQueryClient, InvalidateQueryFilters  } from '@tanstack/react-query';
+import { useGetCurrentUserId } from '@/api/getCurrentUserId';
+import { createExpense, insertRelOwesFor } from '@/api/expenses'; // Import the function
 
 export default function AddExpenseScreen() {
   const router = useRouter();
@@ -27,6 +28,10 @@ export default function AddExpenseScreen() {
   const [selectedMates, setSelectedMates] = useState<
     { id: string; name: string }[]
   >([]);
+
+  // Get current user ID
+  const { data: currentUserId, error } = useGetCurrentUserId();
+
 
   useEffect(() => {
     if (params.mateIds && params.mateNames) {
@@ -85,18 +90,6 @@ export default function AddExpenseScreen() {
     }
     
     try {
-      // Get current user ID
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-      
-      if (userError) {
-        Alert.alert('Error', userError.message);
-        return;
-      }
-      
-      const currentUserId = user.id;
       // console.log('Current User ID:', currentUserId);
   
       const participantCount = selectedMates.length + 1; // Including the current user
@@ -112,8 +105,14 @@ export default function AddExpenseScreen() {
       });
   
       // Create the expense and get the expense ID
-      const expenseId = await createExpense(expenseName, numericCost, currentUserId, params.groupId, participantCount);
-  
+      const expenseId = await createExpense({
+        expenseName,
+        numericCost,
+        currentUserId,
+        groupId: params.groupId,
+        participantCount,
+      });
+
       // Insert into Rel_owesFor for each mate
       await insertRelOwesFor(expenseId, mateIds);
   
@@ -124,17 +123,14 @@ export default function AddExpenseScreen() {
       //   selectedMates,
       // });
   
-      // const filters: InvalidateQueryFilters = { queryKey: ['mates'] };
+      // Reset query keys
       queryClient.invalidateQueries({ queryKey: ['mates', currentUserId] });
-
       queryClient.invalidateQueries({ queryKey: ['groupExpenses', params.groupId] });
 
       for (const mate of selectedMates) {
         queryClient.invalidateQueries({ queryKey: ['mateExpenses', currentUserId, mate] });
       }
       
-
-  
       // Reset the form if needed
       setExpenseName('');
       setCost('');
@@ -145,46 +141,6 @@ export default function AddExpenseScreen() {
     }
   };
 
-  // Function to create an expense with correct field names and retrieve the inserted ID
-  const createExpense = async (expenseName: string, cost: number, currentUserId: string, groupId: string, participantCount: number): Promise<string> => {
-    const { data, error } = await supabase
-      .from('Expenses')
-      .insert([
-        {
-          name: expenseName,
-          amount: cost,
-          paid_by: currentUserId,
-          created_at: new Date().toISOString(),
-          in_group: groupId || null,
-          involved_people: participantCount,
-        },
-      ])
-      .select('id'); // Ensure the inserted ID is returned
-  
-    if (error) throw new Error(error.message);
-  
-    if (!data || data.length === 0) {
-      throw new Error('Failed to retrieve the inserted expense ID.');
-    }
-  
-    return data[0].id;
-  };
-  
-  // Function to insert into Rel_owesFor with correct column names
-  const insertRelOwesFor = async (expenseId: string, mateIds: string[]) => {
-    for (const mateId of mateIds) {
-      // console.log('Inserting Rel_owesFor with mateId:', mateId, 'and expenseId:', expenseId);
-      
-      const { error } = await supabase
-        .from('Rel_owesFor')
-        .insert({
-          userid: mateId,      // Use 'userid' as per your table schema
-          expenseid: expenseId, // Use 'expenseid' as per your table schema
-        });
-  
-      if (error) throw new Error(error.message);
-    }
-  };
 
   return (
     <View style={styles.container}>

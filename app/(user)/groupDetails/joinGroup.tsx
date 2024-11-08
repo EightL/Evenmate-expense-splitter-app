@@ -17,6 +17,9 @@ import { supabase } from '@/lib/supabase';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import * as Clipboard from 'expo-clipboard';
 import { useQueryClient, InvalidateQueryFilters  } from '@tanstack/react-query';
+import { useGetCurrentUserId } from '@/api/getCurrentUserId';
+import { checkUserMembership, addUserToGroup } from '@/api/groups';
+
 
 const JoinGroup = () => {
   const router = useRouter();
@@ -25,6 +28,8 @@ const JoinGroup = () => {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [isScannerVisible, setScannerVisible] = useState(false);
   const [scanned, setScanned] = useState(false); // New state
+  const { data: currentUserId, error: currentUserError } = useGetCurrentUserId();
+
 
   const queryClient = useQueryClient();
 
@@ -45,45 +50,21 @@ const JoinGroup = () => {
 
     setLoading(true);
     try {
-      // Fetch the current user
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-
-      if (userError || !user) {
-        throw new Error('User not authenticated.');
-      }
-
-      const userId = user.id;
-
       // Check existing membership
-      const { data: existingMembership, error: fetchError } = await supabase
-        .from('rel_ingroup')
-        .select('*')
-        .eq('userid', userId)
-        .eq('groupid', finalGroupId.trim())
-        .single();
+      const existingMembership = await checkUserMembership(currentUserId, finalGroupId);
 
       if (existingMembership) {
         Alert.alert('Already a Member', 'You are already a member of this group.');
         return;
       }
 
-      // Insert a new membership
-      const { error: insertError } = await supabase.from('rel_ingroup').insert([
-        {
-          userid: userId,
-          groupid: finalGroupId.trim(),
-          joined_at: new Date().toISOString(),
-        },
-      ]);
+      else {
+        // Join group
+        await addUserToGroup(finalGroupId.trim(), currentUserId);
 
-      if (insertError) {
-        throw insertError;
+        queryClient.invalidateQueries({ queryKey: ['groupslist', currentUserId] });
       }
 
-      queryClient.invalidateQueries({ queryKey: ['groupslist'] });
-
-
-      Alert.alert('Success', `You have successfully joined Group ID ${finalGroupId.trim()}.`);
       router.back(); // Navigate back to the previous screen
     } catch (error: any) {
       console.error('Error joining group:', error.message);

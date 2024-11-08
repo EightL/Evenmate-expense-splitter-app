@@ -5,28 +5,14 @@ import { StyleSheet, ActivityIndicator, FlatList, View, Text, Pressable } from '
 import { useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { useGroupsList } from '@/api/groups';
+import { useGetCurrentUserId } from '@/api/getCurrentUserId';
+
 
 export default function GroupsScreen() {
   const router = useRouter();
+  const { data: currentUserId, error: currentUserError } = useGetCurrentUserId();
 
-  // State to store the current user ID
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-
-  // Retrieve the current user ID once on component mount
-  useEffect(() => {
-    const fetchSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (error) {
-        console.error('Error fetching session:', error.message);
-        return;
-      }
-      setCurrentUserId(session?.user.id || null);
-    };
-
-    fetchSession();
-  }, []);
-  
-  const { data: groupsData, error, isLoading } = useGroupsList(currentUserId);
+  const { data: groupsData, error, isLoading } = useGroupsList(currentUserId || null);
 
   if (isLoading) {
     return (

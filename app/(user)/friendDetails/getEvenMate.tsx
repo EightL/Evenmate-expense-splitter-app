@@ -5,12 +5,15 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { handleUpdateBalances } from '@/api/updateBalances'; // Adjust the import path if necessary
 import { useQueryClient, InvalidateQueryFilters  } from '@tanstack/react-query';
+import { useGetCurrentUserId } from '@/api/getCurrentUserId';
 
 
 export default function GetEvenInput() {
   const [amount, setAmount] = useState('');
   const router = useRouter();
   const { name, mateId } = useLocalSearchParams();
+  // Get current user ID
+  const { data: currentUserId, error: currentUserError } = useGetCurrentUserId();
 
   const queryClient = useQueryClient();
 
@@ -23,17 +26,6 @@ export default function GetEvenInput() {
       }
 
       try {
-        // Get current user ID
-        const {
-          data: { user },
-          error: userError,
-        } = await supabase.auth.getUser();
-        if (userError) {
-          Alert.alert('Error', userError.message);
-          return;
-        }
-        const currentUserId = user.id;
-
         // Update balances
         await handleUpdateBalances({
           currentUserId,
@@ -43,9 +35,8 @@ export default function GetEvenInput() {
 
         const filters: InvalidateQueryFilters = { queryKey: ['mates'] };
         queryClient.invalidateQueries(filters);
-
-        Alert.alert('Success', 'Balance updated successfully.');
         // Optionally, navigate back or reset the input
+        router.back();
         router.back();
       } catch (error: any) {
         console.error('Error updating balance:', error.message);

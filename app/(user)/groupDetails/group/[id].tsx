@@ -44,9 +44,6 @@ export default function GroupDetailScreen() {
   const { data: expensesData, error, isLoading: isLoadingExpenses} = useGroupExpensesList(groupId);
   const { data: groupMembers, error: error2, isLoading: isLoadingBalances} = useGroupMembersWithBalance(groupId);
 
-  // console.log('groupMembers', groupMembers);
-  // console.log('expensesData', expensesData);
-
   const totalBalance = useMemo(() => {
     return groupMembers?.reduce((sum, item) => sum + item.balance, 0) || 0;
   }, [groupMembers]);

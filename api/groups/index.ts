@@ -3,23 +3,33 @@ import { supabase } from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
 
 
-export const useGroupsList = (currentUser: string | null) => {
+// Retrieve all info of specific group
+export const useGroupInfo = (groupId: string | null) => {
+  return useQuery({
+      queryKey: ['groupinfo', groupId],
+      queryFn: async () => {
+
+          const { data, error } = await supabase
+          .from('groups')
+          .select('*')
+          .eq('id', groupId)
+          .single();
+          if(error) {
+              throw new Error(error.message);
+          }
+          
+          return data;
+      },
+  });
+}
+
+export const useGroupsList = (currentUserId: string | null) => {
     return useQuery({
-        queryKey: ['groupslist', currentUser],
+        queryKey: ['groupslist', currentUserId],
         queryFn: async () => {
-            // Retrieve the current user ID
+
             // console.log("USERID in API function: ", currentUser);
 
-            const {
-                data: { session },
-                error: sessionError,
-            } = await supabase.auth.getSession();
-            
-            if (sessionError) {
-                throw new Error(sessionError.message);
-            }
-            const currentUserId = session?.user.id; // retrieve current user ID
-        
             const { data, error } = await supabase
             .from('rel_ingroup')
             .select(`
@@ -27,7 +37,7 @@ export const useGroupsList = (currentUser: string | null) => {
                 groupid,
                 groups!groupid(*)
             `)
-                .or(`userid.eq.${currentUserId}`);
+            .eq('userid', currentUserId);
 
             if(error) {
                 throw new Error(error.message);
@@ -130,42 +140,98 @@ export const useGroupMembersWithBalance = (currentGroupId: string) => {
   });
 };
 
+export const fetchGroupNotes = async (groupId: string) => {
+  const { data, error } = await supabase
+    .from('groups')
+    .select('notes')
+    .eq('id', groupId)
+    .single();
 
+  if (error) {
+    throw new Error(error.message || 'Failed to fetch notes.');
+  }
 
-// Returns All the group members including CurrentUser
-// export const useGroupMembers = (currentGroupId : string) => {
-//     return useQuery({
-//         queryKey: ['groupMembers', currentGroupId],
-//         queryFn: async () => {
-        
-//             const { data, error } = await supabase
-//             .from('rel_ingroup')
-//             .select(`
-//                 userid,
-//                 profiles!userid(*)
-//             `)
-//             .eq('groupid', currentGroupId)
-//             if(error) {
-//                 throw new Error(error.message);
-//             }
-//             return data;
-//         },
-//     });
-// }
+  return data.notes || '';
+};
 
+export const updateGroupNotes = async (groupId: string, notes: string) => {
+  const { error } = await supabase
+    .from('groups')
+    .update({ notes })
+    .eq('id', groupId);
 
-// DONT USE, DOESNT HAVE UNIQUE QUERY KEY
-export const useGroupInfo = () => {
-    return useQuery({
-        queryKey: ['groupsinfo'],
-        queryFn: async () => {
-            const { data, error } = await supabase
-            .from('groups')
-            .select('*');
-            if(error) {
-                throw new Error(error.message);
-            }
-            return data;
-        },
+  if (error) {
+    throw new Error(error.message || 'Failed to update notes.');
+  }
+};
+
+export const createGroup = async (groupName: string, userId: string) => {
+  const { data: newGroup, error: groupError } = await supabase
+    .from('groups')
+    .insert({
+      name: groupName,
+      creator_id: userId,
+      created_at: new Date().toISOString(),
+    })
+    .select()
+    .single();
+
+  if (groupError) {
+    throw groupError;
+  }
+
+  return newGroup;
+};
+
+export const addUserToGroup = async (groupId: string, userId: string) => {
+  const { error: membershipError } = await supabase
+    .from('rel_ingroup')
+    .insert({
+      groupid: groupId,
+      userid: userId,
+      joined_at: new Date().toISOString(),
     });
-}
+
+  if (membershipError) {
+    throw membershipError;
+  }
+};
+
+export const checkUserMembership = async (userId: string, groupId: string) => {
+  const { data, error } = await supabase
+    .from('rel_ingroup')
+    .select('*')
+    .eq('userid', userId)
+    .eq('groupid', groupId)
+    .single();
+
+  if (error && error.code === 'PGRST116') { // PGRST116: No rows found
+    return null;
+  }
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+};
+
+// export const joinGroup = async (userId: string, groupId: string) => {
+//  // Insert a new membership
+//     const { data, error } = await supabase
+//       .from('rel_ingroup')
+//       .insert([
+//         {
+//           userid: userId,
+//           groupid: groupId,
+//           joined_at: new Date().toISOString(),
+//         },
+//       ]);
+
+//     if (error) {
+//       throw new Error(error.message);
+//     }
+
+//     return data; // Return the data if successful
+//   };
+

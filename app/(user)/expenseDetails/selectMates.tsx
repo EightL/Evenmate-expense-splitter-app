@@ -18,6 +18,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useMatesList } from '@/api/mates';
 import { useGroupsList, useGroupMembers } from '@/api/groups';
 import { supabase } from '@/lib/supabase';
+import { useGetCurrentUserId } from '@/api/getCurrentUserId';
 
 
 export default function SelectMatesScreen() {
@@ -26,22 +27,8 @@ export default function SelectMatesScreen() {
   const [selectedMates, setSelectedMates] = useState<string[]>([]);
   const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
 
-  // State to store the current user ID
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-
-  // Retrieve the current user ID once on component mount
-  useEffect(() => {
-    const fetchSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (error) {
-        console.error('Error fetching session:', error.message);
-        return;
-      }
-      setCurrentUserId(session?.user.id || null);
-    };
-
-    fetchSession();
-  }, []);
+  // Get current user ID
+  const { data: currentUserId, error } = useGetCurrentUserId();
 
   const { data: matesData, isLoading: isLoadingMates, error: errorMates } = useMatesList(currentUserId);
   const { data: groupsData, error: errorGroups } = useGroupsList(currentUserId);
@@ -49,9 +36,7 @@ export default function SelectMatesScreen() {
 
   // Fetch group members for all group IDs
   // const { data: groupMembers, error: errorGroupsMembers } = useGroupMembers(groupIds);
-  const { data: groupMembers, error: errorGroupsMembers, isLoading: isLoadingGroupMembers } = useGroupMembers(expandedGroups, {
-    enabled: !!expandedGroups, // Fetch only when a group is selected
-  });
+  const { data: groupMembers, error: errorGroupsMembers, isLoading: isLoadingGroupMembers } = useGroupMembers(expandedGroups);
 
   useEffect(() => {
     if (Platform.OS === 'android') {

@@ -1,8 +1,7 @@
-// app/(user)/expenseDetails/[id].tsx
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, FlatList, ActivityIndicator, Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { supabase } from '@/lib/supabase';
+import { fetchExpenseDetails } from '@/api/involvedUsers';  // Import the API function
 
 type Expense = {
   id: string;
@@ -12,76 +11,39 @@ type Expense = {
   created_at: string;
 };
 
-type RelOwesFor = {
-  userid: string;
-  expenseid: string;
-};
-
 export default function ExpenseDetailScreenInMates() {
   const router = useRouter();
-  const { id } = useLocalSearchParams();
+  const { id, mateid } = useLocalSearchParams();
   const [expense, setExpense] = useState<Expense | null>(null);
   const [splitDetails, setSplitDetails] = useState<{ username: string; share: number }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchExpenseDetails = async () => {
+    const fetchDetails = async () => {
       try {
-        // Fetch expense details
-        const { data: expenseData, error: expenseError } = await supabase
-          .from('Expenses')
-          .select('*')
-          .eq('id', id)
-          .single();
-  
-        if (expenseError) throw expenseError;
+        setIsLoading(true);
+        const { expenseData, splitDetails } = await fetchExpenseDetails(id as string);
+
         setExpense(expenseData);
-  
-        // Fetch related users from Rel_owesFor
-        const { data: relData, error: relError } = await supabase
-          .from('Rel_owesFor')
-          .select('userid')
-          .eq('expenseid', id);
-  
-        if (relError) throw relError;
-  
-        // Fetch usernames of involved users
-        const userIds = relData.map(rel => rel.userid);
-        
-        // Add the payer's ID to the list if they are not already included
-        if (!userIds.includes(expenseData.paid_by)) {
-          userIds.push(expenseData.paid_by);
-        }
-  
-        const { data: users, error: usersError } = await supabase
-          .from('profiles') // Assuming you have a 'profiles' table
-          .select('username')
-          .in('id', userIds);
-  
-        if (usersError) throw usersError;
-  
-        // Calculate share per user
-        const share = expenseData.amount / users.length;
-        const split = users.map(user => ({
-          username: user.username,
-          share,
-        }));
-  
-        setSplitDetails(split);
+        setSplitDetails(splitDetails);
       } catch (error: any) {
         console.error('Error fetching expense details:', error.message);
-        Alert.alert('Error', error.message);
+        setError(error.message);
       } finally {
         setIsLoading(false);
       }
     };
-  
-    fetchExpenseDetails();
+
+    fetchDetails();
   }, [id]);
-  
 
   if (isLoading) {
     return <ActivityIndicator style={styles.loader} />;
+  }
+
+  if (error) {
+    return <Text style={styles.errorText}>{`Error: ${error}`}</Text>;
   }
 
   if (!expense) {
@@ -106,7 +68,12 @@ export default function ExpenseDetailScreenInMates() {
       />
       <Pressable
         style={styles.editButton}
-        onPress={() => router.push(`/friendDetails/expense/editExpense/${id}`)}
+        onPress={() =>
+          router.push({
+            pathname: `/friendDetails/expense/editExpense/${id}`,
+            params: { mateId: mateid },
+          })
+        }
       >
         <Text style={styles.editButtonText}>Edit Expense</Text>
       </Pressable>
@@ -169,15 +136,5 @@ const styles = StyleSheet.create({
     color: 'red',
     textAlign: 'center',
     marginTop: 20,
-  },
-  backButton: {
-    marginBottom: 20,
-    padding: 10,
-    backgroundColor: '#e0e0e0',
-    borderRadius: 5,
-  },
-  backButtonText: {
-    fontSize: 16,
-    color: '#333',
   },
 });

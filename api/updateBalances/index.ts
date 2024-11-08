@@ -63,7 +63,7 @@ export const handleUpdateBalances = async ({
       }
     }
 
-    Alert.alert('Success', 'Balances updated successfully.');
+    Alert.alert('Success', 'Balances updated successfully.')
   } catch (err: any) {
     Alert.alert('Error', err.message);
     throw err;

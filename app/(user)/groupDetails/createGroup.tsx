@@ -13,7 +13,8 @@ import {
 import { useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { useQueryClient, InvalidateQueryFilters  } from '@tanstack/react-query';
-
+import { useGetCurrentUserId } from '@/api/getCurrentUserId';
+import { createGroup, addUserToGroup } from '@/api/groups';
 
 export default function CreateGroupScreen() {
   const router = useRouter();
@@ -21,6 +22,7 @@ export default function CreateGroupScreen() {
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const queryClient = useQueryClient();
+  const { data: currentUserId, error } = useGetCurrentUserId();
 
 
   const handleCreateGroup = async () => {
@@ -32,46 +34,17 @@ export default function CreateGroupScreen() {
     setLoading(true);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      const userId = user?.id;
+      // Create the group
+      const newGroup = await createGroup(groupName, currentUserId);
 
-      if (!userId) {
-        Alert.alert('Authentication Error', 'You must be logged in to create a group.');
-        return;
-      }
+      // Add the user to the group
+      await addUserToGroup(newGroup.id, currentUserId);
 
-      const { data: newGroup, error: groupError } = await supabase
-        .from('groups')
-        .insert({
-          name: groupName,
-          // notes: description,
-          creator_id: userId,
-          created_at: new Date().toISOString(),
-        })
-        .select()
-        .single();
-
-      if (groupError) {
-        throw groupError;
-      }
-
-      const { error: membershipError } = await supabase
-        .from('rel_ingroup')
-        .insert({
-          groupid: newGroup.id,
-          userid: userId,
-          joined_at: new Date().toISOString(),
-        });
-
-      if (membershipError) {
-        throw membershipError;
-      }
-
-      // console.log("USERID in CreateGroup: ", userId);
-      queryClient.invalidateQueries({ queryKey: ['groupslist', userId] });
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries();
 
       Alert.alert('Success', 'Group created successfully.');
-      router.back();
+      router.back(); // Navigate back to the previous screen
     } catch (error: any) {
       console.error('Error creating group:', error.message);
       Alert.alert('Error', error.message);
@@ -90,14 +63,6 @@ export default function CreateGroupScreen() {
         onChangeText={setGroupName}
         autoCapitalize="words"
       />
-      {/* <TextInput
-        style={[styles.input, { height: 100 }]}
-        placeholder="Description"
-        value={description}
-        onChangeText={setDescription}
-        multiline
-        textAlignVertical="top"
-      /> */}
       {loading ? (
         <ActivityIndicator size="large" color="#4CAF50" />
       ) : (

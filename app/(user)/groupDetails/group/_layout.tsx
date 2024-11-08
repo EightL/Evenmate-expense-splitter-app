@@ -11,9 +11,6 @@ export default function UserLayout() {
 
   const extractGroupId = (): string | null => {
     const pathSegments = pathname.split('/');
-    // Adjust the index based on your route structure
-    // For example, if the route is /groups/[groupId]/inviteGroup
-    // then groupId would be at index 2
     const groupIdIndex = pathSegments.findIndex(segment => segment === 'groupDetails') + 2;
     return pathSegments[groupIdIndex] || null;
   };

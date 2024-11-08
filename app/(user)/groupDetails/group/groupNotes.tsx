@@ -13,12 +13,14 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { supabase } from '@/lib/supabase';
+import { fetchGroupNotes, updateGroupNotes } from '@/api/groups';
+
 
 type GroupNotesProps = {};
 
 const GroupNotes: React.FC<GroupNotesProps> = () => {
   const router = useRouter();
-  const { id, name } = useLocalSearchParams(); // Assuming 'id' is passed as a route parameter
+  const { id, name } = useLocalSearchParams();
 
   const [notes, setNotes] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -30,17 +32,8 @@ const GroupNotes: React.FC<GroupNotesProps> = () => {
     const fetchNotes = async () => {
       setIsLoading(true);
       try {
-        const { data, error } = await supabase
-          .from('groups') // Replace with your actual table name
-          .select('notes')
-          .eq('id', id)
-          .single();
-
-        if (error) {
-          throw error;
-        }
-
-        setNotes(data.notes || '');
+        const fetchedNotes = await fetchGroupNotes(id as string);
+        setNotes(fetchedNotes);
       } catch (err: any) {
         setError(err.message || 'Failed to fetch notes.');
         Alert.alert('Error', err.message || 'Failed to fetch notes.');
@@ -61,19 +54,12 @@ const GroupNotes: React.FC<GroupNotesProps> = () => {
   const handleSaveNotes = async () => {
     setIsSaving(true);
     try {
-      const { error } = await supabase
-        .from('groups') // Replace with your actual table name
-        .update({ notes })
-        .eq('id', id);
-
-      if (error) {
-        throw error;
-      }
-
+      await updateGroupNotes(id as string, notes);
       Alert.alert('Success', 'Notes have been updated.');
       router.back(); // Navigate back to the previous screen
     } catch (err: any) {
-      Alert.alert('Error', err.message || 'Failed to save notes.');
+      setError(err.message || 'Failed to update notes.');
+      Alert.alert('Error', err.message || 'Failed to update notes.');
     } finally {
       setIsSaving(false);
     }

@@ -2,37 +2,43 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 
-export const useCurrentUserProfile = (currentUserId: string | null) => {
+// Retrieve all info of specific user
+export const useUserInfo = (userId: string | null) => {
     return useQuery({
-        queryKey: ['currentuserprofile', currentUserId],
+        queryKey: ['userinfo', userId],
         queryFn: async () => {
-            // Retrieve the current user ID
-            // const {
-            //     data: { session },
-            //     error: sessionError,
-            // } = await supabase.auth.getSession();
-            // if (sessionError) {
-            //     throw new Error(sessionError.message);
-            // }
-            // const currentUserId = session?.user.id; // retrieve current user ID
-
-            // if (!currentUserId) {
-            //     throw new Error('User is not authenticated.');
-            // }
 
             const { data, error } = await supabase
             .from('profiles')
             .select('*')
-            .eq('id', currentUserId)
+            .eq('id', userId)
             .single();
-
             if(error) {
                 throw new Error(error.message);
             }
-
-            // console.log("PROFILE DATA: ", data);
-
+            
             return data;
         },
     });
-};
+}
+
+
+type UpdateUserProfileParams = {
+    id: string;
+    username: string;
+    bankAccount: string;
+  };
+  
+  export const useUpdateProfile = async ({ id, username, bankAccount }: UpdateUserProfileParams): Promise<void> => {
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        username: username,
+        bank_account: bankAccount,
+      })
+      .eq('id', id);
+  
+    if (error) {
+      throw new Error(`Error updating profile: ${error.message}`);
+    }
+  };

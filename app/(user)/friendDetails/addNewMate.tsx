@@ -17,6 +17,8 @@ import { supabase } from '@/lib/supabase';
 import { useQueryClient } from '@tanstack/react-query';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import { Ionicons } from '@expo/vector-icons';
+import { useGetCurrentUserId } from '@/api/getCurrentUserId';
+import { getProfileByEmail, getExistingRelationship, createMateRelationship } from '@/api/mates';
 
 export default function AddNewMateScreen() {
   const router = useRouter();
@@ -29,6 +31,7 @@ export default function AddNewMateScreen() {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [isScannerVisible, setScannerVisible] = useState(false);
   const [scanned, setScanned] = useState(false);
+  const { data: currentUserId, error } = useGetCurrentUserId();
 
   useEffect(() => {
     // Request Camera Permissions
@@ -57,75 +60,29 @@ export default function AddNewMateScreen() {
     setLoading(true);
 
     try {
-      // Get current user's ID
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-
-      if (userError) {
-        throw userError;
-      }
-
-      const userId = user?.id;
-
-      if (!userId) {
+      if (!currentUserId) {
         throw new Error('User is not authenticated.');
       }
 
       // Check if the email already exists in profiles
-      const { data: existingProfile, error: fetchError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('email', email.trim())
-        .single();
+      const existingProfile = await getProfileByEmail(email);
 
-      if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116: No rows found
-        throw fetchError;
-      }
 
       if (existingProfile) {
         // Check if the relationship already exists to prevent duplicates
-        const { data: existingRelationship, error: relError } = await supabase
-          .from('rel_uubalance')
-          .select('*')
-          .or(`user1.eq.${userId},user2.eq.${userId}`)
-          .eq('user1', existingProfile.id)
-          .or(`user2.eq.${existingProfile.id}`)
-          .maybeSingle();
-
-        if (relError && relError.code !== 'PGRST116') {
-          throw relError;
-        }
+        const existingRelationship = await getExistingRelationship(currentUserId, existingProfile.id);
 
         if (existingRelationship) {
           Alert.alert('Info', 'You are already mates with this user.');
         } else {
           // Create a new mate relationship
-          await createMateRelationship(existingProfile.id, userId);
+          await createMateRelationship(existingProfile.id, currentUserId);
           // Update queries
-          queryClient.invalidateQueries({ queryKey: ['mates', userId] });
+          queryClient.invalidateQueries({ queryKey: ['mates', currentUserId] });
           queryClient.invalidateQueries({ queryKey: ['mates', existingProfile.id] });
           Alert.alert('Success', 'Mate added successfully.');
         }
-      } else {
-        // Profile does not exist, optionally handle inviting the user
-        Alert.alert(
-          'User Not Found',
-          'No user found with this email address. You can invite them to join the app.',
-          [
-            {
-              text: 'Invite',
-              onPress: () => {
-                // Implement your invite functionality here
-                inviteUser(email.trim());
-              },
-            },
-            {
-              text: 'Cancel',
-              style: 'cancel',
-            },
-          ]
-        );
       }
-
       // Navigate back to the Mates screen after adding
       router.back();
     } catch (error: any) {
@@ -133,51 +90,6 @@ export default function AddNewMateScreen() {
       Alert.alert('Error', error.message);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const createMateRelationship = async (mateId: string, userId: string) => {
-    // Insert a new row into the mates relationship table
-    const { error: error1 } = await supabase
-      .from('rel_uubalance')
-      .insert([
-        {
-          user1: userId,
-          user2: mateId,
-          balance: 0, // Initialize balance as needed
-        },
-      ]);
-
-    if (error1) {
-      throw error1;
-    }
-
-    // Insert a reciprocal relationship
-    const { error } = await supabase
-      .from('rel_uubalance')
-      .insert([
-        {
-          user1: mateId,
-          user2: userId,
-          balance: 0, // Initialize balance as needed
-        },
-      ]);
-
-    if (error) {
-      throw error;
-    }
-  };
-
-  const inviteUser = async (inviteEmail: string) => {
-    try {
-      // Implement your invite logic here, e.g., send an email invitation
-      // This could involve calling an API endpoint that handles sending emails
-
-      // Example placeholder implementation:
-      Alert.alert('Invite Sent', `An invitation has been sent to ${inviteEmail}.`);
-    } catch (error: any) {
-      console.error('Error inviting user:', error.message);
-      Alert.alert('Error', 'Failed to send invitation.');
     }
   };
 

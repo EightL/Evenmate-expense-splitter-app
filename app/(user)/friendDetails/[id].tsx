@@ -58,6 +58,7 @@ export default function FriendDetailScreen() {
           pathname: `/friendDetails/expense/${encodeURIComponent(item.id)}`,
           params: {
             expid: item.id,
+            mateid: mateId,
             name: item.name,
             time: item.time,
             description: item.description,

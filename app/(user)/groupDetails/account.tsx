@@ -11,12 +11,13 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { useCurrentUserProfile } from '@/api/profiles';
+import { useUserInfo, useUpdateProfile } from '@/api/profiles';
 import { supabase } from '@/lib/supabase';
 import { useGroupsList } from '@/api/groups';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native'; // Import useNavigation
+import { useGetCurrentUserId } from '@/api/getCurrentUserId';
 
 type GroupItem = {
   id: string;
@@ -24,36 +25,19 @@ type GroupItem = {
   notes: string;
 };
 
+
 const AccountScreen = () => {
   const router = useRouter();
   const navigation = useNavigation(); // Initialize navigation
+  const { data: currentUserId, error } = useGetCurrentUserId();
 
-  // State to store the current user ID
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-
-  // Retrieve the current user ID once on component mount
-  useEffect(() => {
-    const fetchSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (error) {
-        console.error('Error fetching session:', error.message);
-        Alert.alert('Error', 'Failed to retrieve user session.');
-        router.replace('/sign-in'); // Redirect to sign-in if needed
-        return;
-      }
-      setCurrentUserId(session?.user.id || null);
-    };
-
-    fetchSession();
-  }, [router]);
-
-  // Fetch the current user's profile
+  // Fetch the current user's profile data
   const {
     data: profile,
     isLoading: isProfileLoading,
     error: profileError,
     refetch: refetchProfile,
-  } = useCurrentUserProfile(currentUserId || null);
+  } = useUserInfo(currentUserId || null);
 
   // Configure header with QR Code icon
   useLayoutEffect(() => {
@@ -77,13 +61,15 @@ const AccountScreen = () => {
     }
   }, [navigation, router, profile?.email]);
 
+  //
+
   // Fetch the user's groups
   const {
     data: groupsDataRaw,
     isLoading: isGroupsLoading,
     error: groupsError,
     refetch: refetchGroups,
-  } = useGroupsList(currentUserId);
+  } = useGroupsList(currentUserId || null);
 
   // Map groupsData to match GroupItem type
   const groupsData: GroupItem[] | undefined = groupsDataRaw?.map(item => ({
@@ -136,27 +122,21 @@ const AccountScreen = () => {
     user.username !== originalUserRef.current.username ||
     user.bankAccount !== originalUserRef.current.bankAccount;
 
-  // Handler for saving details
   const handleSaveDetails = async () => {
     try {
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({
-          username: user.username,
-          bank_account: user.bankAccount,
-        })
-        .eq('id', profile.id);
-
-      if (updateError) {
-        throw new Error(updateError.message);
-      }
-
+      await useUpdateProfile({
+        id: profile.id,
+        username: user.username,
+        bankAccount: user.bankAccount,
+      });
+  
       Alert.alert('Success', 'Your details have been updated.');
       originalUserRef.current = { ...user };
       refetchProfile();
     } catch (err: any) {
       Alert.alert('Error', err.message);
     }
+    
   };
 
   // Render each group item
@@ -174,7 +154,6 @@ const AccountScreen = () => {
       }
     >
       <Text style={styles.groupName}>{item.name}</Text>
-      {/* <Text style={styles.groupNotes}>{item.notes}</Text> */}
     </Pressable>
   );
 

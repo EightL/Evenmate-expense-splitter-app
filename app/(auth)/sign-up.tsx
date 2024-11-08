@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
   textButton: {
     alignSelf: 'center',
     fontWeight: 'bold',
-    color: Colors.light.tint,
+    color: "#5AC07C",
     marginVertical: 10,
   },
 });
