@@ -97,3 +97,5 @@ export const fetchExpenseDetails = async (id: string) => {
     throw new Error(`Error fetching expense details: ${error.message}`);
   }
 };
+
+

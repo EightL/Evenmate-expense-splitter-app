@@ -21,6 +21,25 @@ export const useExpenseInfo = (expenseId: string | null) => {
   });
 }
 
+export const deleteExpense = async (id: string) => {
+  const { error: error2 } = await supabase
+  .from('Rel_owesFor')
+  .delete()
+  .eq('expenseid', id)
+
+  const { error } = await supabase
+  .from('Expenses')
+  .delete()
+  .eq('id', id)
+  .single();
+
+  if (error || error2) {
+    throw new Error(`Error deleting relationship: ${error.message}`);
+  }
+
+  return true;
+}
+
 export const updateExpense = async (id: string, expenseName: string, numericCost: number) => {
   try {
     const { error } = await supabase

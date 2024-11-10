@@ -8,13 +8,14 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { handleUpdateBalances } from '@/api/updateBalances'; // Import the function
-import { supabase } from '@/lib/supabase'; // Ensure supabase is imported
-import { useQueryClient, InvalidateQueryFilters  } from '@tanstack/react-query';
+import { handleUpdateBalances } from '@/api/updateBalances';
+import { supabase } from '@/lib/supabase';
+import { useQueryClient } from '@tanstack/react-query';
 import { useGetCurrentUserId } from '@/api/getCurrentUserId';
-import { createExpense, insertRelOwesFor } from '@/api/expenses'; // Import the function
+import { createExpense, insertRelOwesFor } from '@/api/expenses';
 
 export default function AddExpenseScreen() {
   const router = useRouter();
@@ -28,10 +29,10 @@ export default function AddExpenseScreen() {
   const [selectedMates, setSelectedMates] = useState<
     { id: string; name: string }[]
   >([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Get current user ID
   const { data: currentUserId, error } = useGetCurrentUserId();
-
 
   useEffect(() => {
     if (params.mateIds && params.mateNames) {
@@ -66,6 +67,11 @@ export default function AddExpenseScreen() {
   }, [params.mateIds, params.mateNames]);
 
   const handleAddMates = () => {
+    // Reset the form
+    setExpenseName('');
+    setCost('');
+    setSelectedMates([]);
+
     router.push({
       pathname: '/expenseDetails/selectMates',
       params: {
@@ -75,7 +81,7 @@ export default function AddExpenseScreen() {
     });
   };
 
-  // Updated handleSubmitExpense function with additional logging
+  // Updated handleSubmitExpense function with ActivityIndicator in the button
   const handleSubmitExpense = async () => {
     // Input validation
     if (!expenseName.trim() || !cost.trim()) {
@@ -90,20 +96,19 @@ export default function AddExpenseScreen() {
     }
     
     try {
-      // console.log('Current User ID:', currentUserId);
-  
+      setIsSubmitting(true);
+
       const participantCount = selectedMates.length + 1; // Including the current user
       const share = numericCost / participantCount;
       const mateIds = selectedMates.map((mate) => mate.id);
-      // console.log('Mate IDs:', mateIds);
-  
+
       // Update balances
       await handleUpdateBalances({
         currentUserId,
         mateIds,
         share,
       });
-  
+
       // Create the expense and get the expense ID
       const expenseId = await createExpense({
         expenseName,
@@ -115,14 +120,7 @@ export default function AddExpenseScreen() {
 
       // Insert into Rel_owesFor for each mate
       await insertRelOwesFor(expenseId, mateIds);
-  
-      // Log and reset
-      // console.log('Expense Submitted:', {
-      //   expenseName,
-      //   cost: numericCost,
-      //   selectedMates,
-      // });
-  
+
       // Reset query keys
       queryClient.invalidateQueries({ queryKey: ['mates', currentUserId] });
       queryClient.invalidateQueries({ queryKey: ['groupExpenses', params.groupId] });
@@ -131,19 +129,23 @@ export default function AddExpenseScreen() {
         queryClient.invalidateQueries({ queryKey: ['mateExpenses', currentUserId, mate] });
       }
       
-      // Reset the form if needed
+      // Reset the form
       setExpenseName('');
       setCost('');
       setSelectedMates([]);
+
+      Alert.alert('Success', 'Expense added successfully.');
+      router.back();
     } catch (error: any) {
       console.error('Error submitting expense:', error.message);
       Alert.alert('Error', error.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Add Expense</Text>
       <TextInput
         style={styles.input}
@@ -174,14 +176,18 @@ export default function AddExpenseScreen() {
       <Pressable
         style={[
           styles.submitButton,
-          (!expenseName || !cost || selectedMates.length === 0) && styles.submitButtonDisabled,
+          (!expenseName || !cost || selectedMates.length === 0 || isSubmitting) && styles.submitButtonDisabled,
         ]}
         onPress={handleSubmitExpense}
-        disabled={!expenseName || !cost || selectedMates.length === 0}
+        disabled={!expenseName || !cost || selectedMates.length === 0 || isSubmitting}
       >
-        <Text style={styles.submitButtonText}>Submit Expense</Text>
+        {isSubmitting ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.submitButtonText}>Submit Expense</Text>
+        )}
       </Pressable>
-    </View>
+    </ScrollView>
   );
 }
 

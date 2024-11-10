@@ -79,6 +79,92 @@ export const useGroupMembers = (currentGroupId : string) => {
 }
 
 
+export const useGroupsTotalBalances = (groupIds: string[]) => {
+  return useQuery<number[], Error>({
+    queryKey: ['groupsTotalBalances', groupIds],
+    queryFn: async () => {
+      if (groupIds.length === 0) {
+        return [];
+      }
+
+      // Retrieve the current user session
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
+
+      if (sessionError) {
+        throw new Error(sessionError.message);
+      }
+
+      const currentUserId = session?.user.id;
+
+      if (!currentUserId) {
+        throw new Error('User is not authenticated.');
+      }
+
+      /**
+       * Fetches the total balance for a single group.
+       *
+       * @param groupId - The ID of the group.
+       * @returns The total balance for the group.
+       */
+      const fetchGroupBalance = async (groupId: string): Promise<number> => {
+        // Get group members excluding the current user
+        const { data: groupMembers, error: groupError } = await supabase
+          .from('rel_ingroup')
+          .select('userid')
+          .eq('groupid', groupId)
+          .neq('userid', currentUserId);
+
+        if (groupError) {
+          throw new Error(groupError.message);
+        }
+
+        const userIds = groupMembers.map((member) => member.userid);
+
+        if (userIds.length === 0) {
+          return 0;
+        }
+
+        // Get balances between current user and each group member
+        const { data: balances, error: balanceError } = await supabase
+          .from('rel_uubalance')
+          .select('balance')
+          .eq('user1', currentUserId)
+          .in('user2', userIds);
+
+        if (balanceError) {
+          throw new Error(balanceError.message);
+        }
+
+        // Calculate the total balance by summing individual balances
+        const totalBalance = balances.reduce((sum, balance) => sum + (balance.balance || 0), 0);
+
+        return totalBalance;
+      };
+
+      // Fetch balance for each group concurrently
+      const balancePromises = groupIds.map((groupId) => fetchGroupBalance(groupId));
+
+      try {
+        // Await all balance fetches
+        const balances = await Promise.all(balancePromises);
+        return balances; // Returns an array like [100, 300, 400]
+      } catch (error) {
+        // Handle any errors that occurred during the balance fetches
+        console.error('Error fetching group balances:', error);
+        throw error;
+      }
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    cacheTime: 1000 * 60 * 10, // 10 minutes
+    refetchOnWindowFocus: false,
+  });
+};
+
+
+
 
 export const useGroupMembersWithBalance = (currentGroupId: string) => {
   return useQuery({

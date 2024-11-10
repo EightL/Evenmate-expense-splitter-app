@@ -1,10 +1,19 @@
 // app/(user)/expenseDetails/edit/[id].tsx
 import React, { useEffect, useState } from 'react';
-import { View, TextInput, Text, Pressable, StyleSheet, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import {
+  View,
+  TextInput,
+  Text,
+  Pressable,
+  StyleSheet,
+  ScrollView,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import { useExpenseInfo, updateExpense } from '@/api/expenses';
+import { useExpenseInfo, updateExpense, deleteExpense } from '@/api/expenses';
 import { useGetCurrentUserId } from '@/api/getCurrentUserId';
 import { handleUpdateBalances } from '@/api/updateBalances';
 import { useInvolvedPeople } from '@/api/involvedUsers';
@@ -22,12 +31,12 @@ export default function EditExpenseScreen() {
   const { id, mateid } = useLocalSearchParams<{ id: string }>();
   const [expenseName, setExpenseName] = useState('');
   const [cost, setCost] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const queryClient = useQueryClient();
   const { data: currentUserId } = useGetCurrentUserId();
   const { data: mateIds } = useInvolvedPeople(id);
-
-  const { data: expense, isLoading, error } = useExpenseInfo(id);
+  const { data: expense, isLoading: isExpenseLoading, error } = useExpenseInfo(id);
 
   useEffect(() => {
     if (expense) {
@@ -35,6 +44,51 @@ export default function EditExpenseScreen() {
       setCost(expense.amount.toString());
     }
   }, [expense]);
+
+  const handleDeleteExpense = async () => {
+    Alert.alert(
+      'Confirm Deletion',
+      'Are you sure you want to delete this expense?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setIsDeleting(true);
+              
+              // Delete the expense
+              await deleteExpense(id);
+              
+              // Calculate the share to update balances
+              const numericCost = parseFloat(cost);
+              const share = -numericCost / (mateIds?.length || 1);
+    
+              // Update balances of involved users
+              await handleUpdateBalances({ currentUserId, mateIds, share });
+    
+              // Invalidate queries to refresh data
+              queryClient.invalidateQueries();
+    
+              // Navigate back after deletion
+              router.back();
+              router.back();
+            } catch (error: any) {
+              console.error('Error deleting expense:', error.message);
+              Alert.alert('Error', error.message);
+            } finally {
+              setIsDeleting(false);
+            }
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
 
   const handleUpdateExpense = async () => {
     if (!expenseName.trim() || !cost.trim()) {
@@ -49,7 +103,7 @@ export default function EditExpenseScreen() {
     }
 
     try {
-      setLoading(true);
+      setIsUpdating(true);
 
       // Update expense details
       const result = await updateExpense(id, expenseName, numericCost);
@@ -60,7 +114,7 @@ export default function EditExpenseScreen() {
 
       // Update balances of involved users
       const changedAmount = numericCost - expense.amount;
-      const share = changedAmount / mateIds?.length;
+      const share = changedAmount / (mateIds?.length || 1);
 
       await handleUpdateBalances({ currentUserId, mateIds, share });
 
@@ -75,17 +129,29 @@ export default function EditExpenseScreen() {
       console.error('Error updating expense:', error.message);
       Alert.alert('Error', error.message);
     } finally {
-      setLoading(false);
+      setIsUpdating(false);
     }
   };
 
-  if (isLoading || loading) {
-    return <ActivityIndicator style={styles.loader} size="large" color="#0000ff" />;
+  if (isExpenseLoading) {
+    return (
+      <View style={styles.loaderContainer}>
+        <ActivityIndicator style={styles.loader} size="large" color="#0000ff" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>{`Error: ${error.message}`}</Text>
+      </View>
+    );
   }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Edit expense details</Text>
+      <Text style={styles.title}>Edit Expense Details</Text>
       <TextInput
         style={styles.input}
         placeholder="Expense Name"
@@ -100,21 +166,55 @@ export default function EditExpenseScreen() {
         keyboardType="numeric"
       />
 
-      <Pressable style={styles.updateButton} onPress={handleUpdateExpense}>
-        <Text style={styles.updateButtonText}>Update Expense</Text>
+      <Pressable
+        style={[
+          styles.updateButton,
+          (isUpdating || isDeleting) && styles.buttonDisabled,
+        ]}
+        onPress={handleUpdateExpense}
+        disabled={isUpdating || isDeleting}
+      >
+        {isUpdating ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.updateButtonText}>Update Expense</Text>
+        )}
       </Pressable>
+
       <View style={styles.spacer} />
-      <Pressable style={styles.deleteButton}>
-        <Text style={styles.deleteButtonText}>Delete Expense</Text>
+
+      <Pressable
+        style={[
+          styles.deleteButton,
+          (isUpdating || isDeleting) && styles.buttonDisabled,
+        ]}
+        onPress={handleDeleteExpense}
+        disabled={isUpdating || isDeleting}
+      >
+        {isDeleting ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.deleteButtonText}>Delete Expense</Text>
+        )}
       </Pressable>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  loader: {
+  loaderContainer: {
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loader: {
+    // Optional additional styling
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
   },
   container: {
     flexGrow: 1,
@@ -165,5 +265,13 @@ const styles = StyleSheet.create({
   },
   spacer: {
     flex: 1,
+  },
+  buttonDisabled: {
+    opacity: 0.7,
+  },
+  errorText: {
+    fontSize: 18,
+    color: 'red',
+    textAlign: 'center',
   },
 });

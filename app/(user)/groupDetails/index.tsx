@@ -1,18 +1,26 @@
-// app/(user)/groupDetails/index.tsx
 import React from 'react';
 import { useState, useEffect } from 'react';
 import { StyleSheet, ActivityIndicator, FlatList, View, Text, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
-import { useGroupsList } from '@/api/groups';
+import { useGroupsList, useGroupsTotalBalances } from '@/api/groups';
 import { useGetCurrentUserId } from '@/api/getCurrentUserId';
-
 
 export default function GroupsScreen() {
   const router = useRouter();
   const { data: currentUserId, error: currentUserError } = useGetCurrentUserId();
 
   const { data: groupsData, error, isLoading } = useGroupsList(currentUserId || null);
+  // console.log('groupsData', groupsData);
+
+  // const groupIds = groupsData?.map((group) => group.groupid) || [];
+  // console.log('groupIds', groupIds);
+
+  // const matesInGroups = groupsData?.map((group) => group.userid) || [];
+  // console.log('matesInGroups', matesInGroups);
+
+  // const { data: groupBalances, error: error5 } = useGroupsTotalBalances(groupIds);
+  // console.log('groupBalances', groupBalances);
 
   if (isLoading) {
     return (
@@ -36,23 +44,33 @@ export default function GroupsScreen() {
     };
   };
 
-  const renderItem = ({ item }: { item: Group }) => (
-    <Pressable
-      style={styles.itemContainer}
-      onPress={() =>
-        router.push({
-          pathname: `./groupDetails/group/${encodeURIComponent(item.groups.id)}`,
-          params: {
-            name: item.groups.name,
-            notes: item.groups.notes,
-          },
-        })
-      }
-    >
-      <Text style={styles.groupName}>{item.groups.name}</Text>
-      {/* <Text style={styles.description}>{item.groups.notes}</Text> */}
-    </Pressable>
-  );
+  // Render each group and its corresponding balance
+  const renderItem = ({ item }: { item: Group }) => {
+    // Find the balance for the current group
+    // const groupBalance = groupBalances?.find(
+    //   (balance, index) => groupsData && groupsData[index]?.groupid === item.groupid
+    // );
+
+    return (
+      <Pressable
+        style={styles.itemContainer}
+        onPress={() =>
+          router.push({
+            pathname: `./groupDetails/group/${encodeURIComponent(item.groups.id)}`,
+            params: {
+              name: item.groups.name,
+              notes: item.groups.notes,
+            },
+          })
+        }
+      >
+        <Text style={styles.groupName}>{item.groups.name}</Text>
+        {/* <Text>
+          /* Balance: {groupBalance?.toFixed(2)} CZK Display balance or default to 0 *
+        </Text> */}
+      </Pressable>
+    );
+  };
 
   const handleCreateNewGroup = () => {
     router.push('/groupDetails/createGroup');
