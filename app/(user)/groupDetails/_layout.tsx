@@ -9,6 +9,8 @@ import { handleLogout, handleAccount } from '@/lib/auth';
 export default function GroupsStack() {
   const router = useRouter(); // Initialize the router
 
+
+
   return (
     <Stack>
       <Stack.Screen
@@ -34,7 +36,7 @@ export default function GroupsStack() {
           ),
           headerRight: () => (
             <Pressable
-              onPress={() => handleAccount(router)}
+              onPress={() => router.push('/groupDetails/account')} // Use the router to navigate to the account screen
               style={({ pressed }) => [
                 styles.accountButton,
                 pressed && styles.pressedButton,

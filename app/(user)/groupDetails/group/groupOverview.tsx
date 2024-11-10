@@ -16,7 +16,7 @@ type GroupMember = {
 
 export default function GroupOverviewScreen() {
   const router = useRouter();
-  const { id: groupId, name: groupName } = useLocalSearchParams<{ id: string; name: string }>();
+  const { id: groupId, name: groupName, totalBalance } = useLocalSearchParams<{ id: string; name: string }>();
 
   const [session, setSession] = useState<{ user: { id: string } } | null>(null);
   const [isSessionLoading, setIsSessionLoading] = useState<boolean>(true);
@@ -111,7 +111,7 @@ export default function GroupOverviewScreen() {
     <View style={styles.memberContainer}>
       <Text style={styles.username}>{item.profiles.username}</Text>
       <Text style={styles.balanceText}>
-        {item.balance > 0
+        {item.balance >= 0
           ? `You lent: ${item.balance.toFixed(2)} CZK`
           : `You owe: ${Math.abs(item.balance).toFixed(2)} CZK`}
       </Text>
@@ -125,12 +125,7 @@ export default function GroupOverviewScreen() {
       {/* Current User Container */}
       {session?.user.id && (
         <View style={styles.currentUserContainer}>
-          <Text style={styles.currentUserTitle}>You</Text>
-          <Text style={styles.balanceText}>
-            {/* {currentUser.balance > 0
-              ? `You lent: ${currentUser.balance.toFixed(2)} CZK`
-              : `You owe: ${Math.abs(currentUser.balance).toFixed(2)} CZK`} */}
-          </Text>
+          <Text style={styles.currentUserTitle}>Your balance {totalBalance} CZK</Text>
         </View>
       )}
 
@@ -177,7 +172,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '600',
     marginBottom: 5,
-    color: '#1B5E20',
+    color: 'black',
   },
   subTitle: {
     fontSize: 20,

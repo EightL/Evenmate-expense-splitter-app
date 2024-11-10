@@ -2,22 +2,6 @@ import { supabase } from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
 
 
-// DONT USE, DOESTN HAVE UNIQUE QUERY KEY
-// export const useExpensesList = () => {
-//     return useQuery({
-//         queryKey: ['expenses'],
-//         queryFn: async () => {
-//             const { data, error } = await supabase
-//             .from('Expenses')
-//             .select('*');
-//             if(error) {
-//                 throw new Error(error.message);
-//             }
-//             return data;
-//         },
-//     });
-// }
-
 // Retrieve all info of specific expense
 export const useExpenseInfo = (expenseId: string | null) => {
   return useQuery({
@@ -103,7 +87,7 @@ export const useMateExpenses = (currentUserId: string, mateId: string) => {
             throw new Error(userError.message);
           }
   
-            //   console.log("KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKYYYYYYYYYYYYS");
+          //   console.log("KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKYYYYYYYYYYYYS");
   
           // Fetch expenses where paid_by is currentUserId or mateId
           const { data: paidByExpenses, error: paidByError } = await supabase

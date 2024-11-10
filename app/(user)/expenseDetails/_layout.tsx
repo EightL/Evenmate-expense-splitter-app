@@ -33,7 +33,7 @@ export default function ExpenseStack() {
           ),
           headerRight: () => (
             <Pressable
-              onPress={() => handleAccount(router)} // Wrap in an anonymous function
+              onPress={() => router.push('/expenseDetails/account')} // Wrap in an anonymous function
               style={({ pressed }) => [
                 styles.accountButton,
                 pressed && styles.pressedButton,

@@ -1,21 +1,26 @@
 // app/(user)/friendDetails/getEvenMate.tsx
-import React, { useState } from 'react';
-import { View, TextInput, Text, Pressable, StyleSheet, Alert } from 'react-native';
+
+import React, { useEffect, useState } from 'react';
+import { View, TextInput, Text, Pressable, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { supabase } from '@/lib/supabase';
-import { handleUpdateBalances } from '@/api/updateBalances'; // Adjust the import path if necessary
-import { useQueryClient, InvalidateQueryFilters  } from '@tanstack/react-query';
+import { handleUpdateBalances } from '@/api/updateBalances';
+import { useQueryClient } from '@tanstack/react-query';
 import { useGetCurrentUserId } from '@/api/getCurrentUserId';
 
-
 export default function GetEvenInput() {
-  const [amount, setAmount] = useState('');
   const router = useRouter();
-  const { name, mateId } = useLocalSearchParams();
-  // Get current user ID
+  const { name, mateId, balance } = useLocalSearchParams<{ name: string; mateId: string; balance: string }>();
+  const [amount, setAmount] = useState('');
   const { data: currentUserId, error: currentUserError } = useGetCurrentUserId();
-
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (balance) {
+      setAmount((-parseFloat(balance)).toString()); // Invert the balance sign here
+    }
+  }, [balance]);
+
+  // console.log('balance:', balance); // Should now log the correct balance
 
   const handleAdd = async () => {
     if (amount.trim() !== '') {
@@ -26,16 +31,14 @@ export default function GetEvenInput() {
       }
 
       try {
-        // Update balances
         await handleUpdateBalances({
-          currentUserId,
+          currentUserId: currentUserId!,
           mateIds: [mateId],
           share: numericAmount,
         });
+        queryClient.invalidateQueries({ queryKey: ['mates', currentUserId] });
+        queryClient.invalidateQueries({ queryKey: ['mates', mateId] });
 
-        const filters: InvalidateQueryFilters = { queryKey: ['mates'] };
-        queryClient.invalidateQueries(filters);
-        // Optionally, navigate back or reset the input
         router.back();
         router.back();
       } catch (error: any) {
@@ -48,26 +51,19 @@ export default function GetEvenInput() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Get Even with: {name}</Text>
-
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Amount:</Text>
         <TextInput
           style={styles.input}
-          placeholder="500.00"
+          placeholder="0.00"
           value={amount}
           onChangeText={setAmount}
           keyboardType="numeric"
         />
-        <Text style={styles.currency}>Kč</Text>
+        <Text style={styles.currency}>CZK</Text>
       </View>
-
-      {/* Additional fields like date and comments */}
-
       <Pressable
-        style={[
-          styles.button,
-          amount.trim() === '' && styles.buttonDisabled,
-        ]}
+        style={[styles.button, amount.trim() === '' && styles.buttonDisabled]}
         onPress={handleAdd}
         disabled={amount.trim() === ''}
       >
@@ -81,48 +77,47 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    justifyContent: 'center',
     backgroundColor: '#fff',
   },
   title: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: 'bold',
-    textAlign: 'center',
     marginBottom: 20,
   },
   inputContainer: {
     flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
-    marginVertical: 20,
+    marginBottom: 20,
   },
   label: {
     fontSize: 18,
     marginRight: 10,
   },
   input: {
-    borderBottomWidth: 1,
-    fontSize: 24,
-    padding: 5,
     flex: 1,
-    textAlign: 'center',
+    borderColor: '#4CAF50',
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    fontSize: 16,
   },
   currency: {
-    fontSize: 18,
     marginLeft: 10,
+    fontSize: 16,
   },
   button: {
-    marginTop: 20,
-    backgroundColor: 'green',
-    padding: 15,
+    backgroundColor: '#4CAF50',
+    paddingVertical: 15,
     borderRadius: 10,
     alignItems: 'center',
   },
   buttonDisabled: {
-    backgroundColor: 'rgba(0,128,0,0.3)', // Semi-transparent green
+    backgroundColor: '#a5d6a7',
   },
   buttonText: {
     color: '#fff',
     fontSize: 18,
+    fontWeight: 'bold',
   },
 });

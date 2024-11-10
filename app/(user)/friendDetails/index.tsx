@@ -80,7 +80,7 @@ export default function MatesScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Balance: {totalBalance.toFixed(2)} CZK</Text>
+      <Text style={styles.title}>Overall Balance: {totalBalance.toFixed(2)} CZK</Text>
       <FlatList
         data={matesData}
         keyExtractor={(item) => item.profiles.username}

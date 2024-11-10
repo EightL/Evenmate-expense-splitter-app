@@ -2,10 +2,12 @@
 import React, { useEffect, useState } from 'react';
 import { View, TextInput, Text, Pressable, StyleSheet, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import { useQueryClient, InvalidateQueryFilters  } from '@tanstack/react-query';
 import { useExpenseInfo, updateExpense } from '@/api/expenses';
 import { useGetCurrentUserId } from '@/api/getCurrentUserId';
+import { handleUpdateBalances } from '@/api/updateBalances';
+import { useInvolvedPeople } from '@/api/involvedUsers';
 
 type Expense = {
   id: string;
@@ -17,19 +19,15 @@ type Expense = {
 
 export default function EditExpenseScreen() {
   const router = useRouter();
-  const { id, mateid} = useLocalSearchParams<{ id: string }>();
+  const { id, mateid } = useLocalSearchParams<{ id: string }>();
   const [expenseName, setExpenseName] = useState('');
   const [cost, setCost] = useState('');
+  const [loading, setLoading] = useState(false);
   const queryClient = useQueryClient();
-  const { data: currentUserId, error: currentUserIdError } = useGetCurrentUserId();
+  const { data: currentUserId } = useGetCurrentUserId();
+  const { data: mateIds } = useInvolvedPeople(id);
 
-  // Use the custom hook to fetch expense data
-  const {
-    data: expense,
-    isLoading,
-    isError,
-    error,
-  } = useExpenseInfo(id);
+  const { data: expense, isLoading, error } = useExpenseInfo(id);
 
   useEffect(() => {
     if (expense) {
@@ -50,24 +48,40 @@ export default function EditExpenseScreen() {
       return;
     }
 
-    const result = await updateExpense(id, expenseName, numericCost);
+    try {
+      setLoading(true);
 
-    if (result.success) {
-      Alert.alert('Success', 'Expense updated successfully.');
-      router.back();
-      // queryClient.invalidateQueries({ queryKey: ['mateExpenses', currentUserId, mateid] });
-      // console.log("CURRENT USER ID: ", currentUserId);
-      await queryClient.invalidateQueries();
+      // Update expense details
+      const result = await updateExpense(id, expenseName, numericCost);
+
+      if (!result.success) {
+        throw new Error(result.message);
+      }
+
+      // Update balances of involved users
+      const changedAmount = numericCost - expense.amount;
+      const share = changedAmount / mateIds?.length;
+
+      await handleUpdateBalances({ currentUserId, mateIds, share });
+
+      // Invalidate queries to refresh the data
+      queryClient.invalidateQueries();
       queryClient.invalidateQueries({ queryKey: ['mates', currentUserId] });
 
-    } else {
+      Alert.alert('Success', 'Expense updated successfully.');
+      router.back();
+      router.back();
+      router.back();
+    } catch (error: any) {
       console.error('Error updating expense:', error.message);
-      Alert.alert('Error', result.message);
+      Alert.alert('Error', error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (isLoading) {
-    return <ActivityIndicator style={styles.loader} />;
+  if (isLoading || loading) {
+    return <ActivityIndicator style={styles.loader} size="large" color="#0000ff" />;
   }
 
   return (
@@ -86,9 +100,13 @@ export default function EditExpenseScreen() {
         onChangeText={setCost}
         keyboardType="numeric"
       />
-      {/* Add additional fields as needed */}
+
       <Pressable style={styles.updateButton} onPress={handleUpdateExpense}>
         <Text style={styles.updateButtonText}>Update Expense</Text>
+      </Pressable>
+      <View style={styles.spacer} />
+      <Pressable style={styles.deleteButton}>
+        <Text style={styles.deleteButtonText}>Delete Expense</Text>
       </Pressable>
     </ScrollView>
   );
@@ -112,6 +130,18 @@ const styles = StyleSheet.create({
     marginTop: 10,
     textAlign: 'center',
   },
+  deleteButton: {
+    backgroundColor: '#FF3B30',
+    paddingVertical: 15,
+    paddingHorizontal: 25,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  deleteButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
   input: {
     width: '100%',
     borderColor: '#4CAF50',
@@ -124,6 +154,7 @@ const styles = StyleSheet.create({
   },
   updateButton: {
     backgroundColor: '#5AC07C',
+    marginBottom: 10,
     paddingVertical: 15,
     borderRadius: 10,
     alignItems: 'center',
@@ -132,5 +163,8 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  spacer: {
+    flex: 1,
   },
 });

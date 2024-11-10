@@ -9,6 +9,9 @@ import 'react-native-reanimated';
 import AuthProvider from '@/providers/AuthProvider';
 import QueryProvider from '@/providers/QueryProvider';
 import { useColorScheme } from '@/components/useColorScheme';
+import { StatusBar } from 'expo-status-bar';
+import Platform from 'react-native';
+import React from 'react';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -24,6 +27,7 @@ export const unstable_settings = {
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const colorScheme = useColorScheme();
   const [loaded, error] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     ...FontAwesome.font,
@@ -43,21 +47,25 @@ export default function RootLayout() {
   if (!loaded) {
     return null;
   }
-
-  return <RootLayoutNav />;
+  return (
+    <>
+      <RootLayoutNav />
+    </>
+  );
 }
+
+
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}> 
+    <ThemeProvider value={DefaultTheme}> 
       <AuthProvider>
         <QueryProvider>
-        <Stack> 
+        <Stack>
           <Stack.Screen name="(user)" options={{ headerShown: false }} />
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
           <Stack.Screen name="index" options={{ headerShown: false }} />
         </Stack>
         </QueryProvider>

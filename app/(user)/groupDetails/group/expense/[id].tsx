@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, FlatList, ActivityIndicator, Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { fetchExpenseDetails } from '@/api/involvedUsers';  // Import the API function
+import { fetchExpenseDetails } from '@/api/involvedUsers';
+import { useUserInfo } from '@/api/profiles';
+import { useExpenseInfo } from '@/api/expenses';
+
 
 type Expense = {
   id: string;
@@ -9,23 +12,36 @@ type Expense = {
   amount: number;
   paid_by: string;
   created_at: string;
+  in_group: string;
+  involved_people: number;
+};
+
+type User = {
+  id: string;
+  username: string;
+  bank_account: string;
+  email: string;
 };
 
 export default function ExpenseDetailScreenInMates() {
   const router = useRouter();
-  const { id, mateid } = useLocalSearchParams();
-  const [expense, setExpense] = useState<Expense | null>(null);
+  const { id: expenseId, mateid } = useLocalSearchParams();
+  // const [expense, setExpense] = useState<Expense | null>(null);
   const [splitDetails, setSplitDetails] = useState<{ username: string; share: number }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const { data: expense, error: error10 } = useExpenseInfo(expenseId);
+  const { data: User, error : error2 } = useUserInfo(expense?.paid_by);
+  // const { expenseData, splitDetails } = await fetchExpenseDetails(expenseId as string);
+
   useEffect(() => {
     const fetchDetails = async () => {
       try {
-        setIsLoading(true);
-        const { expenseData, splitDetails } = await fetchExpenseDetails(id as string);
+        // setIsLoading(true);
+        const { expenseData, splitDetails } = await fetchExpenseDetails(expenseId as string);
 
-        setExpense(expenseData);
+        // setExpense(expenseData);
         setSplitDetails(splitDetails);
       } catch (error: any) {
         console.error('Error fetching expense details:', error.message);
@@ -36,7 +52,7 @@ export default function ExpenseDetailScreenInMates() {
     };
 
     fetchDetails();
-  }, [id]);
+  }, [expenseId]);
 
   if (isLoading) {
     return <ActivityIndicator style={styles.loader} />;
@@ -54,7 +70,7 @@ export default function ExpenseDetailScreenInMates() {
     <View style={styles.container}>
       <Text style={styles.title}>{expense.name}</Text>
       <Text style={styles.detail}>Cost: {expense.amount} CZK</Text>
-      <Text style={styles.detail}>Paid by: {expense.paid_by}</Text>
+      <Text style={styles.detail}>Paid by: {User.username}</Text>
       <Text style={styles.sectionTitle}>Split Between:</Text>
       <FlatList
         data={splitDetails}
@@ -70,7 +86,7 @@ export default function ExpenseDetailScreenInMates() {
         style={styles.editButton}
         onPress={() =>
           router.push({
-            pathname: `/groupDetails/group/expense/editExpense/${id}`,
+            pathname: `/groupDetails/group/expense/editExpense/${expenseId}`,
             params: { mateId: mateid },
           })
         }

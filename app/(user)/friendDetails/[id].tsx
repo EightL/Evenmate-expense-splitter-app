@@ -6,11 +6,20 @@ import { Stack } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { useSharedGroups } from '@/api/Rel_inGroup';
 import { useGetCurrentUserId } from '@/api/getCurrentUserId';
+import { deleteMateRelationship } from '@/api/mates';
 import { useMateExpenses } from '@/api/expenses';
+import { Alert } from 'react-native';
+import { useQueryClient, InvalidateQueryFilters  } from '@tanstack/react-query';
+import { useUserInfo } from '@/api/profiles';
+
 
 export default function FriendDetailScreen() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { id: mateId, name, balance, bankAccount, email } = useLocalSearchParams();
+  const { data: mateData } = useUserInfo(mateId); // Isnt used but made something else work
+
+  // console.log("TADY balance: ", balance);
   
   // Get current user's ID
   const { data: currentUserId, error: error1 } = useGetCurrentUserId();
@@ -26,9 +35,35 @@ export default function FriendDetailScreen() {
       params: {
         name: name,
         mateId: mateId,
+        balance: balance,
       },
     })
   }
+
+  const handleRemoveFriend = () => {
+    Alert.alert(
+      'Confirm Removal',
+      `Are you sure you want to remove ${name} from your friends?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: async () => {
+            
+            queryClient.invalidateQueries({ queryKey: ['mates', currentUserId] });
+            queryClient.invalidateQueries({ queryKey: ['mates', mateId] });
+
+            const deletionSeccues = deleteMateRelationship(mateId, currentUserId);
+
+            router.back();
+
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
 
   if (!currentUserId) {
     return (
@@ -43,7 +78,7 @@ export default function FriendDetailScreen() {
     id: string;
     name: string;
     amount: number;
-    time: string;
+    created_at: string;
     description: string;
     paid_by: string;
     involved_people: number;
@@ -74,7 +109,7 @@ export default function FriendDetailScreen() {
           ? `You lent: ${(item.amount / item.involved_people).toFixed(2)} CZK`
           : `You owe: ${(item.amount / item.involved_people).toFixed(2)} CZK`}
       </Text>
-      <Text style={styles.expenseDetail}>Created at: {item.time}</Text>
+      <Text style={styles.expenseDetail}>Created at: {new Date(item.created_at).toLocaleString()}</Text>
     </Pressable>
   );
 
@@ -118,8 +153,9 @@ export default function FriendDetailScreen() {
         renderItem={renderExpenses}
         contentContainerStyle={styles.matesList}
       />
-      
-
+      <Pressable style={styles.removeFriendButton} onPress={handleRemoveFriend}>
+        <Text style={styles.removeFriendButtonText}>Remove Friend</Text>
+      </Pressable>
     </View>
   );
 } 
@@ -172,6 +208,19 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
+  removeFriendButton: {
+    marginTop: 15,
+    paddingVertical: 15,
+    borderRadius: 8,
+    width: '100%',
+    alignItems: 'center',
+    backgroundColor: '#FF3B30',
+  },
+  removeFriendButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
   groupName: {
     fontSize: 18,
     marginBottom: 5,
@@ -183,10 +232,10 @@ const styles = StyleSheet.create({
   },
   expenseContainer: {
     width: '100%',
-    padding: 15,
+    padding: 8,
     backgroundColor: '#D4F0DD',
     borderRadius: 10,
-    marginBottom: 15,
+    marginBottom: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,

@@ -16,7 +16,14 @@ export const handleUpdateBalances = async ({
   share,
 }: UpdateBalancesParams) => {
   try {
+    // console.log("MAte ids", mateIds);
+    // console.log("CurrentUserId", currentUserId);
+
     for (const mateId of mateIds) {
+      if (mateId === currentUserId) {
+        // console.log(`Skipping update for mateId ${mateId} as it matches currentUserId`);
+        continue;
+      }
       // Fetch existing balance
       const { data, error } = await supabase
         .from('rel_uubalance')
@@ -63,7 +70,7 @@ export const handleUpdateBalances = async ({
       }
     }
 
-    Alert.alert('Success', 'Balances updated successfully.')
+    // Alert.alert('Success', 'Balances updated successfully.')
   } catch (err: any) {
     Alert.alert('Error', err.message);
     throw err;

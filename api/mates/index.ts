@@ -70,7 +70,7 @@ export const getProfileByEmail = async (email: string) => {
   
 export const createMateRelationship = async (mateId: string, userId: string) => {
     // Insert a new row into the mates relationship table
-    const { error: error1 } = await supabase
+    const { error } = await supabase
       .from('rel_uubalance')
       .insert([
         {
@@ -79,11 +79,11 @@ export const createMateRelationship = async (mateId: string, userId: string) => 
           balance: 0, // Initialize balance as needed
         },
       ]);
-    if (error1) {
-      throw error1;
+    if (error) {
+      throw error;
     }
-    // Insert a reciprocal relationship
-    const { error } = await supabase
+    // Insert the opposite relationship
+    const { error: error2 } = await supabase
       .from('rel_uubalance')
       .insert([
         {
@@ -92,7 +92,20 @@ export const createMateRelationship = async (mateId: string, userId: string) => 
           balance: 0, // Initialize balance as needed
         },
       ]);
-    if (error) {
-      throw error;
+    if (error2) {
+      throw error2;
     }
 };
+
+export const deleteMateRelationship = async (mateId: string, userId: string) => {
+  const { error } = await supabase
+  .from('rel_uubalance')
+  .delete()
+  .or(`and(user1.eq.${userId},user2.eq.${mateId}),and(user1.eq.${mateId},user2.eq.${userId})`);
+
+  if (error) {
+    throw new Error(`Error deleting relationship: ${error.message}`);
+  }
+
+  return true;
+}

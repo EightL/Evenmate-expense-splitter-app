@@ -34,7 +34,7 @@ export default function MatesStack() {
           ),
           headerRight: () => (
             <Pressable
-              onPress={() => handleAccount(router)}
+              onPress={() => router.push('/friendDetails/account')} // Navigate to the account screen
               style={({ pressed }) => [
                 styles.accountButton,
                 pressed && styles.pressedButton,

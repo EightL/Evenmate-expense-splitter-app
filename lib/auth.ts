@@ -31,8 +31,3 @@ export const handleLogout = async (router: ReturnType<typeof useRouter>) => {
     { cancelable: true }
   );
 };
-
-export const handleAccount = (router: ReturnType<typeof useRouter>) => {
-  // Navigate to the account screen
-  router.push('/expenseDetails/account');
-};

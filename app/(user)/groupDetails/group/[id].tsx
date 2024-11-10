@@ -38,6 +38,7 @@ export default function GroupDetailScreen() {
       params: {
         id: groupId,
         name: name,
+        totalBalance: totalBalance,
       },
     });
   };
@@ -78,11 +79,13 @@ export default function GroupDetailScreen() {
     id: string;
     name: string;
     amount: number;
-    time: string;
+    created_at: string;
     description: string;
     paid_by: string;
   };
   
+  // console.log("time", expensesData[0]['created_at']); // this correctly outputs the timestamp
+
   const renderExpenses = ({ item }: { item: Expense }) => (
     <Pressable
       style={styles.expenseContainer}
@@ -101,16 +104,16 @@ export default function GroupDetailScreen() {
     >
       <Text style={styles.expenseName}>{item.name}</Text>
       <Text style={styles.expenseDetail}>Total cost: {item.amount} CZK</Text>
-      <Text style={styles.expenseDetail}>Created at: {item.time}</Text>
+      <Text style={styles.expenseDetail}>Created at: {new Date(item.created_at).toLocaleString()}</Text>
     </Pressable>
   );
 
 
   const renderMembers = ({ item }: { item: groupMember }) => (
-    <View style={styles.memberContainer}>
+    <View>
       <Text>
         <Text style={styles.username}>{item.profiles.username}</Text>
-        <Text style={styles.blackText}>
+        <Text>
           {item.balance > 0 ? ' owes you ' : ' lent you '}
         </Text>
         <Text style={item.balance >= 0 ? styles.positiveBalance : styles.negativeBalance}>
@@ -137,7 +140,7 @@ export default function GroupDetailScreen() {
         </Pressable>
       </ View>
 
-      <Text style={styles.sectionTitle}>Your group balance: {totalBalance.toFixed(2)} </Text>
+      <Text style={styles.sectionTitle}>Your balance: {totalBalance.toFixed(2)} CZK</Text>
       <View style={styles.balanceContainer}>
         {groupMembers && groupMembers.length > 0 ? (
           <FlatList
