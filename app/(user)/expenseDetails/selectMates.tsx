@@ -1,42 +1,46 @@
-// components/selectMates.tsx
-import Icon from 'react-native-vector-icons/MaterialIcons';
-
-import React, { useState, useEffect } from 'react';
+// app/(user)/friendDetails/index.tsx
+import React, { useMemo, useEffect, useState } from 'react';
 import {
   View,
   Text,
+  FlatList,
   StyleSheet,
   Pressable,
-  FlatList,
   ActivityIndicator,
   Alert,
+  TouchableOpacity,
   LayoutAnimation,
-  UIManager,
   Platform,
+  UIManager,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import Colors from '@/constants/Colors';
 import { useMatesList } from '@/api/mates';
 import { useGroupsList, useGroupMembers } from '@/api/groups';
 import { supabase } from '@/lib/supabase';
 import { useGetCurrentUserId } from '@/api/getCurrentUserId';
 
-
-export default function SelectMatesScreen() {
-  const router = useRouter();
+export default function MatesScreen() {
+  const router = useRouter(); // Initialize the router
   const { expenseName, cost } = useLocalSearchParams();
+
+  // State to track selected option: 'Mates' or 'Group'
+  const [selectedOption, setSelectedOption] = useState<'Mates' | 'Group'>('Mates');
   const [selectedMates, setSelectedMates] = useState<string[]>([]);
   const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
 
-  // Get current user ID
-  const { data: currentUserId, error } = useGetCurrentUserId();
+  // State for refreshing FlatList
+  const [refreshing, setRefreshing] = useState(false);
 
-  const { data: matesData, isLoading: isLoadingMates, error: errorMates } = useMatesList(currentUserId);
+  // Retrieve the current user ID
+  const { data: currentUserId, error: currentUserError } = useGetCurrentUserId();
+  const { data: matesData, isLoading: isLoadingMates, error: errorMates, refetch: refetchMates } = useMatesList(currentUserId);
   const { data: groupsData, error: errorGroups } = useGroupsList(currentUserId);
-  const groupIds = groupsData ? groupsData.map(group => group.groupid) : [];
-
+  // const groupIds = groupsData ? groupsData.map(group => group.groupid) : [];
+  
   // Fetch group members for all group IDs
   // const { data: groupMembers, error: errorGroupsMembers } = useGroupMembers(groupIds);
-  const { data: groupMembers, error: errorGroupsMembers, isLoading: isLoadingGroupMembers } = useGroupMembers(expandedGroups);
+  const { data: groupMembers, error: errorGroupsMembers, isLoading: isLoadingGroupMembers, refetch: refetchGroups } = useGroupMembers(expandedGroups);
 
   useEffect(() => {
     if (Platform.OS === 'android') {
@@ -45,68 +49,102 @@ export default function SelectMatesScreen() {
     }
   }, []);
 
-  if (isLoadingMates) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#4CAF50" />
-        <Text>Loading data...</Text>
-      </View>
-    );
-  }
+//   // Fetch mates data
+//   const {
+//     data: matesData,
+//     error: matesError,
+//     isLoading: isLoadingMates,
+//     refetch: refetchMates,
+//   } = useMatesList(currentUserId);
 
-  if (errorMates || errorGroups) {
-    return (
-      <View style={styles.centered}>
-        <Text style={styles.errorText}>Error loading data.</Text>
-      </View>
-    );
-  }
+//   // Fetch groups data
+//   const {
+//     data: groupsData,
+//     error: groupsError,
+//     isLoading: isLoadingGroups,
+//     refetch: refetchGroups,
+//   } = useGroupsList(currentUserId);
+
+  // Handle pull-to-refresh
+  const onRefresh = () => {
+    setRefreshing(true);
+    if (selectedOption === 'Mates') {
+      refetchMates();
+    } else {
+      refetchGroups();
+    }
+    setRefreshing(false);
+  };
+
+//   if (isLoadingMates || isLoadingGroups) {
+//     return (
+//       <View style={styles.centered}>
+//         <ActivityIndicator size="large" color="#4CAF50" />
+//         <Text>Loading data...</Text>
+//       </View>
+//     );
+//   }
+
+//   if (currentUserError || matesError || groupsError) {
+//     return (
+//       <View style={styles.centered}>
+//         <Text style={styles.errorText}>
+//           {currentUserError?.message ||
+//             matesError?.message ||
+//             groupsError?.message ||
+//             'Failed to load data.'}
+//         </Text>
+//       </View>
+//     );
+//   }
 
   // Toggle selection for mates
   const toggleMateSelection = (mateId: string) => {
     if (selectedMates.includes(mateId)) {
-      setSelectedMates(selectedMates.filter((id) => id !== mateId));
-    } else {
-      setSelectedMates([...selectedMates, mateId]);
-    }
+        setSelectedMates(selectedMates.filter((id) => id !== mateId));
+      } else {
+        setSelectedMates([...selectedMates, mateId]);
+      }
   };
 
-  // Toggle expansion for groups
-  const toggleGroupExpansion = (groupId: string) => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    if (expandedGroups.includes(groupId)) {
-      // Collapse if the clicked group is already expanded
-      setExpandedGroups([]);
-    } else {
-      // Set the expanded group to only the clicked groupId
-      setExpandedGroups([groupId]);
-      // const { data: groupMembers, error: errorGroupsMembers } = useGroupMembers(groupId);
-    }
-  };
 
-  // Handle confirm action
-  const handleConfirmSplit = () => {
+// Toggle expansion for groups
+    const toggleGroupExpansion = (groupId: string) => {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        if (expandedGroups.includes(groupId)) {
+            // Collapse if the clicked group is already expanded
+            setSelectedMates([]);
+            setExpandedGroups([]);
+        } else {
+            // Set the expanded group to only the clicked groupId
+            setExpandedGroups([groupId]);
+            // const { data: groupMembers, error: errorGroupsMembers } = useGroupMembers(groupId);
+        }
+    };
+
+// Handle confirm action
+const handleConfirmSplit = () => {
     if (selectedMates.length === 0) {
-      Alert.alert('Selection Error', 'Please select at least one mate.');
-      return;
+        Alert.alert('Selection Error', 'Please select at least one mate.');
+        return;
     }
 
     const selectedMateNames = selectedMates.map((id) => {
-      const mate = matesData.find((mate) => mate.user2 === id);
-      return mate ? mate.profiles.username : '';
+        const mate = matesData.find((mate) => mate.user2 === id);
+        return mate ? mate.profiles.username : '';
     });
 
     router.replace({
-      pathname: '/expenseDetails',
-      params: {
+        pathname: '/expenseDetails',
+        params: {
         expenseName,
         cost,
         mateIds: selectedMates,
         mateNames: selectedMateNames,
         groupId: expandedGroups,
-      },
+        },
     });
-  };
+};
 
   // Render individual mate item
   const renderMate = ({ item }: { item: any }) => (
@@ -127,6 +165,20 @@ export default function SelectMatesScreen() {
       </View>
     </Pressable>
   );
+
+// Type for Group
+type Group = {
+groupid: string;
+groups: {
+    id: string;
+    name: string;
+    created_at: string;
+    creator_id: string;
+    notes: string | null;
+};
+userid: string;
+};
+
 
   // Render individual group item
   const renderGroup = ({ item }: { item: any }) => {
@@ -184,24 +236,59 @@ export default function SelectMatesScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.mainTitle}>Select Mates or Groups</Text>
+      {/* Split With Section */}
+      <Text style={styles.title}>Split with:</Text>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={[
+            styles.toggleButton,
+            selectedOption === 'Mates' && styles.selectedButton,
+          ]}
+          onPress={() => setSelectedOption('Mates')}
+        >
+          <Text
+            style={[
+              styles.buttonText,
+              selectedOption === 'Mates' && styles.selectedButtonText,
+            ]}
+          >
+            Mates
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.toggleButton,
+            selectedOption === 'Group' && styles.selectedButton,
+          ]}
+          onPress={() => setSelectedOption('Group')}
+        >
+          <Text
+            style={[
+              styles.buttonText,
+              selectedOption === 'Group' && styles.selectedButtonText,
+            ]}
+          >
+            Group
+          </Text>
+        </TouchableOpacity>
+      </View>
 
-      {/* Groups List */}
-      <Text style={styles.sectionTitle}>Groups</Text>
+      {/* FlatList for Mates or Groups */}
       <FlatList
-        data={groupsData}
-        keyExtractor={(item) => `group-${item.groups.id}`}
-        renderItem={renderGroup}
-        contentContainerStyle={styles.groupsList}
-      />
-
-      {/* Mates List */}
-      <Text style={styles.sectionTitle}>Mates</Text>
-      <FlatList
-        data={matesData}
-        keyExtractor={(item) => `mate-${item.user2}`}
-        renderItem={renderMate}
-        contentContainerStyle={styles.matesList}
+        data={selectedOption === 'Mates' ? matesData : groupsData}
+        keyExtractor={(item, index) =>
+          selectedOption === 'Mates'
+            ? item.profiles.username + index
+            : item.groups.id + index
+        }
+        renderItem={selectedOption === 'Mates' ? renderMate : renderGroup}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.listContainer}
+        ListEmptyComponent={
+          <View style={styles.centered}>
+            <Text style={styles.emptyText}>No {selectedOption.toLowerCase()} available.</Text>
+          </View>
+        }
       />
 
       {/* Confirm Button */}
@@ -220,130 +307,166 @@ export default function SelectMatesScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#fff',
-    justifyContent: 'flex-start',
-  },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  mainTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginTop: 20,
-    marginBottom: 10,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  matesList: {
-    flexGrow: 1,
-  },
-  groupMembersList: {
-    paddingLeft: 20,
-  },
-  mateContainer: {
-    padding: 15,
-    marginVertical: 5,
-    marginHorizontal: 10,
-    borderRadius: 10,
-    backgroundColor: '#E0F7E9',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 2, // For Android shadow
-  },
-  selectedMateContainer: {
-    backgroundColor: '#4CAF50',
-  },
-  selectedSubMateContainer: {
-    backgroundColor: '#4CAF50',
-  },
-  groupContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 15,
-    backgroundColor: '#E0F7E9',
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 2, // For Android shadow
-  },
-  expandedGroupContainer: {
-    backgroundColor: '#60AF7B',
-  },
-  groupPressable: {
-    // Optional: Add padding or other styles if needed
-  },
-  groupText: {
-    fontSize: 18,
-    color: '#000',
-    fontWeight: 'bold',
-  },
-  mateText: {
-    fontSize: 18,
-    color: '#000',
-    fontWeight: 'bold',
-  },
-  expandedGroupText: {
-    fontSize: 18,
-    color: '#FFF',
-    fontWeight: 'bold',
-  },
-  selectedMateText: {
-    fontSize: 18,
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  subMateContainer: {
-    padding: 15,
-    marginVertical: 5,
-    marginHorizontal: 10,
-    borderRadius: 10,
-    backgroundColor: '#E0F7E9',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 2, // For Android shadow
-  },
-  confirmButton: {
-    marginTop: 20,
-    backgroundColor: '#4CAF50',
-    paddingVertical: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  buttonDisabled: {
-    backgroundColor: '#A1C3AD',
-  },
-  confirmButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  submateText: {
-  },
-  selectedsubMateText:{
-
-  },
-});
+    container: {
+        flex: 1,
+        padding: 20,
+        backgroundColor: '#fff',
+        justifyContent: 'flex-start',
+      },
+      centered: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+      },
+      mainTitle: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 20,
+        textAlign: 'center',
+      },
+      sectionTitle: {
+        fontSize: 20,
+        fontWeight: '600',
+        marginTop: 20,
+        marginBottom: 10,
+      },
+      title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 30,
+        marginTop: 10,
+        textAlign: 'center',
+      },
+      matesList: {
+        flexGrow: 1,
+      },
+      groupMembersList: {
+        paddingLeft: 20,
+      },
+      mateContainer: {
+        width: '100%',
+        padding: 15,
+        marginBottom: 15,
+        backgroundColor: '#D4F0DD',
+        borderRadius: 10,
+        // Shadow for iOS
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        // Elevation for Android
+        elevation: 3,
+        alignItems: 'center',
+      },
+      selectedMateContainer: {
+        backgroundColor: '#4CAF50',
+      },
+      selectedSubMateContainer: {
+        backgroundColor: '#4CAF50',
+      },
+      groupContainer: {
+        width: '100%',
+        padding: 15,
+        marginBottom: 15,
+        backgroundColor: '#D4F0DD',
+        borderRadius: 10,
+        // Shadow for iOS
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        // Elevation for Android
+        elevation: 3,
+      },
+      expandedGroupContainer: {
+        backgroundColor: '#60AF7B',
+        marginBottom: 1,
+      },
+      groupPressable: {
+        // Optional: Add padding or other styles if needed
+      },
+      groupText: {
+        fontSize: 18,
+        color: '#000',
+        fontWeight: 'bold',
+        textAlign: 'center',
+      },
+      mateText: {
+        fontSize: 18,
+        color: '#000',
+        fontWeight: 'bold',
+      },
+      expandedGroupText: {
+        fontSize: 18,
+        color: '#FFF',
+        fontWeight: 'bold',
+        textAlign: 'center',
+      },
+      selectedMateText: {
+        fontSize: 18,
+        color: '#fff',
+        fontWeight: 'bold',
+      },
+      toggleButton: {
+        flex: 1,
+        paddingVertical: 10,
+        marginHorizontal: 5,
+        borderRadius: 10,
+        backgroundColor: '#E0F7E9',
+        alignItems: 'center',
+        justifyContent: 'center',
+      },
+      subMateContainer: {
+        padding: 15,
+        marginVertical: 5,
+        marginHorizontal: 10,
+        borderRadius: 10,
+        backgroundColor: '#E0F7E9',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 5,
+        elevation: 2, // For Android shadow
+      },
+      selectedButton: {
+        backgroundColor: '#4CAF50',
+      },
+      buttonText: {
+        fontSize: 16,
+        color: '#000',
+      },
+      selectedButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+      },
+      confirmButton: {
+        marginTop: 20,
+        backgroundColor: '#4CAF50',
+        paddingVertical: 15,
+        borderRadius: 10,
+        alignItems: 'center',
+      },
+      buttonDisabled: {
+        backgroundColor: '#A1C3AD',
+      },
+      confirmButtonText: {
+        color: '#fff',
+        fontSize: 18,
+        fontWeight: 'bold',
+      },
+      submateText: {
+      },
+      selectedsubMateText:{
+    
+      },
+      splitWithText: {
+        fontSize: 18,
+        fontWeight: '600',
+        marginBottom: 10,
+      },
+      buttonContainer: {
+        flexDirection: 'row',
+        marginBottom: 20,
+      },
+    });

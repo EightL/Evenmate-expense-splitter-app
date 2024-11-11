@@ -12,6 +12,7 @@ import { useColorScheme } from '@/components/useColorScheme';
 import { StatusBar } from 'expo-status-bar';
 import Platform from 'react-native';
 import React from 'react';
+import { LogBox } from 'react-native';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -25,6 +26,10 @@ export const unstable_settings = {
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
+
+
+LogBox.ignoreAllLogs(true); // Ignoruje všechna varování
+
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();

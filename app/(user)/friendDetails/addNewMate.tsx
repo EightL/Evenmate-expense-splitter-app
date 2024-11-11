@@ -165,7 +165,7 @@ export default function AddNewMateScreen() {
             style={StyleSheet.absoluteFillObject}
           />
           <Pressable style={styles.cancelButton} onPress={() => setScannerVisible(false)}>
-            <Ionicons name="close-circle" size={36} color="#fff" />
+            <Text style={styles.buttonText}>Cancel</Text>
           </Pressable>
         </View>
       </Modal>
@@ -253,11 +253,10 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   cancelButton: {
-    position: 'absolute',
-    top: 40,
-    right: 20,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    borderRadius: 20,
-    padding: 5,
+    backgroundColor: '#FF3B30',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    margin: 20,
   },
 });

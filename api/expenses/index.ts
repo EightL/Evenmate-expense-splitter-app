@@ -158,7 +158,7 @@ export const useMateExpenses = (currentUserId: string, mateId: string) => {
           amount: numericCost,
           created_at: new Date().toISOString(),
           paid_by: currentUserId,
-          in_group: groupId,
+          in_group: groupId || null,
           involved_people: participantCount,
         },
       ])

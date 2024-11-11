@@ -19,7 +19,7 @@ import * as Clipboard from 'expo-clipboard';
 import { useQueryClient, InvalidateQueryFilters  } from '@tanstack/react-query';
 import { useGetCurrentUserId } from '@/api/getCurrentUserId';
 import { checkUserMembership, addUserToGroup } from '@/api/groups';
-
+import { Ionicons } from '@expo/vector-icons';
 
 const JoinGroup = () => {
   const router = useRouter();
@@ -108,7 +108,7 @@ const JoinGroup = () => {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <View style={styles.container}>
       <Text style={styles.title}>Join Group</Text>
 
       <TextInput
@@ -119,24 +119,25 @@ const JoinGroup = () => {
         keyboardType="default"
         autoCapitalize="none"
       />
-
-      <Pressable style={styles.scanButton} onPress={handleScanPress}>
-        <Text style={styles.buttonText}>Scan QR Code</Text>
-      </Pressable>
-
+      
       {loading ? (
         <ActivityIndicator size="large" color="#4CAF50" />
       ) : (
         <Pressable style={styles.button} onPress={() => handleJoinGroup()}>
-          <Text style={styles.buttonText}>Join Group</Text>
+          <Text style={styles.buttonText}>Add</Text>
         </Pressable>
       )}
+
+      <Pressable style={styles.scanButton} onPress={() => handleScanPress()}>
+        <Ionicons name="qr-code" size={24} color="#fff" />
+        <Text style={styles.scanButtonText}>Scan QR Code</Text>
+      </Pressable>
 
       {/* QR Code Scanner Modal */}
       <Modal visible={isScannerVisible} animationType="slide">
         <View style={styles.scannerContainer}>
           <BarCodeScanner
-            onBarCodeScanned={scanned ? undefined : handleBarCodeScanned} // Conditionally set handler
+            onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
             style={StyleSheet.absoluteFillObject}
           />
           <Pressable style={styles.cancelButton} onPress={() => setScannerVisible(false)}>
@@ -144,7 +145,7 @@ const JoinGroup = () => {
           </Pressable>
         </View>
       </Modal>
-    </ScrollView>
+    </View>
   );
 };
 
@@ -153,39 +154,75 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     padding: 20,
     backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+  },
+  centered: {
+    flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
+    marginBottom: 30,
+    marginTop: 10,
     textAlign: 'center',
-    marginBottom: 20,
+    color: '#333',
   },
   input: {
+    width: '100%',
+    height: 50,
+    borderColor: '#4CAF50',
     borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 15,
     borderRadius: 10,
-    marginBottom: 15,
-  },
-  scanButton: {
-    backgroundColor: '#2196F3',
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginBottom: 10,
+    paddingHorizontal: 15,
+    marginBottom: 20,
+    fontSize: 16,
+    backgroundColor: '#f9f9f9',
+    color: '#333',
   },
   button: {
     backgroundColor: '#4CAF50',
-    padding: 15,
+    paddingVertical: 15,
+    paddingHorizontal: 25,
     borderRadius: 10,
     alignItems: 'center',
+    width: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
     marginTop: 10,
   },
   buttonText: {
     color: '#fff',
-    fontWeight: '600',
-    fontSize: 16,
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  scanButton: {
+    flexDirection: 'row',
+    backgroundColor: '#2196F3',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 20,
+    width: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  scanButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginLeft: 10,
   },
   scannerContainer: {
     flex: 1,

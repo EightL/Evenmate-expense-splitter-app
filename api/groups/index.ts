@@ -302,3 +302,16 @@ export const checkUserMembership = async (userId: string, groupId: string) => {
   return data;
 };
 
+export const leaveGroup = async (currentUserId: string, groupId: string) => {
+  const { error } = await supabase
+  .from('rel_ingroup')
+  .delete()
+  .eq('groupid', groupId)
+  .eq('userid', currentUserId);
+
+  if (error) {
+    throw new Error(`Error deleting relationship: ${error.message}`);
+  }
+
+  return true;
+}

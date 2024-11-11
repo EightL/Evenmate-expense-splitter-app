@@ -182,7 +182,6 @@ const AccountScreen = () => {
           value={user.bankAccount}
           onChangeText={handleBankAccountChange}
           placeholder="Enter your bank account number"
-          keyboardType="numeric"
           placeholderTextColor="#999"
         />
       </View>

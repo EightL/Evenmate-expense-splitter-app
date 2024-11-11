@@ -9,6 +9,7 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
+  TouchableOpacity,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { handleUpdateBalances } from '@/api/updateBalances';
@@ -222,7 +223,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
-  }, 
+  },
   matesContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
