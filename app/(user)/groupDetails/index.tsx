@@ -1,5 +1,5 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
+// app/(user)/friendDetails/index.tsx
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, ActivityIndicator, FlatList, View, Text, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
@@ -11,16 +11,6 @@ export default function GroupsScreen() {
   const { data: currentUserId, error: currentUserError } = useGetCurrentUserId();
 
   const { data: groupsData, error, isLoading } = useGroupsList(currentUserId || null);
-  // console.log('groupsData', groupsData);
-
-  // const groupIds = groupsData?.map((group) => group.groupid) || [];
-  // console.log('groupIds', groupIds);
-
-  // const matesInGroups = groupsData?.map((group) => group.userid) || [];
-  // console.log('matesInGroups', matesInGroups);
-
-  // const { data: groupBalances, error: error5 } = useGroupsTotalBalances(groupIds);
-  // console.log('groupBalances', groupBalances);
 
   if (isLoading) {
     return (
@@ -44,33 +34,22 @@ export default function GroupsScreen() {
     };
   };
 
-  // Render each group and its corresponding balance
-  const renderItem = ({ item }: { item: Group }) => {
-    // Find the balance for the current group
-    // const groupBalance = groupBalances?.find(
-    //   (balance, index) => groupsData && groupsData[index]?.groupid === item.groupid
-    // );
-
-    return (
-      <Pressable
-        style={styles.itemContainer}
-        onPress={() =>
-          router.push({
-            pathname: `./groupDetails/group/${encodeURIComponent(item.groups.id)}`,
-            params: {
-              name: item.groups.name,
-              notes: item.groups.notes,
-            },
-          })
-        }
-      >
-        <Text style={styles.groupName}>{item.groups.name}</Text>
-        {/* <Text>
-          /* Balance: {groupBalance?.toFixed(2)} CZK Display balance or default to 0 *
-        </Text> */}
-      </Pressable>
-    );
-  };
+  const renderItem = ({ item }: { item: Group }) => (
+    <Pressable
+      style={styles.itemContainer}
+      onPress={() =>
+        router.push({
+          pathname: `./groupDetails/group/${encodeURIComponent(item.groups.id)}`,
+          params: {
+            name: item.groups.name,
+            notes: item.groups.notes,
+          },
+        })
+      }
+    >
+      <Text style={styles.groupName}>{item.groups.name}</Text>
+    </Pressable>
+  );
 
   const handleCreateNewGroup = () => {
     router.push('/groupDetails/createGroup');
@@ -90,12 +69,14 @@ export default function GroupsScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContainer}
       />
-      <Pressable style={styles.button} onPress={handleCreateNewGroup}>
-        <Text style={styles.buttonText}>Create New Group</Text>
-      </Pressable>
-      <Pressable style={styles.button} onPress={handleJoinGroup}>
-        <Text style={styles.buttonText}>Join a Group</Text>
-      </Pressable>
+      <View style={styles.buttonContainer}>
+        <Pressable style={styles.button} onPress={handleCreateNewGroup}>
+          <Text style={styles.buttonText}>Create New Group</Text>
+        </Pressable>
+        <Pressable style={styles.button} onPress={handleJoinGroup}>
+          <Text style={styles.buttonText}>Join a Group</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -119,7 +100,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   listContainer: {
-    paddingBottom: 20,
+    paddingBottom: 100, // Add padding to avoid content being hidden behind buttons
   },
   itemContainer: {
     width: '100%',
@@ -142,9 +123,12 @@ const styles = StyleSheet.create({
     color: '#333',
     textAlign: 'center', // Align text to the center
   },
-  description: {
-    fontSize: 14,
-    color: '#666',
+  buttonContainer: {
+    position: 'absolute',
+    bottom: 20,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
   },
   button: {
     backgroundColor: '#4CAF50',
@@ -152,6 +136,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     marginBottom: 10,
+    width: '90%',
     // Shadow for buttons
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },

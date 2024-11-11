@@ -63,6 +63,11 @@ export default function MatesStack() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+      name="account"
+      options={{
+        title: 'Account',
+      }}/>
     </Stack>
   );
 }

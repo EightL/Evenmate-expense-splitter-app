@@ -1,5 +1,5 @@
 // app/(user)/friendDetails/index.tsx
-import React, {useMemo, useEffect, useState} from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, Pressable, ActivityIndicator, Alert, RefreshControl } from 'react-native';
 import { Link, useRouter, useLocalSearchParams } from 'expo-router';
 import Colors from '@/constants/Colors';
@@ -7,9 +7,7 @@ import { useMatesList } from '@/api/mates';
 import { supabase } from '@/lib/supabase';
 import { useGetCurrentUserId } from '@/api/getCurrentUserId';
 
-
 export default function MatesScreen() {
-
   const router = useRouter(); // Initialize the router
 
   // State to store the current user ID
@@ -18,7 +16,7 @@ export default function MatesScreen() {
   // Retrieve the current user ID
   const { data: currentUserId, error: currentUserError } = useGetCurrentUserId();
 
-  const { data: matesData, error, isLoading} = useMatesList(currentUserId);
+  const { data: matesData, error, isLoading } = useMatesList(currentUserId);
 
   // Calculate total balance using useMemo
   const totalBalance = useMemo(() => {
@@ -28,11 +26,11 @@ export default function MatesScreen() {
   if (isLoading) {
     return <ActivityIndicator />;
   }
-  
+
   if (error) {
     return <Text> Failed to load mates </Text>;
   }
-  
+
   type Mate = {
     balance: number;
     user1: string;
@@ -65,11 +63,16 @@ export default function MatesScreen() {
         })
       }
     >
-        <View style={styles.mateContainer}>
+      <View style={styles.mateContainer}>
         <Text style={styles.name}>{item.profiles.username}</Text>
-        <Text style={item.balance >= 0 ? styles.positiveBalance : styles.negativeBalance}>
-          {item.balance > 0 ? `You lent: ${item.balance.toFixed(2)} CZK` : `You owe: ${-item.balance.toFixed(2)} CZK`}
-        </Text>
+        <View style={styles.balanceContainer}>
+          <Text style={item.balance >= 0 ? styles.positiveBalance : styles.negativeBalance}>
+            {item.balance > 0 ? 'You lent:' : 'You owe:'}
+          </Text>
+          <Text style={item.balance >= 0 ? styles.positiveBalance : styles.negativeBalance}>
+            {item.balance > 0 ? `${item.balance.toFixed(2)} CZK` : `${-item.balance.toFixed(2)} CZK`}
+          </Text>
+        </View>
       </View>
     </Pressable>
   );
@@ -86,6 +89,7 @@ export default function MatesScreen() {
         keyExtractor={(item) => item.profiles.username}
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.listContainer}
       />
       <Pressable style={styles.button} onPress={handleAddNewMate}>
         <Text style={styles.buttonText}>Add new mate</Text>
@@ -97,9 +101,7 @@ export default function MatesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 0,
-    alignItems: 'center',
-    justifyContent: 'flex-start',
+    padding: 20,
     backgroundColor: '#fff',
   },
   title: {
@@ -113,53 +115,63 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderRadius: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 10,
+    shadowOffset: { width: 0, height: 1 }, // Adjusted to reduce the downward stretch
+    shadowOpacity: 0.15, // Reduced opacity for a subtler shadow
+    shadowRadius: 3, // Reduced radius for a tighter shadow
+    elevation: 5, // Reduced elevation for a subtler shadow on Android
     width: '100%', // Ensuring the shadow wrapper takes full width
   },
   mateContainer: {
-    alignItems: 'flex-start', // Align items to the left
-    flexDirection: 'column',
+    flexDirection: 'row', // Align items in a row
+    justifyContent: 'space-between', // Space between items
+    alignItems: 'center', // Center items vertically
     width: '100%', // Full width of the parent container
     padding: 20,
-    paddingHorizontal: 95,
     borderRadius: 10,
     backgroundColor: '#D4F0DD',
-  },
-  group: {
-    fontSize: 14,
-    color: 'black',
   },
   name: {
     fontSize: 20,
     fontWeight: 'bold',
+    flex: 3, // Take 3/4 of the space
+  },
+  balanceContainer: {
+    flex: 2, // Take 1/4 of the space
+    alignItems: 'flex-end', // Align items to the right
   },
   positiveBalance: {
     color: 'green',
+    fontSize: 16,
+    textAlign: 'right', // Align text to the right
   },
   negativeBalance: {
     color: 'red',
+    fontSize: 16,
+    textAlign: 'right', // Align text to the right
+  },
+  listContainer: {
+    paddingBottom: 100, // Add padding to avoid content being hidden behind buttons
   },
   button: {
-    marginTop: 16,
-    marginBottom: 15,
+    position: 'absolute',
+    bottom: 20,
+    left: 20,
+    right: 20,
     backgroundColor: '#4CAF50',
     paddingVertical: 15,
-    paddingHorizontal: 25,
     borderRadius: 10,
     alignItems: 'center',
-    width: '90%',
+    marginBottom: 10,
+    // Shadow for buttons
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 3,
   },
   buttonText: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
   },
 });

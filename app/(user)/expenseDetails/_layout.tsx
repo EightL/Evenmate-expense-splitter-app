@@ -50,6 +50,15 @@ export default function ExpenseStack() {
           ),
         }}
       />
+      <Stack.Screen
+      name="selectMates"
+      options={{title: 'Select mates'}}
+      />
+      <Stack.Screen
+      name="account"
+      options={{
+        title: 'Account',
+      }}/>
     </Stack>
   );
 }

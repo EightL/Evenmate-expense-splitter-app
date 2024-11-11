@@ -57,8 +57,22 @@ export default function GroupsStack() {
         name="group"
         options={{
           headerShown: false,
-        }}
-      />
+        }}/>
+        <Stack.Screen
+        name="createGroup"
+        options={{
+          title: 'Create Group',
+        }}/>
+        <Stack.Screen
+        name="joinGroup"
+        options={{
+          title: 'Join Group',
+        }}/>
+        <Stack.Screen
+        name="account"
+        options={{
+          title: 'Account',
+        }}/>
     </Stack>
   );
 }

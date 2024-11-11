@@ -145,7 +145,7 @@ export default function AddExpenseScreen() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <View style={styles.container}>
       <Text style={styles.title}>Add Expense</Text>
       <TextInput
         style={styles.input}
@@ -187,7 +187,7 @@ export default function AddExpenseScreen() {
           <Text style={styles.submitButtonText}>Submit Expense</Text>
         )}
       </Pressable>
-    </ScrollView>
+    </View>
   );
 }
 
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
-  },
+  }, 
   matesContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',

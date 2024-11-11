@@ -82,6 +82,32 @@ export default function UserLayout() {
           headerShown: false,
         }}
       />
+        <Stack.Screen
+        name="getEvenGroup"
+        options={{
+          title: 'Get Even',
+        }}
+      />
+      <Stack.Screen
+      name="groupNotes"
+      options={{
+        title: 'Group Notes',
+      }}/>
+      <Stack.Screen
+      name="groupOverview"
+      options={{
+        title: 'Group Overview',
+      }}/>
+      <Stack.Screen
+      name="inviteGroup"
+      options={{
+        title: 'Invite Group',
+      }}/>
+      <Stack.Screen
+      name="account"
+      options={{
+        title: 'Account',
+      }}/>
       {/* Other screens */}
     </Stack>
   );

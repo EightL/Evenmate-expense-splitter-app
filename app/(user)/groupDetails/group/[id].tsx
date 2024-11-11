@@ -171,7 +171,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: '#fff',
-    // Removed alignItems to allow stretching
   },
   name: {
     fontSize: 28,

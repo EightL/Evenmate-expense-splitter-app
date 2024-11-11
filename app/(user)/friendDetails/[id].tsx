@@ -11,14 +11,18 @@ import { useMateExpenses } from '@/api/expenses';
 import { Alert } from 'react-native';
 import { useQueryClient, InvalidateQueryFilters  } from '@tanstack/react-query';
 import { useUserInfo } from '@/api/profiles';
-
+import { useLayoutEffect } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from 'expo-router';
+import * as Clipboard from 'expo-clipboard';
 
 export default function FriendDetailScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { id: mateId, name, balance, bankAccount, email } = useLocalSearchParams();
   const { data: mateData } = useUserInfo(mateId); // Isnt used but made something else work
-
+  const navigation = useNavigation();
+  
   // console.log("TADY balance: ", balance);
   
   // Get current user's ID
@@ -28,6 +32,20 @@ export default function FriendDetailScreen() {
   const { data: sharedGroups, isLoading, error } = useSharedGroups(currentUserId, mateId);
 
   const { data: expensesList, error: error2 } = useMateExpenses(currentUserId, mateId);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <Pressable
+          onPress={() => { handleRemoveFriend() }}
+          style={{ marginRight: 15 }}
+        >
+          <Ionicons name="trash" size={24} color="#000" />
+        </Pressable>
+      ),
+    });
+  }, [navigation]);
+
 
   const handleGetEven = () => {
     router.push({
@@ -113,32 +131,54 @@ export default function FriendDetailScreen() {
     </Pressable>
   );
 
-  
+  const copyToClipboard = async (text: string) => {
+    await Clipboard.setStringAsync(text);
+    Alert.alert('Copied to Clipboard');
+  };
 
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ title: 'Mate' }} />
       <Text style={styles.name}>{name}</Text>
       <Text style={styles.balance}>
-        {Number(balance) > 0 ? `You lent: ${balance} CZK` : `You owe: ${-Number(balance)} CZK`}
+        {Number(balance) >= 0 ? (
+          <>
+            You lent: <Text style={styles.numberPositive}>{Number(balance).toFixed(2)} CZK</Text>
+          </>
+        ) : (
+          <>
+            You owe: <Text style={styles.numberNegative}>{Number(balance).toFixed(2)} CZK</Text>
+          </>
+        )}
       </Text>
-      <Text style={styles.detail}>Bank Account: {bankAccount}</Text>
-      <Text style={styles.detail}>Email: {email}</Text>
-
-      {/* Display shared groups */}
-      <Text style={styles.detail}>Shared Groups:</Text>
+      <Pressable style={styles.detailContainer}  onPress={() => copyToClipboard(bankAccount)}>
+        <Text style={styles.boldText}>Bank Account: </Text>
+        <Text style={styles.detail}>{bankAccount}</Text>
+      </Pressable>
+      {/* Email */}
+      <Pressable style={styles.detailContainer} onPress={() => copyToClipboard(email)}>
+        <Text style={styles.boldText}>Email: </Text>
+        <Text style={styles.detail}>{email}</Text>
+      </Pressable>
+      
+      {/* Shared Groups */}
+      <View style={styles.detailContainer}>
+        <Text style={styles.boldText}>Shared Groups:</Text>
+      </View>
       {isLoading ? (
         <ActivityIndicator size="small" color="#4CAF50" />
       ) : error ? (
         <Text>Error loading shared groups: {error.message}</Text>
       ) : sharedGroups && sharedGroups.length > 0 ? (
-        sharedGroups.map((group) => (
-          <Text key={group.id} style={styles.groupName}>
-            {group.name}
-          </Text>
-        ))
+        <View style={styles.groupsContainer}>
+          {sharedGroups.map((group) => (
+            <View style={styles.groupBubble} key={group.id}>
+              <Text style={styles.groupName}>{group.name}</Text>
+            </View>
+          ))}
+        </View>
       ) : (
-        <Text>No shared groups</Text>
+        <Text style={styles.numberNegative}>No shared groups</Text>
       )}
 
       <Pressable style={styles.button} onPress={handleGetEven}>
@@ -153,9 +193,6 @@ export default function FriendDetailScreen() {
         renderItem={renderExpenses}
         contentContainerStyle={styles.matesList}
       />
-      <Pressable style={styles.removeFriendButton} onPress={handleRemoveFriend}>
-        <Text style={styles.removeFriendButtonText}>Remove Friend</Text>
-      </Pressable>
     </View>
   );
 } 
@@ -173,6 +210,19 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 10,
   },
+  groupsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 10,
+  },
+  groupBubble: {
+    backgroundColor: '#D4F0DD',
+    borderRadius: 15,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    marginRight: 5,
+    marginBottom: 5,
+  },
   header:{
     fontSize: 20,
     fontWeight: 'bold',
@@ -182,10 +232,10 @@ const styles = StyleSheet.create({
   balance: {
     fontSize: 20,
     marginBottom: 20,
+    fontWeight: 'bold'
   },
   detail: {
-    fontSize: 18,
-    marginBottom: 10,
+    fontSize: 20,
   },
   button: {
     marginTop: 30,
@@ -250,6 +300,25 @@ const styles = StyleSheet.create({
   expenseDetail: {
     fontSize: 14,
     color: '#555',
+  },
+  detailContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  boldText: {
+    fontWeight: 'bold',
+    fontSize: 18,
+  },
+  numberPositive: {
+    color: 'green',
+    fontWeight: 'bold',
+    fontSize: 18,
+  },
+  numberNegative: {
+    color: 'red',
+    fontWeight: 'bold',
+    fontSize: 18,
   },
 
 });

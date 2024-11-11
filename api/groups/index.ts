@@ -302,22 +302,3 @@ export const checkUserMembership = async (userId: string, groupId: string) => {
   return data;
 };
 
-// export const joinGroup = async (userId: string, groupId: string) => {
-//  // Insert a new membership
-//     const { data, error } = await supabase
-//       .from('rel_ingroup')
-//       .insert([
-//         {
-//           userid: userId,
-//           groupid: groupId,
-//           joined_at: new Date().toISOString(),
-//         },
-//       ]);
-
-//     if (error) {
-//       throw new Error(error.message);
-//     }
-
-//     return data; // Return the data if successful
-//   };
-
