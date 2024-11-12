@@ -315,3 +315,16 @@ export const leaveGroup = async (currentUserId: string, groupId: string) => {
 
   return true;
 }
+
+export const updateGroupSetting = async (groupId: string, groupName : string) => {
+  const { error } = await supabase
+  .from('groups')
+  .update({
+    name: groupName,
+  })
+  .eq('id', groupId);
+
+  if (error) {
+    throw new Error(`Error updating group: ${error.message}`);
+  }
+};

@@ -244,7 +244,11 @@ userid: string;
             styles.toggleButton,
             selectedOption === 'Mates' && styles.selectedButton,
           ]}
-          onPress={() => setSelectedOption('Mates')}
+          onPress={() => {
+            setSelectedOption('Mates');
+            setSelectedMates([]);
+            setExpandedGroups([]);
+          }}
         >
           <Text
             style={[
@@ -260,7 +264,10 @@ userid: string;
             styles.toggleButton,
             selectedOption === 'Group' && styles.selectedButton,
           ]}
-          onPress={() => setSelectedOption('Group')}
+          onPress={() => {
+            setSelectedOption('Group');
+            setSelectedMates([]);
+          }}
         >
           <Text
             style={[

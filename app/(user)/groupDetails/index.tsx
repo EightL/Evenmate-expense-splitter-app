@@ -42,7 +42,6 @@ export default function GroupsScreen() {
           pathname: `./groupDetails/group/${encodeURIComponent(item.groups.id)}`,
           params: {
             name: item.groups.name,
-            notes: item.groups.notes,
           },
         })
       }

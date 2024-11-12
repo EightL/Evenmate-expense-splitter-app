@@ -67,10 +67,10 @@ export default function MatesScreen() {
         <Text style={styles.name}>{item.profiles.username}</Text>
         <View style={styles.balanceContainer}>
           <Text style={item.balance >= 0 ? styles.positiveBalance : styles.negativeBalance}>
-            {item.balance > 0 ? 'You lent:' : 'You owe:'}
+            {item.balance >= 0 ? 'You lent:' : 'You owe:'}
           </Text>
           <Text style={item.balance >= 0 ? styles.positiveBalance : styles.negativeBalance}>
-            {item.balance > 0 ? `${item.balance.toFixed(2)} CZK` : `${-item.balance.toFixed(2)} CZK`}
+            {item.balance >=0 ? `${item.balance.toFixed(2)} CZK` : `${item.balance.toFixed(2)} CZK`}
           </Text>
         </View>
       </View>
@@ -83,7 +83,15 @@ export default function MatesScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Overall Balance: {totalBalance.toFixed(2)} CZK</Text>
+      <Text style={styles.title}>Overall Balance: {Number(totalBalance) >= 0 ? (
+          <>
+            <Text style={styles.numberPositive}>{Number(totalBalance).toFixed(2)} CZK</Text>
+          </>
+        ) : (
+          <>
+            <Text style={styles.numberNegative}>{Number(totalBalance).toFixed(2)} CZK</Text>
+          </>
+        )}</Text>
       <FlatList
         data={matesData}
         keyExtractor={(item) => item.profiles.username}
@@ -131,7 +139,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#D4F0DD',
   },
   name: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     flex: 3, // Take 3/4 of the space
   },
@@ -143,11 +151,13 @@ const styles = StyleSheet.create({
     color: 'green',
     fontSize: 16,
     textAlign: 'right', // Align text to the right
+    fontWeight: 'bold',
   },
   negativeBalance: {
     color: 'red',
     fontSize: 16,
     textAlign: 'right', // Align text to the right
+    fontWeight: 'bold'
   },
   listContainer: {
     paddingBottom: 100, // Add padding to avoid content being hidden behind buttons
@@ -174,4 +184,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  numberPositive: {
+    color: 'green',
+    fontWeight: 'bold',
+    fontSize: 24,
+  },
+  numberNegative: {
+    color: 'red',
+    fontWeight: 'bold',
+    fontSize: 24,
+  },
+
 });

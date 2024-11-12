@@ -1,23 +1,27 @@
 // app/(user)/groupDetails/[id].tsx
 import React, { useEffect, useState, useMemo } from 'react';
-import { View, Text, StyleSheet, Pressable, ActivityIndicator, FlatList } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ActivityIndicator, FlatList, Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Stack } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { useSharedGroups } from '@/api/Rel_inGroup';
 import { useGroupExpensesList } from '@/api/expenses';
-import { useGroupMembersWithBalance } from '@/api/groups';
+import { useGroupMembersWithBalance, useGroupInfo } from '@/api/groups';
+
 
 export default function GroupDetailScreen() {
   const router = useRouter();
-  const {id: groupId, name, notes } = useLocalSearchParams();
+  const {id: groupId, name} = useLocalSearchParams();
+  const {data: groupData, error: groupError } = useGroupInfo(groupId);
+
+  const groupName = groupData?.name;
 
   const handleGetEven = () => {
     router.push({
       pathname: '/groupDetails/group/getEvenGroup',
       params: {
         groupId,
-        name,
+        groupName,
       },
     });
   };
@@ -27,7 +31,7 @@ export default function GroupDetailScreen() {
       pathname: '/groupDetails/group/groupNotes',
       params: {
         id: groupId,
-        name: name,
+        groupName,
       },
     });
   };
@@ -42,6 +46,13 @@ export default function GroupDetailScreen() {
       },
     });
   };
+
+  const handleAddNewExpense = () => {
+    router.push({
+      pathname: '/expenseDetails',
+    });
+  };
+  
   const { data: expensesData, error, isLoading: isLoadingExpenses} = useGroupExpensesList(groupId);
   const { data: groupMembers, error: error2, isLoading: isLoadingBalances} = useGroupMembersWithBalance(groupId);
 
@@ -127,21 +138,21 @@ export default function GroupDetailScreen() {
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ title: 'Group' }} />
-      <Text style={styles.name}>{name}</Text>
+      <Text style={styles.name}>{groupName}</Text>
       <View style={styles.buttonContainer}>
-        <Pressable style={styles.button} onPress={handleGetEven}>
+        <Pressable style={styles.button} onPress={() => handleGetEven()}>
           <Text style={styles.buttonText}>Get Even</Text>
         </Pressable>
-        <Pressable style={styles.button} onPress={handleNotes}>
+        <Pressable style={styles.button} onPress={() => handleNotes()}>
           <Text style={styles.buttonText}>Notes</Text>
         </Pressable>
-        <Pressable style={styles.button} onPress={handleOverview}>
-          <Text style={styles.buttonText}>Overview</Text>
+        <Pressable style={styles.button} onPress={() => handleAddNewExpense()}>
+          <Text style={styles.buttonText}>+ Expense</Text>
         </Pressable>
       </ View>
 
       <Text style={styles.sectionTitle}>Your balance: {totalBalance.toFixed(2)} CZK</Text>
-      <View style={styles.balanceContainer}>
+      <Pressable style={styles.balanceContainer} onPress={() => handleOverview()}>
         {groupMembers && groupMembers.length > 0 ? (
           <FlatList
             data={groupMembers}
@@ -152,7 +163,7 @@ export default function GroupDetailScreen() {
         ) : (
           <Text style={styles.balanceText}>No balance details yet</Text>
         )}
-      </View>
+      </Pressable>
 
       <Text style={styles.sectionTitle}>Expenses</Text>
       <FlatList

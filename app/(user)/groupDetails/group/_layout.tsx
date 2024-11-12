@@ -4,6 +4,7 @@ import { Stack, useLocalSearchParams, usePathname } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons'; // Ensure you've installed expo/vector-icons
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function UserLayout() {
   const router = useRouter();
@@ -24,7 +25,7 @@ export default function UserLayout() {
       return;
     }
     router.push({
-      pathname: '/groupDetails/group/inviteGroup',
+      pathname: '/groupDetails/group/groupSettings',
       params: {
         groupId: groupId,
       },
@@ -67,11 +68,7 @@ export default function UserLayout() {
               accessibilityLabel="Invite to Group"
               accessibilityRole="button"
             >
-              <FontAwesome
-                name="qrcode"
-                size={25}
-                color="#4CAF50" // Green color for invite
-              />
+              <Ionicons name="settings" size={24} color="#000" />
             </Pressable>
           ),
         }}
@@ -99,9 +96,9 @@ export default function UserLayout() {
         title: 'Group Overview',
       }}/>
       <Stack.Screen
-      name="inviteGroup"
+      name="groupSettings"
       options={{
-        title: 'Invite Group',
+        title: 'Group Settings',
       }}/>
       <Stack.Screen
       name="account"

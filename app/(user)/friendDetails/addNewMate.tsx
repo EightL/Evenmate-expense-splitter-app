@@ -42,18 +42,16 @@ export default function AddNewMateScreen() {
   }, []);
 
   const handleAddMate = async () => {
-    
-
     // Input Validation
     if (!email.trim()) {
-      Alert.alert('Validation Error', 'Please enter an email address. GRRRRRRRRRRRRRRRRRRRRRRRRRRR');
+      // Alert.alert('Validation Error', 'Please enter an email address.');
       return;
     }
 
     // Simple Email Format Validation
     const emailRegex = /\S+@\S+\.\S+/;
     if (!emailRegex.test(email)) {
-      Alert.alert('Validation Error', 'Please enter a valid email address.');
+       Alert.alert('Validation Error', 'Please enter a valid email address.');
       return;
     }
 
@@ -80,6 +78,7 @@ export default function AddNewMateScreen() {
           // Update queries
           queryClient.invalidateQueries({ queryKey: ['mates', currentUserId] });
           queryClient.invalidateQueries({ queryKey: ['mates', existingProfile.id] });
+          queryClient.invalidateQueries();
           Alert.alert('Success', 'Mate added successfully.');
         }
       }
@@ -131,7 +130,7 @@ export default function AddNewMateScreen() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <View style={styles.container}>
       <Stack.Screen options={{ title: 'New Contact' }} />
       <Text style={styles.title}>Add Mate</Text>
 
@@ -147,12 +146,12 @@ export default function AddNewMateScreen() {
       {loading ? (
         <ActivityIndicator size="large" color="#4CAF50" />
       ) : (
-        <Pressable style={styles.button} onPress={handleAddMate}>
+        <Pressable style={styles.button} onPress={() => handleAddMate()}>
           <Text style={styles.buttonText}>Add</Text>
         </Pressable>
       )}
 
-      <Pressable style={styles.scanButton} onPress={handleScanPress}>
+      <Pressable style={styles.scanButton} onPress={() => handleScanPress()}>
         <Ionicons name="qr-code" size={24} color="#fff" />
         <Text style={styles.scanButtonText}>Scan QR Code</Text>
       </Pressable>
@@ -169,7 +168,7 @@ export default function AddNewMateScreen() {
           </Pressable>
         </View>
       </Modal>
-    </ScrollView>
+    </View>
   );
 }
 

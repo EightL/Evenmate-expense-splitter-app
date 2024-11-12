@@ -58,7 +58,6 @@ export default function GetEvenInput() {
           placeholder="0.00"
           value={amount}
           onChangeText={setAmount}
-          keyboardType="numeric"
         />
         <Text style={styles.currency}>CZK</Text>
       </View>

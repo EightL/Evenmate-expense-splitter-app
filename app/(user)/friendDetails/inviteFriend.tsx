@@ -1,4 +1,4 @@
-// app/(user)/inviteGroup.tsx
+// app/(user)/inviteFriend.tsx
 
 import React from 'react';
 import { View, Text, StyleSheet, Dimensions, Pressable, Alert } from 'react-native';

@@ -105,9 +105,7 @@ export const useMateExpenses = (currentUserId: string, mateId: string) => {
           if (userError) {
             throw new Error(userError.message);
           }
-  
-          //   console.log("KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKYYYYYYYYYYYYS");
-  
+    
           // Fetch expenses where paid_by is currentUserId or mateId
           const { data: paidByExpenses, error: paidByError } = await supabase
             .from('Expenses')
