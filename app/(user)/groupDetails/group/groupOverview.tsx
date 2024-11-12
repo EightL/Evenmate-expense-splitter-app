@@ -16,7 +16,7 @@ type GroupMember = {
 
 export default function GroupOverviewScreen() {
   const router = useRouter();
-  const { id: groupId, name: groupName, totalBalance } = useLocalSearchParams<{ id: string; name: string }>();
+  const { id: groupId, name: groupName, totalBalance } = useLocalSearchParams<{ id: string; name: string; totalBalance: number }>();
 
   const [session, setSession] = useState<{ user: { id: string } } | null>(null);
   const [isSessionLoading, setIsSessionLoading] = useState<boolean>(true);
@@ -80,13 +80,6 @@ export default function GroupOverviewScreen() {
     });
   }, [groupMembers, session?.user.id]);
 
-  // Log currentUserId only when it's updated and not null
-  useEffect(() => {
-    if (session?.user.id) {
-      // console.log("Current User ID 222: ", session.user.id);
-    }
-  }, [session?.user.id]);
-
   if (isSessionLoading || isLoading) {
     return (
       <View style={styles.centered}>
@@ -110,10 +103,10 @@ export default function GroupOverviewScreen() {
   const renderMember = ({ item }: { item: GroupMember }) => (
     <View style={styles.memberContainer}>
       <Text style={styles.username}>{item.profiles.username}</Text>
-      <Text style={styles.balanceText}>
+      <Text style={[styles.balanceText, item.balance < 0 ? styles.negativeBalance : styles.positiveBalance]}>
         {item.balance >= 0
-          ? `You lent: ${item.balance.toFixed(2)} CZK`
-          : `You owe: ${Math.abs(item.balance).toFixed(2)} CZK`}
+          ? `You lent: ${Number(item.balance).toFixed(2)} CZK`
+          : `You owe: ${Number(item.balance).toFixed(2)} CZK`}
       </Text>
     </View>
   );
@@ -125,7 +118,10 @@ export default function GroupOverviewScreen() {
       {/* Current User Container */}
       {session?.user.id && (
         <View style={styles.currentUserContainer}>
-          <Text style={styles.currentUserTitle}>Your balance {totalBalance} CZK</Text>
+          <Text style={styles.currentUserTitle}>Your Balance</Text>
+          <Text style={[styles.totalBalance, totalBalance < 0 ? styles.negativeBalance : styles.positiveBalance]}>
+            {totalBalance >= 0 ? `${Number(totalBalance).toFixed(2)} CZK` : `${Number(totalBalance).toFixed(2)} CZK`}
+          </Text>
         </View>
       )}
 
@@ -157,28 +153,39 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
+    fontSize: 26,
+    fontWeight: '700',
+    marginBottom: 25,
     textAlign: 'center',
+    color: '#333',
   },
   currentUserContainer: {
-    padding: 15,
-    marginBottom: 20,
-    backgroundColor: '#A5D6A7',
-    borderRadius: 10,
+    padding: 20,
+    marginBottom: 25,
+    backgroundColor: '#E8F5E9',
+    borderRadius: 12,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   currentUserTitle: {
     fontSize: 20,
     fontWeight: '600',
     marginBottom: 5,
-    color: 'black',
+    color: '#2E7D32',
+  },
+  totalBalance: {
+    fontSize: 22,
+    fontWeight: '700',
   },
   subTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '600',
-    marginBottom: 10,
-    color: '#333',
+    marginBottom: 15,
+    color: '#555',
   },
   listContainer: {
     paddingBottom: 20,
@@ -188,9 +195,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 15,
-    marginBottom: 10,
+    marginBottom: 15,
     backgroundColor: '#D4F0DD',
-    borderRadius: 10,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
   },
   username: {
     fontSize: 18,
@@ -199,16 +211,22 @@ const styles = StyleSheet.create({
   },
   balanceText: {
     fontSize: 16,
-    color: '#555',
+    fontWeight: '500',
+  },
+  positiveBalance: {
+    color: '#388E3C',
+  },
+  negativeBalance: {
+    color: '#D32F2F',
   },
   noMembersText: {
     textAlign: 'center',
-    color: '#555',
+    color: '#777',
     fontSize: 16,
     marginTop: 20,
   },
   errorText: {
-    color: 'red',
+    color: '#D32F2F',
     fontSize: 16,
     textAlign: 'center',
   },

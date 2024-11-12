@@ -15,7 +15,7 @@ export default function GroupDetailScreen() {
   const {data: groupData, error: groupError } = useGroupInfo(groupId);
 
   const groupName = groupData?.name;
-
+  
   const handleGetEven = () => {
     router.push({
       pathname: '/groupDetails/group/getEvenGroup',
@@ -151,7 +151,12 @@ export default function GroupDetailScreen() {
         </Pressable>
       </ View>
 
-      <Text style={styles.sectionTitle}>Your balance: {totalBalance.toFixed(2)} CZK</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 10 }}>
+        <Text style={styles.sectionTitle}>Your balance: </Text>
+        <Text style={totalBalance >= 0 ? styles.positiveBalanceTitle : styles.negativeBalanceTitle}>
+          {totalBalance.toFixed(2)} CZK
+        </Text>
+      </View>
       <Pressable style={styles.balanceContainer} onPress={() => handleOverview()}>
         {groupMembers && groupMembers.length > 0 ? (
           <FlatList
@@ -222,6 +227,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9f9f9',
     borderRadius: 10,
     marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   balanceText: {
     fontSize: 16,
@@ -255,6 +265,20 @@ const styles = StyleSheet.create({
   negativeBalance: {
     color: 'red',
     fontSize: 16,
+  },
+  positiveBalanceTitle:{
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: 'green',
+    marginVertical: 10,
+
+  },
+  negativeBalanceTitle:{
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: 'red',
+    marginVertical: 10,
+
   },
   username: {
     fontSize: 16,

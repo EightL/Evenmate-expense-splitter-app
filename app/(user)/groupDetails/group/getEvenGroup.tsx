@@ -4,7 +4,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useGroupMembers } from '@/api/groups';
 
 export default function GetEvenGroupScreen() {
-  const {mateId, groupId, name } = useLocalSearchParams();
+  const {groupId, groupName } = useLocalSearchParams();
   const router = useRouter();
   const { data: groupMembers, error } = useGroupMembers(groupId);
 
@@ -43,7 +43,7 @@ export default function GetEvenGroupScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.groupName}>Get Even for Group</Text>
-      <Text style={styles.title}>{name}</Text>
+      <Text style={styles.title}>{groupName}</Text>
 
       <FlatList
         data={groupMembers}

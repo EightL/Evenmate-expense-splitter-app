@@ -62,7 +62,7 @@ export default function GetEvenInput() {
         <TextInput
           style={styles.input}
           placeholder="0.00"
-          value={amount}
+          value={Number(amount).toFixed(2)}
           onChangeText={setAmount}
           keyboardType="numeric"
         />
