@@ -1,5 +1,5 @@
 import { Redirect } from 'expo-router';
 
 export default function TabIndex () {
-  return <Redirect href={'/groupDetails/group/[id]'} />;
+  return <Redirect href={'./groupDetails/group/[id]'} />;
 };

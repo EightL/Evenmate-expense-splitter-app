@@ -15,7 +15,7 @@ export default function GroupsScreen() {
   if (isLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#4CAF50" />
+        <ActivityIndicator/>
       </View>
     );
   }

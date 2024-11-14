@@ -83,7 +83,7 @@ export default function GroupOverviewScreen() {
   if (isSessionLoading || isLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#4CAF50" />
+        <ActivityIndicator/>
       </View>
     );
   }

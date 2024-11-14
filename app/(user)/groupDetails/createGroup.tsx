@@ -64,7 +64,7 @@ export default function CreateGroupScreen() {
         autoCapitalize="words"
       />
       {loading ? (
-        <ActivityIndicator size="large" color="#4CAF50" />
+        <ActivityIndicator/>
       ) : (
         <Pressable style={styles.button} onPress={handleCreateGroup}>
           <Text style={styles.buttonText}>Create Group</Text>

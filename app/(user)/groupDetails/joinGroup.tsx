@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
-import { BarCodeScanner } from 'expo-barcode-scanner';
+// import { BarCodeScanner } from 'expo-barcode-scanner';
 import * as Clipboard from 'expo-clipboard';
 import { useQueryClient, InvalidateQueryFilters  } from '@tanstack/react-query';
 import { useGetCurrentUserId } from '@/api/getCurrentUserId';
@@ -33,12 +33,12 @@ const JoinGroup = () => {
 
   const queryClient = useQueryClient();
 
-  useEffect(() => {
-    (async () => {
-      const { status } = await BarCodeScanner.requestPermissionsAsync();
-      setHasPermission(status === 'granted');
-    })();
-  }, []);
+  // useEffect(() => {
+  //   (async () => {
+  //     const { status } = await BarCodeScanner.requestPermissionsAsync();
+  //     setHasPermission(status === 'granted');
+  //   })();
+  // }, []);
 
   const handleJoinGroup = async (enteredGroupId?: string) => {
     const finalGroupId = enteredGroupId ?? groupId;
@@ -121,7 +121,7 @@ const JoinGroup = () => {
       />
       
       {loading ? (
-        <ActivityIndicator size="large" color="#4CAF50" />
+        <ActivityIndicator/>
       ) : (
         <Pressable style={styles.button} onPress={() => handleJoinGroup()}>
           <Text style={styles.buttonText}>Add</Text>
@@ -136,10 +136,10 @@ const JoinGroup = () => {
       {/* QR Code Scanner Modal */}
       <Modal visible={isScannerVisible} animationType="slide">
         <View style={styles.scannerContainer}>
-          <BarCodeScanner
+          {/* <BarCodeScanner
             onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
             style={StyleSheet.absoluteFillObject}
-          />
+          /> */}
           <Pressable style={styles.cancelButton} onPress={() => setScannerVisible(false)}>
             <Text style={styles.buttonText}>Cancel</Text>
           </Pressable>

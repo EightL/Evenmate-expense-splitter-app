@@ -220,7 +220,7 @@ const AccountScreen = () => {
       {/* Groups Loading Indicator */}
       {isGroupsLoading && (
         <View style={styles.groupsLoading}>
-          <ActivityIndicator size="small" color="#4CAF50" />
+          <ActivityIndicator/>
           <Text style={styles.loadingText}>Loading groups...</Text>
         </View>
       )}
@@ -242,7 +242,7 @@ const AccountScreen = () => {
   if (isProfileLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#4CAF50" />
+        <ActivityIndicator/>
       </View>
     );
   }

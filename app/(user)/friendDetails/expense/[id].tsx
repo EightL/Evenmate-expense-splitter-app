@@ -55,7 +55,7 @@ export default function ExpenseDetailScreenInMates() {
   }, [expenseId]);
 
   if (isLoading) {
-    return <ActivityIndicator style={styles.loader} />;
+    return <ActivityIndicator/>;
   }
 
   if (error) {

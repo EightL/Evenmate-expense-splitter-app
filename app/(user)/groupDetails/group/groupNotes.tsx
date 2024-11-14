@@ -68,7 +68,7 @@ const GroupNotes: React.FC<GroupNotesProps> = () => {
   if (isLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#4CAF50" />
+        <ActivityIndicator/>
       </View>
     );
   }
@@ -103,7 +103,7 @@ const GroupNotes: React.FC<GroupNotesProps> = () => {
         disabled={isSaving}
       >
         {isSaving ? (
-          <ActivityIndicator size="small" color="#fff" />
+          <ActivityIndicator/>
         ) : (
           <Text style={styles.saveButtonText}>Save Notes</Text>
         )}

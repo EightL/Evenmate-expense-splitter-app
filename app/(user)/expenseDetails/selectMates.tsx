@@ -76,14 +76,6 @@ export default function MatesScreen() {
     setRefreshing(false);
   };
 
-//   if (isLoadingMates || isLoadingGroups) {
-//     return (
-//       <View style={styles.centered}>
-//         <ActivityIndicator size="large" color="#4CAF50" />
-//         <Text>Loading data...</Text>
-//       </View>
-//     );
-//   }
 
 //   if (currentUserError || matesError || groupsError) {
 //     return (

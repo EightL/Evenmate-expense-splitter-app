@@ -15,7 +15,7 @@ import {
 import { useRouter, Stack } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { useQueryClient } from '@tanstack/react-query';
-import { BarCodeScanner } from 'expo-barcode-scanner';
+// import { BarCodeScanner } from 'expo-barcode-scanner';
 import { Ionicons } from '@expo/vector-icons';
 import { useGetCurrentUserId } from '@/api/getCurrentUserId';
 import { getProfileByEmail, getExistingRelationship, createMateRelationship } from '@/api/mates';
@@ -33,13 +33,13 @@ export default function AddNewMateScreen() {
   const [scanned, setScanned] = useState(false);
   const { data: currentUserId, error } = useGetCurrentUserId();
 
-  useEffect(() => {
-    // Request Camera Permissions
-    (async () => {
-      const { status } = await BarCodeScanner.requestPermissionsAsync();
-      setHasPermission(status === 'granted');
-    })();
-  }, []);
+  // useEffect(() => {
+  //   // Request Camera Permissions
+  //   (async () => {
+  //     const { status } = await BarCodeScanner.requestPermissionsAsync();
+  //     setHasPermission(status === 'granted');
+  //   })();
+  // }, []);
 
   const handleAddMate = async () => {
     // Input Validation
@@ -113,7 +113,7 @@ export default function AddNewMateScreen() {
   if (hasPermission === null) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#4CAF50" />
+        <ActivityIndicator/>
         <Text>Requesting camera permission...</Text>
       </View>
     );
@@ -144,7 +144,7 @@ export default function AddNewMateScreen() {
       />
 
       {loading ? (
-        <ActivityIndicator size="large" color="#4CAF50" />
+        <ActivityIndicator/>
       ) : (
         <Pressable style={styles.button} onPress={() => handleAddMate()}>
           <Text style={styles.buttonText}>Add</Text>
@@ -159,10 +159,10 @@ export default function AddNewMateScreen() {
       {/* QR Code Scanner Modal */}
       <Modal visible={isScannerVisible} animationType="slide">
         <View style={styles.scannerContainer}>
-          <BarCodeScanner
+          {/* <BarCodeScanner
             onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
             style={StyleSheet.absoluteFillObject}
-          />
+          /> */}
           <Pressable style={styles.cancelButton} onPress={() => setScannerVisible(false)}>
             <Text style={styles.buttonText}>Cancel</Text>
           </Pressable>

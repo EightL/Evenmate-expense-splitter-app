@@ -136,7 +136,7 @@ export default function EditExpenseScreen() {
   if (isExpenseLoading) {
     return (
       <View style={styles.loaderContainer}>
-        <ActivityIndicator style={styles.loader} size="large" color="#0000ff" />
+        <ActivityIndicator/>
       </View>
     );
   }
@@ -175,7 +175,7 @@ export default function EditExpenseScreen() {
         disabled={isUpdating || isDeleting}
       >
         {isUpdating ? (
-          <ActivityIndicator color="#fff" />
+          <ActivityIndicator/>
         ) : (
           <Text style={styles.updateButtonText}>Update Expense</Text>
         )}
@@ -192,7 +192,7 @@ export default function EditExpenseScreen() {
         disabled={isUpdating || isDeleting}
       >
         {isDeleting ? (
-          <ActivityIndicator color="#fff" />
+          <ActivityIndicator/>
         ) : (
           <Text style={styles.deleteButtonText}>Delete Expense</Text>
         )}
