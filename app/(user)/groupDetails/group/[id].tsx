@@ -1,0 +1,499 @@
+import React, { useEffect, useState, useMemo } from 'react';
+import { View, Text, StyleSheet, Pressable, ActivityIndicator, FlatList, Alert, Image, Modal } from 'react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { Stack } from 'expo-router';
+import { supabase } from '@/lib/supabase';
+import { useSharedGroups } from '@/api/Rel_inGroup';
+import { useGroupExpensesList } from '@/api/expenses';
+import { useGroupMembersWithBalance, useGroupInfo } from '@/api/groups';
+import defaultGroupPic from '@/assets/images/defaultGroupPic.png';
+import { FontAwesome } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
+import { useGetCurrentUserId } from '@/api/getCurrentUserId';
+import { useUserInfo } from '@/api/profiles';
+import defaultProfilePic from '@/assets/images/defaultProfilePic.png';
+
+export default function GroupDetailScreen() {
+  const router = useRouter();
+  const { id: groupId, name } = useLocalSearchParams();
+  const { data: groupData, error: groupError } = useGroupInfo(groupId);
+  const [isImageLoading, setImageLoading] = useState(true);
+  const [isModalVisible, setModalVisible] = useState(false);
+  const groupName = groupData?.name;
+
+  const { data: currentUserId } = useGetCurrentUserId();
+  const { data: currentUserData } = useUserInfo(currentUserId);
+
+  const toggleModal = () => {
+    setModalVisible(!isModalVisible);
+  };
+
+  const handleGetEven = () => {
+    router.push({
+      pathname: '/groupDetails/group/getEvenGroup',
+      params: {
+        groupId,
+        groupName,
+      },
+    });
+  };
+
+  const handleNotes = () => {
+    router.push({
+      pathname: '/groupDetails/group/groupNotes',
+      params: {
+        id: groupId,
+        groupName,
+      },
+    });
+  };
+
+  const handleOverview = () => {
+    router.push({
+      pathname: '/groupDetails/group/groupOverview',
+      params: {
+        id: groupId,
+        name: name,
+        totalBalance: totalBalance,
+      },
+    });
+  };
+
+  const handleAddNewExpense = () => {
+    router.push({
+      pathname: '/expenseDetails',
+    });
+  };
+
+  const { data: expensesData, error, isLoading: isLoadingExpenses } = useGroupExpensesList(groupId);
+  const { data: groupMembers, error: error2, isLoading: isLoadingBalances } = useGroupMembersWithBalance(groupId);
+
+  const totalBalance = useMemo(() => {
+    return groupMembers?.reduce((sum, item) => sum + item.balance, 0) || 0;
+  }, [groupMembers]);
+
+  const userIdToUsernameMap = useMemo(() => {
+    const map = new Map();
+    groupMembers?.forEach(member => {
+      map.set(member.userid, member.profiles.username);
+    });
+
+    // Add current user to the map with "You" as the username
+    if (currentUserId) {
+      map.set(currentUserId, 'You');
+    }
+
+    return map;
+  }, [groupMembers, currentUserId]);
+
+  if (isLoadingExpenses) {
+    return <ActivityIndicator />;
+  }
+
+  if (isLoadingBalances) {
+    return <ActivityIndicator />;
+  }
+
+  if (error) {
+    return <Text> Failed to load expenses </Text>;
+  }
+
+  if (error2) {
+    return <Text> Failed to load group members </Text>;
+  }
+
+  type groupMember = {
+    username: string;
+    userid: string;
+    profiles: {
+      username: string;
+    };
+    balance: string;
+  };
+
+  type Expense = {
+    id: string;
+    name: string;
+    amount: number;
+    created_at: string;
+    description: string;
+    paid_by: string;
+    involved_people : number;
+  };
+
+  const renderExpenses = ({ item }: { item: Expense }) => {
+    const paidByUsername = userIdToUsernameMap.get(item.paid_by) || 'Unknown';
+
+    // Convert the created_at timestamp to a Date object
+    const createdAtDate = new Date(item.created_at);
+    const isPaidByCurrentUser = item.paid_by === currentUserId;
+    // Extract the month and day
+    const month = createdAtDate.toLocaleString('default', { month: 'short' });
+    const day = createdAtDate.getDate();
+
+    return (
+      <Pressable
+        style={styles.mainContainer2}
+        onPress={() =>
+          router.push({
+            pathname: `/groupDetails/group/expense/${encodeURIComponent(item.id)}`,
+            params: {
+              expid: item.id,
+              name: item.name,
+              time: item.time,
+              description: item.description,
+              paid_by: item.paid_by,
+            },
+          })
+        }
+      >
+        {/* Date Container */}
+        <View style={styles.dateContainer}>
+          <Text style={styles.dateText}>{month}</Text>
+          <Text style={styles.dateText}>{day}</Text>
+        </View>
+
+        {/* Icon Container */}
+        <View style={styles.iconContainer}>
+          <View style={styles.iconWrapper}>
+            <Ionicons name="receipt" size={24} color="black" />
+          </View>
+        </View>
+
+        {/* Name + Info Container */}
+        <View style={styles.infoContainer}>
+          <Text style={styles.expenseName}>{item.name}</Text>
+          <Text style={styles.expenseDetails}>
+            <Text style={styles.boldText}>{paidByUsername}</Text> paid <Text style={styles.boldText}>{item.amount} Kč</Text>
+          </Text>
+        </View>
+
+        {/* Borrowed Amount Container */}
+        <View style={styles.borrowContainer}>
+          <Text style={styles.borrowText}>{isPaidByCurrentUser ? 'you lent' : 'you borrowed'}</Text>
+          <Text style={isPaidByCurrentUser ? styles.lentAmount : styles.borrowAmount}>{isPaidByCurrentUser ? (item.amount - (item.amount / item.involved_people)).toFixed(2) : (item.amount / item.involved_people).toFixed(2)} CZK</Text>
+        </View>
+      </Pressable>
+    );
+  };
+
+  const renderMembers = ({ item }: { item: groupMember }) => (
+    <View style={{flexDirection: 'row'}}>
+      <Image source={defaultProfilePic} style={{width:10, height: undefined, borderRadius: 5, flex: .5, aspectRatio: 1, marginRight: 5, marginTop: 2,}}></Image>
+      <View style={{flexDirection: 'column', flex: 10}}>
+      <Text>
+        <Text style={styles.username}>{item.profiles.username}</Text>
+        <Text>
+          {item.balance > 0 ? ' owes you ' : ' lent you '}
+        </Text>
+        <Text style={item.balance >= 0 ? styles.positiveBalance : styles.negativeBalance}>
+          {item.balance > 0 ? `${item.balance.toFixed(2)} CZK` : `${(-item.balance).toFixed(2)} CZK`}
+        </Text>
+      </Text>
+      </View>
+    </View>
+  );
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.mainContainer}>
+        {/* Left Container */}
+        <View style={styles.leftContainer}>
+          {/* Group Name Container */}
+          <View style={styles.groupNameContainer}>
+            <Text style={styles.groupName}>Italy Trip</Text>
+          </View>
+          {/* Buttons Container */}
+          <View style={styles.buttonsContainer}>
+            <Pressable style={styles.button} onPress={handleAddNewExpense}>
+              <FontAwesome name="plus" size={24} color="black" />
+              <Text style={styles.buttonText}>Expense</Text>
+            </Pressable>
+            <Pressable style={styles.button} onPress={handleGetEven}>
+              <FontAwesome name="bars" size={24} color="black" />
+              <Text style={styles.buttonText}>Get Even</Text>
+            </Pressable>
+            <Pressable style={styles.button} onPress={handleNotes}>
+              <FontAwesome name="sticky-note-o" size={24} color="black" />
+              <Text style={styles.buttonText}>Notes</Text>
+            </Pressable>
+          </View>
+        </View>
+
+        {/* Right Container (Image) */}
+        <View style={styles.rightContainer}>
+          <Pressable onPress={toggleModal}>
+            <Image
+              source={groupData.avatar_url && !isImageLoading ? { uri: groupData.avatar_url } : defaultGroupPic}
+              style={styles.image}
+              onLoadEnd={() => setImageLoading(false)} // Set loading to false once image loads
+              onError={() => setImageLoading(false)}  // Handle potential errors by stopping loading
+            />
+          </Pressable>
+        </View>
+      </View>
+
+      <Modal visible={isModalVisible} transparent={true} animationType="none">
+        <View style={styles.modalContainer}>
+          <Pressable style={styles.modalCloseButton} onPress={toggleModal}>
+            <Text style={styles.modalCloseButtonText}>Close</Text>
+          </Pressable>
+          <Image
+            source={groupData.avatar_url ? { uri: groupData.avatar_url } : defaultGroupPic}
+            style={styles.modalImage}
+          />
+        </View>
+      </Modal>
+
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 10 }}>
+        <Text style={styles.sectionTitle}>Your balance: </Text>
+        <Text style={totalBalance >= 0 ? styles.positiveBalanceTitle : styles.negativeBalanceTitle}>
+          {totalBalance.toFixed(2)} CZK
+        </Text>
+      </View>
+      <Pressable style={styles.balanceContainer} onPress={handleOverview}>
+        {groupMembers && groupMembers.length > 0 ? (
+          <FlatList
+            data={groupMembers}
+            keyExtractor={(item) => String(item.userid)}
+            renderItem={renderMembers}
+            showsVerticalScrollIndicator={false}
+          />
+        ) : (
+          <Text style={styles.balanceText}>No balance details yet</Text>
+        )}
+      </Pressable>
+
+      <Text style={styles.sectionTitle}>Expenses</Text>
+      <FlatList
+        data={expensesData}
+        keyExtractor={(item) => String(item.id)}
+        renderItem={renderExpenses}
+        showsVerticalScrollIndicator={false}
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  name: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginBottom: 15,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginVertical: 10,
+  },
+  balanceContainer: {
+    width: '100%',
+    padding: 15,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 10,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  balanceText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  expenseContainer: {
+    width: '100%',
+    padding: 15,
+    backgroundColor: '#D4F0DD',
+    borderRadius: 10,
+    marginBottom: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  expenseDetail: {
+    fontSize: 14,
+    color: '#555',
+  },
+  positiveBalance: {
+    color: 'green',
+    fontSize: 16,
+  },
+  negativeBalance: {
+    color: 'red',
+    fontSize: 16,
+  },
+  positiveBalanceTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: 'green',
+    marginVertical: 10,
+  },
+  negativeBalanceTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: 'red',
+    marginVertical: 10,
+  },
+  username: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'black',
+  },
+  mainContainer: {
+    flexDirection: 'row',
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  leftContainer: {
+    flex: 3,
+    justifyContent: 'space-between',
+    marginRight: 8,
+  },
+  groupNameContainer: {
+    backgroundColor: '#4CAF50',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  groupName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  buttonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  button: {
+    backgroundColor: '#D4F0DD',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    flex: 1,
+    marginHorizontal: 4,
+  },
+  buttonText: {
+    fontSize: 10,
+  },
+  rightContainer: {
+    flex: 1,
+  },
+  image: {
+    width: '100%',
+    height: 110,
+    borderRadius: 12,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+  },
+  modalImage: {
+    width: '100%',
+    height: undefined,
+    aspectRatio: 16 / 9,
+    borderRadius: 12,
+  },
+  modalCloseButton: {
+    position: 'absolute',
+    bottom: 250,
+    backgroundColor: '#fff',
+    padding: 10,
+    borderRadius: 8,
+  },
+  modalCloseButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  mainContainer2: {
+    flexDirection: 'row',
+    padding: 10,
+    backgroundColor: '#D4F0DD',
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  dateContainer: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  dateText: {
+    fontSize: 13,
+    marginRight: 4,
+    fontWeight: 'bold',
+  },
+  iconWrapper: {
+    backgroundColor: '#4CAF50',
+    padding: 8,
+    borderRadius: 8,
+  },
+  infoContainer: {
+    flex: 5,
+    paddingHorizontal: 8,
+  },
+  expenseName: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginBottom: 3,
+  },
+  expenseDetails: {
+    fontSize: 11,
+    color: '#333',
+  },
+  boldText: {
+    fontWeight: 'bold',
+  },
+  borrowContainer: {
+    flex: 3,
+    alignItems: 'flex-end',
+  },
+  borrowText: {
+    fontSize: 12,
+  },
+  borrowAmount: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: 'red',
+  },
+  lentAmount:{
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: 'green',
+  },
+  iconContainer: {
+    flex: 1.3,
+    borderRadius: 5,
+    overflow: 'hidden',
+    backgroundColor: '#fff',
+    alignItems: 'center',
+  },
+  iconImage: {
+    width: '100%',
+    height: undefined,
+    aspectRatio: 20 / 21,
+    resizeMode: 'cover',    
+  },
+});
+
+export default GroupDetailScreen;

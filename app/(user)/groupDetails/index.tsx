@@ -1,0 +1,235 @@
+// app/(user)/friendDetails/index.tsx
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, ActivityIndicator, FlatList, View, Text, Pressable, Image, } from 'react-native';
+import { useRouter } from 'expo-router';
+import { supabase } from '@/lib/supabase';
+import { useGroupsList, useGroupsTotalBalances } from '@/api/groups';
+import { useGetCurrentUserId } from '@/api/getCurrentUserId';
+import defaultGroupPic from '@/assets/images/defaultGroupPic.png';
+
+export default function GroupsScreen() {
+  const router = useRouter();
+  const { data: currentUserId, error: currentUserError } = useGetCurrentUserId();
+  const [isImageLoading, setImageLoading] = useState(true);
+
+  const { data: groupsData, error, isLoading } = useGroupsList(currentUserId || null);
+
+  if (isLoading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator/>
+      </View>
+    );
+  }
+
+  if (error) {
+    return <Text>Failed to load groups</Text>;
+  }
+
+  type Group = {
+    userid: string;
+    groupid: string;
+    groups: {
+      id: string;
+      name: string;
+      notes: string;
+      avatar_url: string;
+    };
+  };
+
+  const renderItem = ({ item }: { item: Group }) => (
+    <Pressable style={styles.mainContainer} onPress={() => router.push({
+      pathname: `/(user)/groupDetails/group/${encodeURIComponent(item.groups.id)}`,
+      params: { name: item.groups.name },
+    })}>
+      {/* Left Container */}
+      <View style={styles.leftContainer}>
+        {/* Top Section */}
+        <View style={styles.topSection}>
+          <Text style={styles.groupName} adjustsFontSizeToFit numberOfLines={1} >{item.groups.name}</Text>
+        </View>
+        {/* Middle Section */}
+        <View>
+          <Text style={styles.amountText}>102,26 Kč</Text>
+        </View>
+      </View>
+
+      {/* Right Container */}
+      <View style={styles.rightContainer}>
+        <Image
+            source={item.groups.avatar_url && !isImageLoading ? { uri: item.groups.avatar_url } : defaultGroupPic}
+            style={styles.image}
+            onLoadEnd={() => setImageLoading(false)} // Set loading to false once image loads
+            onError={() => setImageLoading(false)}  // Handle potential errors by stopping loading
+          />
+      </View>
+    </Pressable>
+  );
+
+  const handleCreateNewGroup = () => {
+    router.push('/groupDetails/createGroup');
+  };
+
+  const handleJoinGroup = () => {
+    router.push('/groupDetails/joinGroup');
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Your groups</Text>
+      <FlatList
+        data={groupsData || []}
+        keyExtractor={(item) => item.groups.id} // Assuming 'id' is unique
+        renderItem={renderItem}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.listContainer}
+      />
+      <View style={styles.buttonContainer}>
+        <Pressable style={styles.button} onPress={handleCreateNewGroup}>
+          <Text style={styles.buttonText}>Create New Group</Text>
+        </Pressable>
+        <Pressable style={styles.button} onPress={handleJoinGroup}>
+          <Text style={styles.buttonText}>Join a Group</Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20, // Add padding around the container
+    backgroundColor: '#fff',
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    marginTop: 10,
+    textAlign: 'center',
+  },
+  listContainer: {
+    paddingBottom: 100, // Add padding to avoid content being hidden behind buttons
+  },
+  groupImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginRight: 15,
+    resizeMode: 'cover',
+    overflow: 'hidden',
+    flex : 2,
+  },
+  itemContainer: {
+    flexDirection: 'row',
+    padding: 15,
+    marginBottom: 15,
+    backgroundColor: '#D4F0DD',
+    borderRadius: 10,
+    // Shadow for iOS
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    // Elevation for Android
+    elevation: 3,
+  },
+  groupName: {
+    fontSize: 30,
+    fontWeight: '600',
+    color: '#333',
+    textAlign: 'center', // Align text to the center
+  },
+  buttonContainer: {
+    position: 'absolute',
+    bottom: 20,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+  },
+  button: {
+    backgroundColor: '#4CAF50',
+    paddingVertical: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginBottom: 10,
+    width: '90%',
+    // Shadow for buttons
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  mainContainer: {
+    flexDirection: 'row-reverse',
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 15,
+  },
+  leftContainer: {
+    flex: 2,
+    justifyContent: 'space-between',
+  },
+  rightContainer: {
+    flex: 2,
+  },
+  topSection: {
+    marginBottom: 8,
+    backgroundColor: '#D4F0DD',
+    borderRadius: 8,
+    padding: 8,
+  },
+  bottomSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  amountText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    backgroundColor: '#D4F0DD',
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    color: '#4CAF50',
+  },
+  circleUser: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#ADD8E6',
+    marginRight: 4,
+  },
+  moreCircle: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#ccc',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  moreText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+  image: {
+    width: 170,
+    height: undefined,
+    aspectRatio: 16 / 9,
+    borderRadius: 15,
+  },
+});
