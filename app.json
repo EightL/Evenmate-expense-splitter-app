@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Evenmate2",
-    "slug": "Evenmate2",
+    "name": "Evenmate",
+    "slug": "Evenmate",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",

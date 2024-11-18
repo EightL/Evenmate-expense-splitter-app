@@ -1,0 +1,109 @@
+// api/mates/index.ts
+import { supabase } from '@/lib/supabase';
+import { useQuery } from '@tanstack/react-query';
+// import { useGetCurrentUserId } from '@/api/getCurrentUserId';
+
+export const useMatesList = (currentUserId: string | null) => {
+  return useQuery({
+    queryKey: ['mates', currentUserId],
+    queryFn: async () => {
+      if (!currentUserId) {
+        console.log("No currentUserId provided");
+        return [];
+      }
+
+      console.log("Fetching mates for user:", currentUserId);
+
+      const { data, error } = await supabase
+        .from('rel_uubalance')
+        .select(`
+          balance,
+          user1,
+          user2,
+          profiles!user2(*)
+        `)
+        .or(`user1.eq.${currentUserId}`);
+
+      if (error) {
+        console.error("Error fetching mates:", error.message);
+        throw new Error(error.message);
+      }
+
+      console.log("DATA FROM MATELIST", data);
+      return data;
+    },
+    refetchOnMount: 'always', // Ensures query refetches on each mount
+  });
+};
+
+export const getProfileByEmail = async (email: string) => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('email', email.trim())
+      .single();
+  
+    if (error && error.code !== 'PGRST116') { // PGRST116: No rows found
+      throw error;
+    }
+  
+    return data;
+};
+
+  export const getExistingRelationship = async (userId: string, mateId: string) => {
+    const { data, error } = await supabase
+      .from('rel_uubalance')
+      .select('*')
+      .or(`user1.eq.${userId},user2.eq.${userId}`)
+      .eq('user1', mateId)
+      .or(`user2.eq.${mateId}`)
+      .maybeSingle();
+  
+    if (error && error.code !== 'PGRST116') {
+      throw error;
+    }
+  
+    return data;
+};
+  
+export const createMateRelationship = async (mateId: string, userId: string) => {
+    // Insert a new row into the mates relationship table
+    const { error } = await supabase
+      .from('rel_uubalance')
+      .insert([
+        {
+          user1: userId,
+          user2: mateId,
+          balance: 0, // Initialize balance as needed
+        },
+      ]);
+    if (error) {
+      throw error;
+    }
+    // Insert the opposite relationship
+    const { error: error2 } = await supabase
+      .from('rel_uubalance')
+      .insert([
+        {
+          user1: mateId,
+          user2: userId,
+          balance: 0, // Initialize balance as needed
+        },
+      ]);
+    if (error2) {
+      throw error2;
+    }
+};
+
+export const deleteMateRelationship = async (mateId: string, userId: string) => {
+  const { error } = await supabase
+  .from('rel_uubalance')
+  .delete()
+  .or(`and(user1.eq.${userId},user2.eq.${mateId}),and(user1.eq.${mateId},user2.eq.${userId})`);
+
+  if (error) {
+    throw new Error(`Error deleting relationship: ${error.message}`);
+  }
+
+  return true;
+}
