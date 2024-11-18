@@ -100,11 +100,6 @@ export default function UserLayout() {
       options={{
         title: 'Group Settings',
       }}/>
-      <Stack.Screen
-      name="account"
-      options={{
-        title: 'Account',
-      }}/>
       {/* Other screens */}
     </Stack>
   );

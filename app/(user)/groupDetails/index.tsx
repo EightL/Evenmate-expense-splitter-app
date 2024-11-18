@@ -1,28 +1,38 @@
-// app/(user)/friendDetails/index.tsx
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, ActivityIndicator, FlatList, View, Text, Pressable, Image, } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { StyleSheet, ActivityIndicator, FlatList, View, Text, Pressable, Image } from 'react-native';
 import { useRouter } from 'expo-router';
-import { supabase } from '@/lib/supabase';
 import { useGroupsList, useGroupsTotalBalances } from '@/api/groups';
 import { useGetCurrentUserId } from '@/api/getCurrentUserId';
 import defaultGroupPic from '@/assets/images/defaultGroupPic.png';
 
 export default function GroupsScreen() {
   const router = useRouter();
-  const { data: currentUserId, error: currentUserError } = useGetCurrentUserId();
+  const { data: currentUserId } = useGetCurrentUserId();
   const [isImageLoading, setImageLoading] = useState(true);
 
-  const { data: groupsData, error, isLoading } = useGroupsList(currentUserId || null);
+  // Use default values to avoid undefined or null issues
+  const { data: groupsData = [], error, isLoading } = useGroupsList(currentUserId || null);
+  const groupIds = groupsData.map(group => group.groupid);
+  const { data: totalBalances = [], error: totalBalancesError, isLoading: totalBalancesLoading } = useGroupsTotalBalances(groupIds);
 
-  if (isLoading) {
+  // Create a mapping for group balances
+  const groupBalanceMap = useMemo(() => {
+    const map: { [key: string]: number } = {};
+    groupsData.forEach((group, index) => {
+      map[group.groupid] = totalBalances[index] || 0;
+    });
+    return map;
+  }, [groupsData, totalBalances]);
+
+  if (isLoading || totalBalancesLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator/>
+        <ActivityIndicator />
       </View>
     );
   }
 
-  if (error) {
+  if (error || totalBalancesError) {
     return <Text>Failed to load groups</Text>;
   }
 
@@ -37,34 +47,49 @@ export default function GroupsScreen() {
     };
   };
 
-  const renderItem = ({ item }: { item: Group }) => (
-    <Pressable style={styles.mainContainer} onPress={() => router.push({
-      pathname: `/(user)/groupDetails/group/${encodeURIComponent(item.groups.id)}`,
-      params: { name: item.groups.name },
-    })}>
-      {/* Left Container */}
-      <View style={styles.leftContainer}>
-        {/* Top Section */}
-        <View style={styles.topSection}>
-          <Text style={styles.groupName} adjustsFontSizeToFit numberOfLines={1} >{item.groups.name}</Text>
-        </View>
-        {/* Middle Section */}
-        <View>
-          <Text style={styles.amountText}>102,26 Kč</Text>
-        </View>
-      </View>
+  const renderItem = ({ item }: { item: Group }) => {
+    const totalBalance = groupBalanceMap[item.groupid] || 0;
 
-      {/* Right Container */}
-      <View style={styles.rightContainer}>
-        <Image
-            source={item.groups.avatar_url && !isImageLoading ? { uri: item.groups.avatar_url } : defaultGroupPic}
+    return (
+      <Pressable
+        style={styles.mainContainer}
+        onPress={() =>
+          router.push({
+            pathname: `/(user)/groupDetails/group/${encodeURIComponent(item.groups.id)}`,
+            params: { name: item.groups.name },
+          })
+        }
+      >
+        {/* Left Container */}
+        <View style={styles.leftContainer}>
+          {/* Top Section */}
+          <View style={styles.topSection}>
+            <Text style={styles.groupName} adjustsFontSizeToFit numberOfLines={1}>
+              {item.groups.name}
+            </Text>
+          </View>
+          {/* Middle Section */}
+          <View>
+            <Text style={styles.amountText}>{totalBalance.toFixed(2)} Kč</Text>
+          </View>
+        </View>
+
+        {/* Right Container */}
+        <View style={styles.rightContainer}>
+          <Image
+            source={
+              item.groups.avatar_url && !isImageLoading
+                ? { uri: item.groups.avatar_url }
+                : defaultGroupPic
+            }
             style={styles.image}
-            onLoadEnd={() => setImageLoading(false)} // Set loading to false once image loads
-            onError={() => setImageLoading(false)}  // Handle potential errors by stopping loading
+            onLoadEnd={() => setImageLoading(false)}
+            onError={() => setImageLoading(false)}
           />
-      </View>
-    </Pressable>
-  );
+        </View>
+      </Pressable>
+    );
+  };
 
   const handleCreateNewGroup = () => {
     router.push('/groupDetails/createGroup');
@@ -78,8 +103,8 @@ export default function GroupsScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>Your groups</Text>
       <FlatList
-        data={groupsData || []}
-        keyExtractor={(item) => item.groups.id} // Assuming 'id' is unique
+        data={groupsData}
+        keyExtractor={(item) => item.groups.id}
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContainer}
@@ -99,7 +124,7 @@ export default function GroupsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20, // Add padding around the container
+    padding: 20,
     backgroundColor: '#fff',
   },
   centered: {
@@ -115,7 +140,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   listContainer: {
-    paddingBottom: 100, // Add padding to avoid content being hidden behind buttons
+    paddingBottom: 100,
   },
   groupImage: {
     width: 100,
@@ -124,7 +149,7 @@ const styles = StyleSheet.create({
     marginRight: 15,
     resizeMode: 'cover',
     overflow: 'hidden',
-    flex : 2,
+    flex: 2,
   },
   itemContainer: {
     flexDirection: 'row',
@@ -132,19 +157,17 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     backgroundColor: '#D4F0DD',
     borderRadius: 10,
-    // Shadow for iOS
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
-    // Elevation for Android
     elevation: 3,
   },
   groupName: {
     fontSize: 30,
     fontWeight: '600',
     color: '#333',
-    textAlign: 'center', // Align text to the center
+    textAlign: 'center',
   },
   buttonContainer: {
     position: 'absolute',
@@ -160,7 +183,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
     width: '90%',
-    // Shadow for buttons
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
@@ -205,6 +227,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 8,
     color: '#4CAF50',
+    textAlign: 'center',
   },
   circleUser: {
     width: 24,

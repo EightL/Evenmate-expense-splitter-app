@@ -47,18 +47,22 @@ export default function FriendDetailScreen() {
       ),
     });
   }, [navigation]);
-
+  
+  const avatar_url = mateData?.avatar_url;
 
   const handleGetEven = () => {
+  
     router.push({
       pathname: `/friendDetails/getEvenMate`,
       params: {
         name: name,
         mateId: mateId,
         balance: balance,
+        avatar_url: avatar_url,
+        currentUserId: currentUserId,
       },
-    })
-  }
+    });
+  };
 
   const handleRemoveFriend = () => {
     Alert.alert(
