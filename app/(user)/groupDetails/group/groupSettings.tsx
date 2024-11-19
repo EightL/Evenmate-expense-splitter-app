@@ -29,12 +29,14 @@ import { useGroupInfo } from '@/api/groups';
 import defaultGroupPic from '@/assets/images/defaultGroupPic.png';
 import { supabase }  from '@/lib/supabase';
 import { v4 as uuidv4 } from 'uuid';
+import { fetchBlob, uploadGroupImage } from '@/api/profiles';
+
 
 export default function groupSettings() {
   const queryClient = useQueryClient();
   const router = useRouter();
   const navigation = useNavigation();
-  const [selectedGroupImage, setSelectedGroupImage] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isGroupImageLoading, setGroupImageLoading] = useState(false);
   const [isGroupImageUploading, setGroupImageUploading] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -52,10 +54,6 @@ export default function groupSettings() {
     }
   }, [groupData]);
 
-  const handleCopy = async () => {
-    await Clipboard.setStringAsync(groupId);
-    Alert.alert('Copied!', 'Group ID has been copied to your clipboard.');
-  };
 
   const handleGroupImageChange = async () => {
     // Request permission to access the media library
@@ -76,36 +74,15 @@ export default function groupSettings() {
   
     // Check if the user canceled the picker or if assets are available
     if (!result.canceled && result.assets && result.assets.length > 0) {
-      setSelectedGroupImage(result.assets[0].uri);
+      setSelectedImage(result.assets[0].uri);
     } else {
       Alert.alert("No Image Selected", "Please select an image to upload.");
     }
   };
 
-  const fetchBlob = async (uri: string): Promise<Uint8Array> => {
-    return new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.onload = function () {
-        const arrayBuffer = xhr.response;
-        if (arrayBuffer) {
-          const uint8Array = new Uint8Array(arrayBuffer);
-          resolve(uint8Array);
-        } else {
-          reject(new Error('Failed to fetch blob'));
-        }
-      };
-      xhr.onerror = function (e) {
-        console.error('XHR Error:', e);
-        reject(new TypeError('Network request failed'));
-      };
-      xhr.responseType = 'arraybuffer';
-      xhr.open('GET', uri, true);
-      xhr.send(null);
-    });
-  };
 
   const uploadImage = async (): Promise<string | null> => {
-    if (!selectedGroupImage) {
+    if (!selectedImage) {
       Alert.alert("No Image Selected", "Please select an image first.");
       return null;
     }
@@ -113,11 +90,6 @@ export default function groupSettings() {
     try {
       setLoading(true);
       console.log('Starting image upload...');
-
-      const uint8Array = await fetchBlob(selectedGroupImage);
-      if (uint8Array.length === 0) {
-        throw new Error('Blob is empty.');
-      }
 
       // Ensure that group and group.id exist
       if (!groupData || !groupData.id) {
@@ -127,33 +99,9 @@ export default function groupSettings() {
       const fileName = `group-images/${groupData.id}/group_${uuidv4()}.jpg`;
       console.log('Uploading to Supabase:', fileName);
 
-      const { data, error: uploadError } = await supabase
-        .storage
-        .from('group-images')
-        .upload(fileName, uint8Array, {
-          cacheControl: '3600',
-          upsert: true,
-          contentType: 'image/jpeg',
-        });
+      const publicURL = await uploadGroupImage(fileName, currentUserId, selectedImage);
 
-      if (uploadError) {
-        console.error('Upload Error:', uploadError);
-        throw uploadError;
-      }
-
-      console.log('Upload successful:', data);
-
-      const { data: publicData, error: urlError } = supabase
-        .storage
-        .from('group-images')
-        .getPublicUrl(data.path);
-
-      if (urlError) {
-        throw new Error('Failed to retrieve public URL.');
-      }
-      
-      console.log('Public URL retrieved:', publicData.publicUrl);
-      return publicData.publicUrl;
+      return publicURL;
     } catch (err: any) {
       console.error('Error uploading image:', err);
       Alert.alert('Error', err.message || 'An unknown error occurred.');
@@ -210,8 +158,8 @@ const handleSaveDetails = async () => {
     let imageUrl = groupData.avatar_url || ''; // Assuming groupData has avatar_url
     console.log('Initial imageUrl:', imageUrl);
 
-    if (selectedGroupImage) {
-      console.log('Selected group image URI:', selectedGroupImage);
+    if (selectedImage) {
+      console.log('Selected group image URI:', selectedImage);
 
       const uploadedURL = await uploadImage();
       console.log('Uploaded group image URL:', uploadedURL);
@@ -265,8 +213,8 @@ const handleSaveDetails = async () => {
           <Pressable onPress={handleGroupImageChange}>
             <Image
               source={
-                selectedGroupImage
-                  ? { uri: selectedGroupImage }
+                selectedImage
+                  ? { uri: selectedImage }
                   : groupData?.avatar_url
                   ? { uri: groupData.avatar_url }
                   : defaultGroupPic

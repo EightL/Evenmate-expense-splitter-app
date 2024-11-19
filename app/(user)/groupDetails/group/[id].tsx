@@ -13,6 +13,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useGetCurrentUserId } from '@/api/getCurrentUserId';
 import { useUserInfo } from '@/api/profiles';
 import defaultProfilePic from '@/assets/images/defaultProfilePic.png';
+import { MaterialIcons } from '@expo/vector-icons';
+import { useInvolvedPeople } from '@/api/involvedUsers';
 
 export default function GroupDetailScreen() {
   const THRESHOLD = 0.01; // Define the threshold for treating values close to zero as zero
@@ -26,7 +28,7 @@ export default function GroupDetailScreen() {
 
   const { data: currentUserId } = useGetCurrentUserId();
   const { data: currentUserData } = useUserInfo(currentUserId);
-
+  
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
   };
@@ -64,9 +66,12 @@ export default function GroupDetailScreen() {
     });
   };
 
-  const handleAddNewExpense = () => {
+  const handleToDo = () => {
     router.push({
-      pathname: '/expenseDetails',
+      pathname: '/groupDetails/group/groupTodo',
+      params: {
+        groupId,
+      },
     });
   };
 
@@ -127,13 +132,14 @@ export default function GroupDetailScreen() {
     paid_by: string;
     involved_people : number;
     icon: string;
+
   };
 
   const sortedExpensesData = expensesData?.slice().sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   const renderExpenses = ({ item }: { item: Expense }) => {
     const paidByUsername = userIdToUsernameMap.get(item.paid_by) || 'Unknown';
-
+    const isUserInvolved = null;
     // Convert the created_at timestamp to a Date object
     const createdAtDate = new Date(item.created_at);
     const isPaidByCurrentUser = item.paid_by === currentUserId;
@@ -216,13 +222,13 @@ export default function GroupDetailScreen() {
         <View style={styles.leftContainer}>
           {/* Group Name Container */}
           <View style={styles.groupNameContainer}>
-            <Text style={styles.groupName}>Italy Trip</Text>
+            <Text style={styles.groupName}>{name}</Text>
           </View>
           {/* Buttons Container */}
           <View style={styles.buttonsContainer}>
-            <Pressable style={styles.button} onPress={handleAddNewExpense}>
-              <FontAwesome name="plus" size={24} color="black" />
-              <Text style={styles.buttonText}>Expense</Text>
+            <Pressable style={styles.button} onPress={handleToDo}>
+              <MaterialIcons name="add-task" size={24} color="black" />
+              <Text style={styles.buttonText}>To-Do</Text>
             </Pressable>
             <Pressable style={styles.button} onPress={handleGetEven}>
               <FontAwesome name="bars" size={24} color="black" />
@@ -278,7 +284,6 @@ export default function GroupDetailScreen() {
           <Text style={styles.balanceText}>No balance details yet</Text>
         )}
       </Pressable>
-
       <Text style={styles.sectionTitle}>Expenses</Text>
       <FlatList
         data={sortedExpensesData}

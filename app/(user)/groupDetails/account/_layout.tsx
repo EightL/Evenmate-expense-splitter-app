@@ -16,7 +16,7 @@ export default function ExpenseStack() {
         name="index"
         options={{
           title: 'Account',
-          
+          headerTitleAlign: 'center', // Center the title
           headerRight: () => (
             <Pressable
               onPress={() => router.push('/groupDetails/account/accountSettings')} // Wrap in an anonymous function

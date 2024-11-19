@@ -1,17 +1,18 @@
 // app/(auth)/sign-up.tsx
 import { View, Text, TextInput, StyleSheet, Alert, TouchableWithoutFeedback, Keyboard } from 'react-native';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Button from '../../components/Button';
-import Colors from '../../constants/Colors';
 import { Link, Stack } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 
 const SignUpScreen = () => {
+  // State variables
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState(''); // New state for username
   const [loading, setLoading] = useState(false);
 
+  // Sign up with email and password
   async function signUpWithEmail() {
     setLoading(true);
     const { error } = await supabase.auth.signUp({
@@ -29,12 +30,14 @@ const SignUpScreen = () => {
   }
 
   return (
+    // Dismiss keyboard when tapping outside of input fields
     <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss(); }} accessible={false}>
       <View style={styles.container}>
         <Stack.Screen options={{ title: 'Sign up' }} />
 
         <Text style={styles.title}>Create an Account</Text>
 
+        {/* Username input */}
         <Text style={styles.label}>Username</Text>
         <TextInput
           value={username}
@@ -43,6 +46,7 @@ const SignUpScreen = () => {
           style={styles.input}
         />
 
+        {/* Email input */}
         <Text style={styles.label}>Email</Text>
         <TextInput
           value={email}
@@ -51,6 +55,7 @@ const SignUpScreen = () => {
           style={styles.input}
         />
 
+        {/* Password input */}
         <Text style={styles.label}>Password</Text>
         <TextInput
           value={password}
@@ -60,10 +65,11 @@ const SignUpScreen = () => {
           secureTextEntry
         />
 
+        {/* Sign up button */}
         <Button onPress={signUpWithEmail} disabled={loading} text="Create account" />
+        <View style={styles.spacer} />
 
-        <View style={styles.spacer} /> {/* Spacer to push the link to the bottom */}
-
+        {/* Bottom text */}
         <View style={styles.bottomContainer}>
           <Text style={styles.textnormal}>Already have an account?</Text>
           <Link href="/sign-in" style={styles.textButton}>
@@ -119,7 +125,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20, // Optional: Add some margin at the bottom
+    marginBottom: 20,
   },
 });
 

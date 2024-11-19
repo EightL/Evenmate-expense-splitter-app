@@ -5,6 +5,7 @@ import { useGroupsList, useGroupsTotalBalances } from '@/api/groups';
 import { useGetCurrentUserId } from '@/api/getCurrentUserId';
 import defaultGroupPic from '@/assets/images/defaultGroupPic.png';
 import { useQueryClient } from '@tanstack/react-query';
+import { Platform } from 'react-native';
 
 export default function GroupsScreen() {
   const THRESHOLD = 0.01; // Define the threshold for treating values close to zero as zero
@@ -74,7 +75,7 @@ export default function GroupsScreen() {
         }
       >
         {/* Left Container */}
-        <View style={styles.leftContainer}>
+        <View style={Platform.OS === 'android' ? styles.leftContainerAndroid : styles.leftContainer}>
           {/* Top Section */}
           <View style={styles.topSection}>
             <Text style={styles.groupName} adjustsFontSizeToFit numberOfLines={1}>
@@ -180,7 +181,7 @@ const styles = StyleSheet.create({
   groupName: {
     fontSize: 30,
     fontWeight: '600',
-    color: '#333',
+    color: '#FFF',
     textAlign: 'center',
   },
   buttonContainer: {
@@ -212,24 +213,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row-reverse',
     backgroundColor: '#fff',
     borderRadius: 15,
-    alignItems: 'center',
-    justifyContent: 'space-between',
     marginBottom: 15,
   },
   leftContainer: {
-    flex: 2,
-    justifyContent: 'space-between',
+    flex: 1,
+  },
+  leftContainerAndroid: {
+    flex: 0.82,
   },
   rightContainer: {
-    flex: 2,
+    flex: 1,
   },
   topSection: {
-    marginBottom: 8,
-    backgroundColor: '#D4F0DD',
+    marginBottom: 10,
+    backgroundColor: '#4CAF50',
     borderRadius: 8,
     padding: 8,
+    flex : 3,
   },
   bottomSection: {
+    flex : 1,
     flexDirection: 'row',
     alignItems: 'center',
   },

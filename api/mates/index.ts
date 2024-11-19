@@ -29,7 +29,6 @@ export const useMatesList = (currentUserId: string | null) => {
         throw new Error(error.message);
       }
 
-      console.log("DATA FROM MATELIST", data);
       return data;
     },
     refetchOnMount: 'always', // Ensures query refetches on each mount

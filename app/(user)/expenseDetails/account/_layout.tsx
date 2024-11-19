@@ -1,10 +1,8 @@
 // app/(user)/friendDetails/_layout.tsx
-import React from 'react';
 import { Pressable, StyleSheet, Image } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { FontAwesome, Ionicons } from '@expo/vector-icons';
-import { handleLogout, handleAccount } from '@/lib/auth'; // Import the functions
-
+// Import the Evenmate logo
 import evenmatelogo from '@/assets/images/Evenmatelogo_1.png';
 
 export default function ExpenseStack() {
@@ -16,10 +14,10 @@ export default function ExpenseStack() {
         name="index"
         options={{
           title: 'Account',
-          
+          headerTitleAlign: 'center', // Center the title
           headerRight: () => (
             <Pressable
-              onPress={() => router.push('/expenseDetails/account/accountSettings')} // Wrap in an anonymous function
+              onPress={() => router.push('/expenseDetails/account/accountSettings')}
               style={({ pressed }) => [
                 styles.accountButton,
                 pressed && styles.pressedButton,
@@ -30,7 +28,7 @@ export default function ExpenseStack() {
               <Ionicons
                 name="settings"
                 size={25}
-                color="#000" // Blue color for the account icon
+                color="#000"
               />
             </Pressable>
           ),
@@ -47,7 +45,7 @@ export default function ExpenseStack() {
               <FontAwesome
                 name="arrow-left"
                 size={25}
-                color="#007AFF" // Blue color for back button
+                color="#007AFF"
               />
             </Pressable>
           ),
@@ -73,7 +71,7 @@ export default function ExpenseStack() {
             <FontAwesome
             name="arrow-left"
             size={25}
-            color="#007AFF" // Blue color for back button
+            color="#007AFF"
             />
         </Pressable>
         ),
@@ -84,15 +82,15 @@ export default function ExpenseStack() {
 
 const styles = StyleSheet.create({
   logoutButton: {
-    marginLeft: 15, // Adds spacing from the left edge
-    padding: 5, // Increases the touchable area
+    marginLeft: 15,
+    padding: 5,
   },
   accountButton: {
-    marginRight: 15, // Adds spacing from the right edge
+    marginRight: 15,
     padding: 5,
   },
   pressedButton: {
-    opacity: 0.5, // Provides visual feedback when pressed
+    opacity: 0.5, 
   },
   evenmatelogo: {
     width: 33,
@@ -102,7 +100,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   backButton: {
-    marginLeft: 15, // Adds spacing from the left edge
-    padding: 5, // Increases the touchable area
+    marginLeft: 15,
+    padding: 5,
   },
 });

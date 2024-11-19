@@ -22,12 +22,12 @@ export const useExpenseInfo = (expenseId: string | null) => {
 }
 
 export const deleteExpense = async (id: string) => {
-  const { error: error2 } = await supabase
+  const { error } = await supabase
   .from('Rel_owesFor')
   .delete()
   .eq('expenseid', id)
 
-  const { error } = await supabase
+  const { error: error2 } = await supabase
   .from('Expenses')
   .delete()
   .eq('id', id)

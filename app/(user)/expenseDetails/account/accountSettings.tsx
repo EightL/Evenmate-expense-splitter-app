@@ -5,7 +5,7 @@ import { Buffer } from 'buffer';
 // @ts-ignore
 global.Buffer = Buffer;
 
-import React, { useEffect, useRef, useState, useLayoutEffect } from 'react';
+import { useEffect, useRef, useState, useLayoutEffect } from 'react';
 import {
   View,
   Text,
@@ -24,16 +24,21 @@ import { useRouter } from 'expo-router';
 import { useGetCurrentUserId } from '@/api/getCurrentUserId';
 import * as ImagePicker from 'expo-image-picker';
 import defaultProfilePic from '@/assets/images/defaultProfilePic.png';
+import { fetchBlob, uploadImageToStorage } from '@/api/profiles';
 
-import { v4 as uuidv4 } from 'uuid'; // Import the uuid library correctly
+
+import { v4 as uuidv4 } from 'uuid'; // Import the UUID generator
 
 const AccountSettings = () => {
   const router = useRouter();
+  // State variables
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const { data: currentUserId, error } = useGetCurrentUserId();
   const [loading, setLoading] = useState(false);
   const [isImageLoading, setImageLoading] = useState(true);
+  // Get the current user ID
+  const { data: currentUserId, error } = useGetCurrentUserId();
 
+  // Fetch the user's profile data
   const {
     data: profile,
     isLoading: isProfileLoading,
@@ -41,7 +46,7 @@ const AccountSettings = () => {
     refetch: refetchProfile,
   } = useUserInfo(currentUserId || null);
 
-
+  // Initialize the user state
   const [user, setUser] = useState({
     username: '',
     bankAccount: '',
@@ -49,6 +54,7 @@ const AccountSettings = () => {
     avatar_url: '',
   });
 
+  // Create a reference to the original user data
   const originalUserRef = useRef({
     username: '',
     bankAccount: '',
@@ -56,6 +62,7 @@ const AccountSettings = () => {
     avatar_url: '',
   });
 
+  // Update the user state when the profile data changes
   useEffect(() => {
     if (profile) {
       setUser({
@@ -73,14 +80,17 @@ const AccountSettings = () => {
     }
   }, [profile]);
 
+  // Handle changes to the user's name
   const handleNameChange = (text: string) => {
     setUser((prev) => ({ ...prev, username: text }));
   };
 
+  // Handle changes to the user's bank account number
   const handleBankAccountChange = (text: string) => {
     setUser((prev) => ({ ...prev, bankAccount: text }));
   };
 
+  // Handle the image picker
   const pickImage = async () => {
     // Request permission to access the media library
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -106,30 +116,15 @@ const AccountSettings = () => {
     }
   };
 
+  // Check if the user has made any changes
   const isEdited =
     user.username !== originalUserRef.current.username ||
     user.bankAccount !== originalUserRef.current.bankAccount ||
     selectedImage !== null;
 
-  const fetchBlob = async (uri: string): Promise<Uint8Array> => {
-    return new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.onload = function () {
-        const arrayBuffer = xhr.response;
-        const uint8Array = new Uint8Array(arrayBuffer);
-        resolve(uint8Array);
-      };
-      xhr.onerror = function (e) {
-        console.error('XHR Error:', e);
-        reject(new TypeError('Network request failed'));
-      };
-      xhr.responseType = 'arraybuffer';
-      xhr.open('GET', uri, true);
-      xhr.send(null);
-    });
-  };
 
-  const uploadImage = async (): Promise<string | null> => {
+  // Upload the image to Supabase
+  const uploadImage = async () => {
     if (!selectedImage) {
       Alert.alert("No Image Selected", "Please select an image first.");
       return null;
@@ -139,37 +134,18 @@ const AccountSettings = () => {
       setLoading(true);
       console.log('Starting image upload...');
   
-      const uint8Array = await fetchBlob(selectedImage);
-      if (uint8Array.length === 0) {
-        throw new Error('Blob is empty.');
-      }
-  
+      // Generate a unique file name
       const fileName = `avatars/${currentUserId}/profile_${uuidv4()}.jpg`;
       console.log('Uploading to Supabase:', fileName);
   
-      const { data, error: uploadError } = await supabase
-        .storage
-        .from('avatars')
-        .upload(fileName, uint8Array, {
-          cacheControl: '3600',
-          upsert: true,
-          contentType: 'image/jpeg',
-        });
-  
-      if (uploadError) {
-        console.error('Upload Error:', uploadError);
-        throw uploadError;
-      }
-  
-      console.log('Upload successful:', data);
-  
-      // Log the data.path to verify the path
-      console.log('Uploaded file path:', data.path);
-  
-      const publicURL = `https://fcxvtpbbexwjimojbbcy.supabase.co/storage/v1/object/public/avatars/${data.path}`;
+      const publicURL = await uploadImageToStorage(fileName, currentUserId, selectedImage);
 
-      
-      console.log('Public URL retrieved:', publicURL);
+      if (!publicURL) {
+        throw new Error('Failed to retrieve public URL after upload.');
+      }
+
+      console.log('Image uploaded successfully:', publicURL);
+
       return publicURL;
     } catch (err: any) {
       console.error('Error uploading image:', err);
@@ -180,6 +156,7 @@ const AccountSettings = () => {
     }
   };
 
+  // Save the user's details
   const handleSaveDetails = async () => {
     try {
       setLoading(true);
@@ -189,7 +166,8 @@ const AccountSettings = () => {
   
       if (selectedImage) {
         console.log('Selected image URI:', selectedImage);
-  
+        
+        // Upload the image and get the URL
         const uploadedURL = await uploadImage();
         if (uploadedURL) {
           imageUrl = uploadedURL;
@@ -200,7 +178,8 @@ const AccountSettings = () => {
       }
   
       console.log('Updating profile with imageUrl:', imageUrl);
-  
+      
+      // Update the user's profile
       await useUpdateProfile({
         id: profile.id,
         username: user.username,
@@ -218,6 +197,7 @@ const AccountSettings = () => {
     }
   };
 
+  // Handle user logout
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
@@ -250,6 +230,7 @@ const AccountSettings = () => {
         <Text style={styles.mainHeading}>Edit account info</Text>
       </View>
   
+      {/*/ Display the user's name and bank account number*/}
       <View style={styles.container2}>
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Name:</Text>
@@ -272,7 +253,8 @@ const AccountSettings = () => {
             placeholderTextColor="#999"
           />
         </View>
-  
+
+        {/* Display the user's profile image */}
         <View style={styles.headerContainer}>
           <Pressable onPress={pickImage}>
             <Image
@@ -285,6 +267,7 @@ const AccountSettings = () => {
           <Text style={styles.pfpheading}>Profile picture:</Text>
         </View>
   
+        {/* Display the save button */}
         <Pressable
           style={[
             styles.saveButton,
@@ -295,14 +278,15 @@ const AccountSettings = () => {
           onPress={handleSaveDetails}
           disabled={!isEdited}
         >
+
           <Text style={styles.buttonText}>Save Details</Text>
         </Pressable>
-      </View>
-      <View style={{flex: 1}}/>
-      <Pressable onPress={handleLogout}>
-        <Text style={styles.logoutText}>Log out</Text>
-      </Pressable>
-    </View>
+        </View>
+        <View style={{flex: 1}}/>
+          <Pressable onPress={handleLogout}>
+            <Text style={styles.logoutText}>Log out</Text>
+          </Pressable>
+        </View>
     </TouchableWithoutFeedback>
   );
 };
@@ -317,10 +301,10 @@ const styles = StyleSheet.create({
       borderRadius: 15,
       
       
-      marginBottom: 20, // Add margin below the container
+      marginBottom: 20,
     },
     headerContainer: {
-      flexDirection: 'row-reverse', // Reverse the order of elements
+      flexDirection: 'row-reverse', 
       marginBottom: 20,
       
     },
@@ -359,7 +343,7 @@ const styles = StyleSheet.create({
       paddingHorizontal: 12,
       borderWidth: 1,
       borderColor: '#4CAF50',
-      borderRadius: 15, // Rounded corners
+      borderRadius: 15,
       backgroundColor: '#D4F0DD',
       color: '#333',
       shadowColor: '#000',
@@ -376,7 +360,7 @@ const styles = StyleSheet.create({
       resizeMode: 'cover',
       overflow: 'hidden',
       borderColor: '#4CAF50',
-      borderWidth: 2, // Adds a border similar to user group tags
+      borderWidth: 2,
     },
     evenmatelogo: {
       width: 33,
@@ -401,7 +385,6 @@ const styles = StyleSheet.create({
       fontSize: 20,
       fontWeight: '600',
       textAlign: 'center',
-      // i want it to be at the bottom of the screen
     },
     errorText: {
       color: 'red',

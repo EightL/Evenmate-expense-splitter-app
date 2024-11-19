@@ -41,6 +41,7 @@ export default function UserLayout() {
         name="[id]"
         options={{
           title: 'Groups',
+          headerTitleAlign: 'center', // Center the title
           headerLeft: () => (
             <Pressable
               onPress={handleGoBack}
@@ -96,9 +97,24 @@ export default function UserLayout() {
         title: 'Group Overview',
       }}/>
       <Stack.Screen
+      name="groupSettings"
+      options={{
+        title: 'Group Settings',
+      }}/>
+      <Stack.Screen
       name="getEvenMate"
       options={{
         title: 'Get Even',
+      }}/>
+      <Stack.Screen
+      name="groupTodo"
+      options={{
+        title: 'To-Do',
+      }}/>
+      <Stack.Screen
+      name="todoDetails"
+      options={{
+        headerShown: false,
       }}/>
       {/* Other screens */}
     </Stack>

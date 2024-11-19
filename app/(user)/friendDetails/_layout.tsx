@@ -1,10 +1,12 @@
 // app/(user)/friendDetails/_layout.tsx
 import React from 'react';
-import { Pressable, Alert, StyleSheet } from 'react-native';
+import { Pressable, Alert, StyleSheet, Image } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import { supabase } from '@/lib/supabase'; // Ensure this path is correct
 import { handleLogout, handleAccount } from '@/lib/auth'; // Import the functions
+import evenmatelogo from '@/assets/images/Evenmatelogo_1.png'; // Import the Evenmate logo
+import { styles } from '@/constants/styles';
 
 export default function MatesStack() {
   const router = useRouter(); // Initialize the router
@@ -15,22 +17,9 @@ export default function MatesStack() {
         name="index"
         options={{
           title: 'Mates',
+          headerTitleAlign: 'center', // Center the title
           headerLeft: () => (
-            <Pressable
-              onPress={() => handleLogout(router)} // Use the handleLogout function
-              style={({ pressed }) => [
-                styles.logoutButton,
-                pressed && styles.pressedButton,
-              ]}
-              accessibilityLabel="Logout"
-              accessibilityRole="button"
-            >
-              <FontAwesome
-                name="sign-out"
-                size={25}
-                color="#000" // Red color to signify logout
-              />
-            </Pressable>
+            <Image source={evenmatelogo} style={styles.evenmatelogo}></Image>
           ),
           headerRight: () => (
             <Pressable
@@ -45,7 +34,7 @@ export default function MatesStack() {
               <FontAwesome
                 name="user"
                 size={25}
-                color="#000" // Blue color for the account icon
+                color="#000"
               />
             </Pressable>
           ),
@@ -77,21 +66,3 @@ export default function MatesStack() {
     </Stack>
   );
 }
-
-const styles = StyleSheet.create({
-  logoutButton: {
-    marginLeft: 15, // Adds spacing from the left edge
-    padding: 5, // Increases the touchable area
-  },
-  accountButton: {
-    marginRight: 15, // Adds spacing from the right edge
-    padding: 5,
-  },
-  pressedButton: {
-    opacity: 0.5, // Provides visual feedback when pressed
-  },
-  backButton: {
-    marginLeft: 15, // Adds spacing from the left edge
-    padding: 5, // Increases the touchable area
-  },
-});

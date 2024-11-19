@@ -14,7 +14,6 @@ import {
   UIManager,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import Colors from '@/constants/Colors';
 import { useMatesList } from '@/api/mates';
 import { useGroupsList, useGroupMembers } from '@/api/groups';
 import { supabase } from '@/lib/supabase';
@@ -49,22 +48,6 @@ export default function MatesScreen() {
     }
   }, []);
 
-//   // Fetch mates data
-//   const {
-//     data: matesData,
-//     error: matesError,
-//     isLoading: isLoadingMates,
-//     refetch: refetchMates,
-//   } = useMatesList(currentUserId);
-
-//   // Fetch groups data
-//   const {
-//     data: groupsData,
-//     error: groupsError,
-//     isLoading: isLoadingGroups,
-//     refetch: refetchGroups,
-//   } = useGroupsList(currentUserId);
-
   // Handle pull-to-refresh
   const onRefresh = () => {
     setRefreshing(true);
@@ -75,20 +58,6 @@ export default function MatesScreen() {
     }
     setRefreshing(false);
   };
-
-
-//   if (currentUserError || matesError || groupsError) {
-//     return (
-//       <View style={styles.centered}>
-//         <Text style={styles.errorText}>
-//           {currentUserError?.message ||
-//             matesError?.message ||
-//             groupsError?.message ||
-//             'Failed to load data.'}
-//         </Text>
-//       </View>
-//     );
-//   }
 
   // Toggle selection for mates
   const toggleMateSelection = (mateId: string) => {
@@ -350,12 +319,10 @@ const styles = StyleSheet.create({
         marginBottom: 15,
         backgroundColor: '#D4F0DD',
         borderRadius: 10,
-        // Shadow for iOS
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 3,
-        // Elevation for Android
         elevation: 3,
         alignItems: 'center',
       },
@@ -371,12 +338,10 @@ const styles = StyleSheet.create({
         marginBottom: 15,
         backgroundColor: '#D4F0DD',
         borderRadius: 10,
-        // Shadow for iOS
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 3,
-        // Elevation for Android
         elevation: 3,
       },
       expandedGroupContainer: {

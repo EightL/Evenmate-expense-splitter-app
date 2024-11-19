@@ -76,7 +76,7 @@ export default function MatesScreen() {
       </Pressable>
     );
   };
-  console.log("Matesdata", matesData);
+  
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Balance: {Number(displayBalance) >= 0 ? (

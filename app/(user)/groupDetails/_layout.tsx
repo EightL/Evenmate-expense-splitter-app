@@ -1,15 +1,12 @@
-// app/(user)/friendDetails/_layout.tsx
 import React from 'react';
-import { Pressable, Alert, StyleSheet } from 'react-native';
+import { Pressable, Image} from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
-import { supabase } from '@/lib/supabase'; // Ensure this path is correct
-import { handleLogout, handleAccount } from '@/lib/auth';
+import { styles } from '@/constants/styles';
+import evenmatelogo from '@/assets/images/Evenmatelogo_1.png'; // Import the Evenmate logo
 
 export default function GroupsStack() {
-  const router = useRouter(); // Initialize the router
-
-
+  const router = useRouter();
 
   return (
     <Stack>
@@ -17,26 +14,13 @@ export default function GroupsStack() {
         name="index"
         options={{
           title: 'Groups',
+          headerTitleAlign: 'center',
           headerLeft: () => (
-            <Pressable
-              onPress={() => handleLogout(router)} // Use the handleLogout function
-              style={({ pressed }) => [
-                styles.logoutButton,
-                pressed && styles.pressedButton,
-              ]}
-              accessibilityLabel="Logout"
-              accessibilityRole="button"
-            >
-              <FontAwesome
-                name="sign-out"
-                size={25}
-                color="#000" // Red color to signify logout
-              />
-            </Pressable>
+            <Image source={evenmatelogo} style={styles.evenmatelogo}></Image>
           ),
           headerRight: () => (
             <Pressable
-              onPress={() => router.push('/groupDetails/account')} // Use the router to navigate to the account screen
+              onPress={() => router.push('/groupDetails/account')}
               style={({ pressed }) => [
                 styles.accountButton,
                 pressed && styles.pressedButton,
@@ -47,48 +31,38 @@ export default function GroupsStack() {
               <FontAwesome
                 name="user"
                 size={25}
-                color="#000" // Blue color for the account icon
+                color="#000"
               />
             </Pressable>
           ),
         }}
       />
-        <Stack.Screen
+
+      <Stack.Screen
         name="group"
         options={{
           headerShown: false,
-        }}/>
-        <Stack.Screen
+        }}
+      />
+      <Stack.Screen
         name="createGroup"
         options={{
           title: 'Create Group',
-        }}/>
-        <Stack.Screen
+        }}
+      />
+      <Stack.Screen
         name="joinGroup"
         options={{
           title: 'Join Group',
-        }}/>
-        <Stack.Screen
+        }}
+      />
+      <Stack.Screen
         name="account"
         options={{
           headerShown : false,
           title: 'Account',
-        }}/>
-
+        }}
+      />
     </Stack>
   );
 }
-
-const styles = StyleSheet.create({
-  logoutButton: {
-    marginLeft: 15, // Adds spacing from the left edge
-    padding: 5, // Increases the touchable area
-  },
-  accountButton: {
-    marginRight: 15, // Adds spacing from the right edge
-    padding: 5,
-  },
-  pressedButton: {
-    opacity: 0.5, // Provides visual feedback when pressed
-  },
-});
