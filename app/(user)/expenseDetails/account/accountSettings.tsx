@@ -16,7 +16,8 @@ import {
   Image,
   ActivityIndicator,
   Keyboard,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
+  TouchableOpacity,
 } from 'react-native';
 import { useUserInfo, useUpdateProfile } from '@/api/profiles';
 import { supabase } from '@/lib/supabase';
@@ -256,19 +257,19 @@ const AccountSettings = () => {
 
         {/* Display the user's profile image */}
         <View style={styles.headerContainer}>
-          <Pressable onPress={pickImage}>
+          <TouchableOpacity onPress={pickImage}>
             <Image
                 source={profile.avatar_url && !isImageLoading ? { uri: profile.avatar_url } : defaultProfilePic}
                 style={styles.profileImage}
                 onLoadEnd={() => setImageLoading(false)} // Set loading to false once image loads
                 onError={() => setImageLoading(false)}  // Handle potential errors by stopping loading
             />
-          </Pressable>
+          </TouchableOpacity>
           <Text style={styles.pfpheading}>Profile picture:</Text>
         </View>
   
         {/* Display the save button */}
-        <Pressable
+        <TouchableOpacity
           style={[
             styles.saveButton,
             {
@@ -280,12 +281,12 @@ const AccountSettings = () => {
         >
 
           <Text style={styles.buttonText}>Save Details</Text>
-        </Pressable>
+        </TouchableOpacity>
         </View>
         <View style={{flex: 1}}/>
-          <Pressable onPress={handleLogout}>
+          <TouchableOpacity onPress={handleLogout}>
             <Text style={styles.logoutText}>Log out</Text>
-          </Pressable>
+          </TouchableOpacity>
         </View>
     </TouchableWithoutFeedback>
   );

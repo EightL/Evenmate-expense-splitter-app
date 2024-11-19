@@ -10,6 +10,7 @@ import {
   Image,
   Dimensions,
   Modal,
+  TouchableOpacity,
 } from 'react-native';
 import { useUserInfo, useUpdateProfile } from '@/api/profiles';
 import { supabase } from '@/lib/supabase';
@@ -74,7 +75,7 @@ const AccountScreen = () => {
 
   // Render group item
   const renderGroupItem = (item: GroupItem) => (
-    <Pressable
+    <TouchableOpacity
       key={item.id}
       style={styles.groupBox}
       onPress={() =>
@@ -88,7 +89,7 @@ const AccountScreen = () => {
       }
     >
       <Text style={styles.groupText}>{item.name}</Text>
-    </Pressable>
+    </TouchableOpacity>
   );
 
   if (isProfileLoading) {
@@ -127,17 +128,17 @@ const AccountScreen = () => {
       {/* Bank account */}
       <View style={styles.infoRow}>
         <Text style={styles.label}>Bank account:</Text>
-        <Pressable style={styles.infoBox} onPress={() => copyToClipboard(profile.bank_account)}>
+        <TouchableOpacity style={styles.infoBox} onPress={() => copyToClipboard(profile.bank_account)}>
           <Text style={styles.infoText}>{profile.bank_account}</Text>
-        </Pressable>
+        </TouchableOpacity>
       </View>
 
       {/* Email */}
       <View style={styles.infoRow}>
         <Text style={styles.label}>Email:</Text>
-        <Pressable style={styles.infoBox} onPress={() => copyToClipboard(profile.email)}>
+        <TouchableOpacity style={styles.infoBox} onPress={() => copyToClipboard(profile.email)}>
           <Text style={styles.infoText}>{profile.email}</Text>
-        </Pressable>
+        </TouchableOpacity>
       </View>
 
       {/* Your Groups */}
@@ -147,9 +148,9 @@ const AccountScreen = () => {
       </View>
       <View style={styles.infoRowQR}>
         <Text style={styles.labelQrcode}>QR Code:</Text>
-        <Pressable onPress={() => displayQRinfo()}>
+        <TouchableOpacity onPress={() => displayQRinfo()}>
           <Ionicons name="information-circle-outline" size={30} color="#000" />
-        </Pressable>
+        </TouchableOpacity>
       </View>
       {qrdata ? (
           <View style={styles.qrContainer}>
@@ -179,9 +180,9 @@ const AccountScreen = () => {
             <Text style={styles.modalText}>
               This QR code contains your email address. It can be used to add you as a friend or group member.
             </Text>
-            <Pressable style={styles.closeButton} onPress={closeModal}>
+            <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
               <Text style={styles.closeButtonText}>Close</Text>
-            </Pressable>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>

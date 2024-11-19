@@ -1,6 +1,6 @@
 // app/(user)/friendDetails/index.tsx
 import React, { useMemo, useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, Pressable, ActivityIndicator, Alert, RefreshControl, Image } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Pressable, ActivityIndicator, Alert, RefreshControl, Image, TouchableOpacity } from 'react-native';
 import { Link, useRouter, useLocalSearchParams } from 'expo-router';
 import { useMatesList } from '@/api/mates';
 import { supabase } from '@/lib/supabase';
@@ -40,7 +40,7 @@ export default function MatesScreen() {
     const normalizedBalance = Math.abs(item.balance) < THRESHOLD ? 0 : item.balance;
 
     return (
-      <Pressable
+      <TouchableOpacity
         style={styles.shadowWrapper}
         onPress={() =>
           router.push({
@@ -73,7 +73,7 @@ export default function MatesScreen() {
             </Text>
           </View>
         </View>
-      </Pressable>
+      </TouchableOpacity>
     );
   };
   
@@ -100,9 +100,9 @@ export default function MatesScreen() {
       ) : (
           <Text style={styles.lessTitle}>Looks like you have no mates! Click 'Add new mate' and start getting even!</Text>
       )}
-      <Pressable style={styles.button} onPress={handleAddNewMate}>
+      <TouchableOpacity style={styles.button} onPress={handleAddNewMate}>
         <Text style={styles.buttonText}>Add new mate</Text>
-      </Pressable>
+      </TouchableOpacity>
     </View>
   );
 }

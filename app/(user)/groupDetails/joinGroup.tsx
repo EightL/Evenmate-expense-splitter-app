@@ -1,8 +1,5 @@
-// app/(user)/groupDetails/joinGroup.tsx
-
 import React, { useState, useEffect } from 'react';
 import {
-  ScrollView,
   Text,
   TextInput,
   Pressable,
@@ -12,9 +9,7 @@ import {
   View,
   Modal,
 } from 'react-native';
-
 import { useRouter } from 'expo-router';
-import { supabase } from '@/lib/supabase';
 import { Camera, CameraView } from 'expo-camera';
 import * as Clipboard from 'expo-clipboard';
 import { useQueryClient, InvalidateQueryFilters  } from '@tanstack/react-query';
@@ -22,18 +17,20 @@ import { useGetCurrentUserId } from '@/api/getCurrentUserId';
 import { checkUserMembership, addUserToGroup } from '@/api/groups';
 import { Ionicons } from '@expo/vector-icons';
 
-const JoinGroup = () => {
+
+export default function JoinGroup() {
   const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const { data: currentUserId, error: currentUserError } = useGetCurrentUserId();
+
   const [groupId, setGroupId] = useState('');
   const [loading, setLoading] = useState(false);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [isScannerVisible, setScannerVisible] = useState(false);
-  const [scanned, setScanned] = useState(false); // New state
-  const { data: currentUserId, error: currentUserError } = useGetCurrentUserId();
+  const [scanned, setScanned] = useState(false);
 
-
-  const queryClient = useQueryClient();
-
+  // Get camera permissions
   useEffect(() => {
     const getCameraPermissions = async () => {
       const { status } = await Camera.requestCameraPermissionsAsync();
@@ -43,7 +40,7 @@ const JoinGroup = () => {
     getCameraPermissions();
   }, []);
 
-  const handleJoinGroup = async (enteredGroupId?: string) => {
+  const handleJoinGroup = async (enteredGroupId: string) => {
     const finalGroupId = enteredGroupId ?? groupId;
 
     if (!finalGroupId.trim()) {
@@ -53,37 +50,38 @@ const JoinGroup = () => {
 
     setLoading(true);
     try {
-      // Check existing membership
+      // Check if user is already member of the group
       const existingMembership = await checkUserMembership(currentUserId, finalGroupId);
 
       if (existingMembership) {
         Alert.alert('Already a Member', 'You are already a member of this group.');
         return;
       }
-
+      // Add user to the group
       else {
-        // Join group
         await addUserToGroup(finalGroupId.trim(), currentUserId);
 
         queryClient.invalidateQueries({ queryKey: ['groupslist', currentUserId] });
       }
+      router.back();
 
-      router.back(); // Navigate back to the previous screen
-    } catch (error: any) {
+    }
+    catch (error: any) {
       console.error('Error joining group:', error.message);
-      Alert.alert('Error', error.message);
-    } finally {
+      Alert.alert('Error joining group, please check you entered correct group ID');
+    }
+    finally {
       setLoading(false);
     }
   };
 
-  const handleBarCodeScanned = ({ data }: { type: string; data: string }) => {
+  const handleBarCodeScanned = ({ data }: { data: string }) => {
     if (scanned) return; // Prevent multiple handles
 
     setScanned(true);
     setScannerVisible(false);
     setGroupId(data);
-    Alert.alert('Group ID Scanned', `Group ID: ${data}`, [
+    Alert.alert('Group ID Scanned', [
       { text: 'OK', onPress: () => handleJoinGroup(data) },
     ]);
   };

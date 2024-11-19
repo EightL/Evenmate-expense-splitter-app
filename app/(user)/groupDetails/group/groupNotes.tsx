@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   Alert,
   ScrollView,
+  TouchableOpacity
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { supabase } from '@/lib/supabase';
@@ -77,9 +78,9 @@ const GroupNotes: React.FC<GroupNotesProps> = () => {
     return (
       <View style={styles.centered}>
         <Text style={styles.errorText}>{error}</Text>
-        <Pressable style={styles.backButton} onPress={() => router.back()}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <Text style={styles.backButtonText}>Go Back</Text>
-        </Pressable>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -97,7 +98,7 @@ const GroupNotes: React.FC<GroupNotesProps> = () => {
         placeholderTextColor="#999"
         editable={!isSaving}
       />
-      <Pressable
+      <TouchableOpacity
         style={[styles.saveButton, { backgroundColor: isSaving ? '#ccc' : '#4CAF50' }]}
         onPress={handleSaveNotes}
         disabled={isSaving}
@@ -107,7 +108,7 @@ const GroupNotes: React.FC<GroupNotesProps> = () => {
         ) : (
           <Text style={styles.saveButtonText}>Save Notes</Text>
         )}
-      </Pressable>
+      </TouchableOpacity>
     </ScrollView>
   );
 };

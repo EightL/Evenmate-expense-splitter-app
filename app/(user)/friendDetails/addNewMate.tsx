@@ -47,7 +47,7 @@ export default function AddNewMateScreen() {
   const handleAddMate = async () => {
     // Input Validation
     if (!email.trim()) {
-      Alert.alert('Validation Error', 'Please enter an email address.');
+      // Alert.alert('Validation Error', 'Please enter an email address.');
       return;
     }
 
@@ -61,10 +61,6 @@ export default function AddNewMateScreen() {
     setLoading(true);
 
     try {
-      if (!currentUserId) {
-        throw new Error('User is not authenticated.');
-      }
-
       // Check if the email already exists in profiles
       const existingProfile = await getProfileByEmail(email);
 
@@ -81,7 +77,6 @@ export default function AddNewMateScreen() {
           queryClient.invalidateQueries({ queryKey: ['mates', currentUserId] });
           queryClient.invalidateQueries({ queryKey: ['mates', existingProfile.id] });
           queryClient.invalidateQueries();
-          Alert.alert('Success', 'Mate added successfully.');
         }
       } else {
         Alert.alert('Not Found', 'No user found with this email address.');
@@ -101,11 +96,11 @@ export default function AddNewMateScreen() {
 
     setScanned(true);
     setScannerVisible(false);
-    setEmail(data.trim()); // Assuming the QR code contains the mate's email
+    setEmail(data.trim());
 
     Alert.alert('Mate Scanned', `Email: ${data.trim()}`, [
-      { text: 'Add Mate', onPress: () => handleAddMate() },
       { text: 'Cancel', style: 'cancel', onPress: () => setScanned(false) },
+      { text: 'Add New Mate', onPress: () => handleAddMate() },
     ]);
   };
 
@@ -150,7 +145,7 @@ export default function AddNewMateScreen() {
       {loading ? (
         <ActivityIndicator />
       ) : (
-        <Pressable style={styles.button} onPress={() => handleAddMate()}>
+        <Pressable style={styles.button} onPress={handleAddMate}>
           <Text style={styles.buttonText}>Add</Text>
         </Pressable>
       )}
@@ -166,7 +161,7 @@ export default function AddNewMateScreen() {
           <CameraView
             ref={cameraRef}
             style={StyleSheet.absoluteFillObject}
-            onBarcodeScanned={scanned ? undefined : handleBarcodeScanned}
+            onBarcodeScanned={scanned ? undefined :  handleBarcodeScanned}
             barcodeScannerSettings={{
               barcodeTypes: ["qr", "pdf417"],
             }}

@@ -261,9 +261,9 @@ export default function AddExpenseScreen() {
               onChangeText={setCost}
               keyboardType="numeric"
             />
-            <TouchableOpacity style={styles.iconContainer}>
+            <View style={styles.iconContainer}>
               <Text style={styles.currencyText}>CZK</Text>
-            </TouchableOpacity>
+            </View>
           </View>
         </View>
         <View style={styles.splitWithContainer}>
@@ -274,12 +274,12 @@ export default function AddExpenseScreen() {
                 <Text style={styles.mateName}>{mate.name}</Text>
               </View>
             ))}
-            <Pressable style={styles.addButton} onPress={handleAddMates}>
+            <TouchableOpacity style={styles.addButton} onPress={handleAddMates}>
               <Text style={styles.addButtonText}>+</Text>
-            </Pressable>
+            </TouchableOpacity>
           </View>
         </View>
-        <Pressable
+        <TouchableOpacity
           style={[
             styles.submitButton,
             (!expenseName || !cost || selectedMates.length === 0 || isSubmitting) && styles.submitButtonDisabled,
@@ -292,7 +292,7 @@ export default function AddExpenseScreen() {
           ) : (
             <Text style={styles.submitButtonText}>Submit Expense</Text>
           )}
-        </Pressable>
+        </TouchableOpacity>
       </View>
     </TouchableWithoutFeedback>
   );

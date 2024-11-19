@@ -5,6 +5,7 @@ import { fetchExpenseDetails } from '@/api/involvedUsers';
 import { useUserInfo } from '@/api/profiles';
 import { useExpenseInfo } from '@/api/expenses';
 import { FontAwesome5 } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 type Expense = {
   id: string;
@@ -71,13 +72,24 @@ export default function ExpenseDetailScreenInMates() {
       <View style={styles.container2}>
         <View style={styles.iconContainer}>
           {/* You can use any icon library or image */}
-          <FontAwesome5 name="tree" size={24} color="black" />
+          <MaterialCommunityIcons name={expense.icon} size={40} color="black" />
         </View>
         <View style={styles.infoContainer}>
           <Text style={styles.title}>{expense.name}</Text>
           <Text style={styles.price}>{(expense.amount).toFixed(2)} CZK</Text>
-          <Text style={styles.details}>{expense.paid_by}</Text>
+          <Text style={styles.details}>
+            Paid by: <Text style={{ fontWeight: 'bold' }}>{User.username}</Text>on <Text style={{fontWeight: 'bold'}}>{new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(new Date(expense.created_at))}</Text>
+          </Text>
         </View>
+      </View>
+      <Text style={styles.sectionTitle}>Split Details</Text>
+      <View>
+        {splitDetails.map((item, index) => (
+          <View key={index} style={styles.splitItem}>
+            <Text style={styles.splitUsername}>{item.username}</Text>
+            <Text style={styles.splitShare}>{item.share.toFixed(2)} CZK</Text>
+          </View>
+        ))}
       </View>
       <Pressable
         style={styles.editButton}
@@ -105,9 +117,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   title: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 10,
+    
   },
   detail: {
     fontSize: 18,
@@ -127,6 +139,7 @@ const styles = StyleSheet.create({
   },
   splitUsername: {
     fontSize: 16,
+    fontWeight: 'bold',
   },
   splitShare: {
     fontSize: 16,
@@ -134,8 +147,8 @@ const styles = StyleSheet.create({
   },
   container2: {
     flexDirection: 'row',
-    padding: 10,
-    backgroundColor: '#EAF5EA', // Example background color
+    marginBottom: 20,
+    marginTop: 20,
     borderRadius: 8,
     alignItems: 'center',
   },
@@ -159,15 +172,19 @@ const styles = StyleSheet.create({
   },
   iconContainer: {
     marginRight: 10,
-    backgroundColor: '#A2D9A2', // Example background color for icon container
+    aspectRatio : 1,
+    backgroundColor: '#4CAF50', // Example background color for icon container
     padding: 10,
-    borderRadius: 5,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flex: 1
   },
   infoContainer: {
-    flex: 1,
+    flex: 6,
   },
   price: {
-    fontSize: 18,
+    fontSize: 25,
     fontWeight: 'bold',
   },
   details: {

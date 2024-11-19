@@ -1,6 +1,6 @@
 // app/(user)/friendDetails/[id].tsx
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, ActivityIndicator, FlatList, Image } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ActivityIndicator, FlatList, Image, TouchableOpacity } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Stack } from 'expo-router';
 import { supabase } from '@/lib/supabase';
@@ -40,12 +40,12 @@ export default function FriendDetailScreen() {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <Pressable
+        <TouchableOpacity
           onPress={() => { handleRemoveFriend() }}
           style={{ marginRight: 15 }}
         >
           <Ionicons name="trash" size={24} color="#000" />
-        </Pressable>
+        </TouchableOpacity>
       ),
     });
   }, [navigation]);
@@ -125,7 +125,7 @@ export default function FriendDetailScreen() {
 
     const paidByUser = currentUserId === item.paid_by ? "You" : name;
     return (
-      <Pressable
+      <TouchableOpacity
         style={styles.mainContainer2}
         onPress={() =>
           router.push({
@@ -166,7 +166,7 @@ export default function FriendDetailScreen() {
           <Text style={styles.borrowText}>{isPaidByCurrentUser ? 'you lent' : 'you borrowed'}</Text>
           <Text style={isPaidByCurrentUser ? styles.lentAmount : styles.borrowAmount}>{isPaidByCurrentUser ? (item.amount - (item.amount / item.involved_people)).toFixed(2) : (item.amount / item.involved_people).toFixed(2)} CZK</Text>
         </View>
-      </Pressable>
+      </TouchableOpacity>
     );
   };
 
@@ -207,16 +207,16 @@ export default function FriendDetailScreen() {
       </View>
       <View style={styles.infoRow}>
         <Text style={styles.label}>Bank account:</Text>
-        <Pressable style={styles.infoBox} onPress={() => copyToClipboard(bankAccount)}>
+        <TouchableOpacity style={styles.infoBox} onPress={() => copyToClipboard(bankAccount)}>
           <Text style={styles.infoText}>{bankAccount}</Text>
-        </Pressable>
+        </TouchableOpacity>
       </View>
       {/* Email */}
       <View style={styles.infoRow}>
         <Text style={styles.label}>Email:</Text>
-        <Pressable style={styles.infoBox} onPress={() => copyToClipboard(email)}>
+        <TouchableOpacity style={styles.infoBox} onPress={() => copyToClipboard(email)}>
           <Text style={styles.infoText}>{email}</Text>
-        </Pressable>
+        </TouchableOpacity>
       </View>
       
       {/* Shared Groups */}
@@ -230,18 +230,22 @@ export default function FriendDetailScreen() {
       ) : sharedGroups && sharedGroups.length > 0 ? (
         <View style={styles.groupsContainer}>
           {sharedGroups.map((group) => (
-            <View style={styles.groupBubble} key={group.id}>
+            <TouchableOpacity style={styles.groupBubble} key={group.id} onPress={() =>
+                router.push({
+                  pathname: `/(user)/groupDetails/group/${encodeURIComponent(group.id)}`,
+                  params: { name: group.name },
+                })}>
               <Text style={styles.groupName}>{group.name}</Text>
-            </View>
+            </TouchableOpacity>
           ))}
         </View>
       ) : (
         <Text style={styles.numberNegative}>No shared groups</Text>
       )}
 
-      <Pressable style={styles.button} onPress={handleGetEven}>
+      <TouchableOpacity style={styles.button} onPress={handleGetEven}>
         <Text style={styles.buttonText}>Get Even</Text>
-      </Pressable>
+      </TouchableOpacity>
 
       <Text style={styles.header}>Expense History</Text>
       <FlatList

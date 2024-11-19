@@ -1,23 +1,25 @@
 import React, { useState, useMemo } from 'react';
-import { StyleSheet, ActivityIndicator, FlatList, View, Text, Pressable, Image, RefreshControl } from 'react-native';
+import { StyleSheet, ActivityIndicator, FlatList, View, Text, Pressable, Image, RefreshControl, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
+import defaultGroupPic from '@/assets/images/defaultGroupPic.png';
+import { useQueryClient, InvalidateQueryFilters } from '@tanstack/react-query';
+import { Platform } from 'react-native';
 import { useGroupsList, useGroupsTotalBalances } from '@/api/groups';
 import { useGetCurrentUserId } from '@/api/getCurrentUserId';
-import defaultGroupPic from '@/assets/images/defaultGroupPic.png';
-import { useQueryClient } from '@tanstack/react-query';
-import { Platform } from 'react-native';
+
 
 export default function GroupsScreen() {
   const THRESHOLD = 0.01; // Define the threshold for treating values close to zero as zero
 
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { data: currentUserId } = useGetCurrentUserId();
+
   const [isImageLoading, setImageLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const queryClient = useQueryClient();
 
   // Use default values to avoid undefined or null issues
-  const { data: groupsData = [], error, isLoading, refetch } = useGroupsList(currentUserId || null);
+  const { data: groupsData = [], error: groupsDataError, isLoading, refetch } = useGroupsList(currentUserId || null);
   const groupIds = groupsData.map(group => group.groupid);
   const { data: totalBalances = [], error: totalBalancesError, isLoading: totalBalancesLoading } = useGroupsTotalBalances(groupIds);
 
@@ -44,9 +46,17 @@ export default function GroupsScreen() {
     );
   }
 
-  if (error || totalBalancesError) {
+  if (groupsDataError || totalBalancesError) {
     return <Text>Failed to load groups</Text>;
   }
+
+  const handleCreateNewGroup = () => {
+    router.push('/groupDetails/createGroup');
+  };
+
+  const handleJoinGroup = () => {
+    router.push('/groupDetails/joinGroup');
+  };
 
   type Group = {
     userid: string;
@@ -59,36 +69,36 @@ export default function GroupsScreen() {
     };
   };
 
-  const renderItem = ({ item }: { item: Group }) => {
+  const renderGroups = ({ item }: { item: Group }) => {
     // Normalize the total balance to convert small values close to zero to zero
     const totalBalance = groupBalanceMap[item.groupid] || 0;
     const normalizedTotalBalance = Math.abs(totalBalance) < THRESHOLD ? 0 : totalBalance;
   
     return (
-      <Pressable
+      <TouchableOpacity
         style={styles.mainContainer}
         onPress={() =>
           router.push({
             pathname: `/(user)/groupDetails/group/${encodeURIComponent(item.groups.id)}`,
             params: { name: item.groups.name },
           })
-        }
-      >
-        {/* Left Container */}
+        }>
+
+        {/* Right container */}
         <View style={Platform.OS === 'android' ? styles.leftContainerAndroid : styles.leftContainer}>
-          {/* Top Section */}
+          {/* Top Section - group name */}
           <View style={styles.topSection}>
             <Text style={styles.groupName} adjustsFontSizeToFit numberOfLines={1}>
               {item.groups.name}
             </Text>
           </View>
-          {/* Middle Section */}
+          {/* Middle Section - group balance */}
           <View>
             <Text style={normalizedTotalBalance >= 0 ? styles.amountTextPositive : styles.amountTextNegative}>{normalizedTotalBalance.toFixed(2)} Kč</Text>
           </View>
         </View>
   
-        {/* Right Container */}
+        {/* Left Container */}
         <View style={styles.rightContainer}>
           <Image
             source={
@@ -101,36 +111,34 @@ export default function GroupsScreen() {
             onError={() => setImageLoading(false)}
           />
         </View>
-      </Pressable>
+      </TouchableOpacity>
     );
-  };
-
-  const handleCreateNewGroup = () => {
-    router.push('/groupDetails/createGroup');
-  };
-
-  const handleJoinGroup = () => {
-    router.push('/groupDetails/joinGroup');
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Your groups</Text>
+      {groupsData && groupsData.length > 0 ? (
       <FlatList
         data={groupsData}
         keyExtractor={(item) => item.groups.id}
-        renderItem={renderItem}
+        renderItem={renderGroups}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContainer}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       />
+      ) : (
+      <Text style={styles.noGroupsText}>
+        Looks like you aren't in any group yet! Create new group and share QR code from group settings or join a group with QR code.
+      </Text>
+      )}
       <View style={styles.buttonContainer}>
-        <Pressable style={styles.button} onPress={handleCreateNewGroup}>
+        <TouchableOpacity style={styles.button} onPress={handleCreateNewGroup}>
           <Text style={styles.buttonText}>Create New Group</Text>
-        </Pressable>
-        <Pressable style={styles.button} onPress={handleJoinGroup}>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={handleJoinGroup}>
           <Text style={styles.buttonText}>Join a Group</Text>
-        </Pressable>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -156,27 +164,6 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     paddingBottom: 100,
-  },
-  groupImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginRight: 15,
-    resizeMode: 'cover',
-    overflow: 'hidden',
-    flex: 2,
-  },
-  itemContainer: {
-    flexDirection: 'row',
-    padding: 15,
-    marginBottom: 15,
-    backgroundColor: '#D4F0DD',
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
   },
   groupName: {
     fontSize: 30,
@@ -228,13 +215,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     backgroundColor: '#4CAF50',
     borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
     padding: 8,
     flex : 3,
-  },
-  bottomSection: {
-    flex : 1,
-    flexDirection: 'row',
-    alignItems: 'center',
   },
   amountTextPositive: {
     fontSize: 16,
@@ -256,48 +240,14 @@ const styles = StyleSheet.create({
     color: 'red',
     textAlign: 'center',
   },
-  circleUser: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#ADD8E6',
-    marginRight: 4,
-  },
-  moreCircle: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#ccc',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  moreText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#000',
-  },
   image: {
     width: 170,
     height: undefined,
     aspectRatio: 16 / 9,
     borderRadius: 15,
   },
-  positiveBalance: {
-    color: 'green',
-    fontSize: 16,
-  },
-  negativeBalance: {
-    color: 'red',
-    fontSize: 16,
-  },
-  noGroupsContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 500
-  },
   noGroupsText: {
-    fontSize: 20,
+    fontSize: 19,
     color: 'black',
   },
 });

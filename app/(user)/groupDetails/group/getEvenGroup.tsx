@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, Pressable, Image } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Pressable, Image, TouchableOpacity } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useGroupMembers } from '@/api/groups';
 import defaultProfilePic from '@/assets/images/defaultProfilePic.png';
@@ -37,7 +37,7 @@ export default function GetEvenGroupScreen() {
   };
 
   const renderMemberItem = ({ item }: { item: GroupMember }) => (
-    <Pressable
+    <TouchableOpacity
       style={styles.memberContainer}
       onPress={() => handleGetEven(item.profiles.id, item.profiles.username)}
     >
@@ -52,7 +52,7 @@ export default function GetEvenGroupScreen() {
         onError={() => setImageLoading(false)}
       />
       <Text style={styles.memberName}>{item.profiles.username}</Text>
-    </Pressable>
+    </TouchableOpacity>
   );
 
   return (

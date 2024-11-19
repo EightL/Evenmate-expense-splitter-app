@@ -22,7 +22,6 @@ import { useGetCurrentUserId } from '@/api/getCurrentUserId';
 export default function MatesScreen() {
   const router = useRouter(); // Initialize the router
   const { expenseName, cost, selectedIcon } = useLocalSearchParams();
-  console.log("selectedIcon", selectedIcon);
   // State to track selected option: 'Mates' or 'Group'
   const [selectedOption, setSelectedOption] = useState<'Mates' | 'Group'>('Mates');
   const [selectedMates, setSelectedMates] = useState<string[]>([]);
@@ -110,7 +109,7 @@ const handleConfirmSplit = () => {
 
   // Render individual mate item
   const renderMate = ({ item }: { item: any }) => (
-    <Pressable onPress={() => toggleMateSelection(item.user2)}>
+    <TouchableOpacity onPress={() => toggleMateSelection(item.user2)}>
       <View
         style={[
           styles.mateContainer,
@@ -125,7 +124,7 @@ const handleConfirmSplit = () => {
           {item.profiles.username}
         </Text>
       </View>
-    </Pressable>
+    </TouchableOpacity>
   );
 
 // Type for Group
@@ -148,7 +147,7 @@ userid: string;
 
     return (
       <View>
-        <Pressable onPress={() => toggleGroupExpansion(item.groups.id)}>
+        <TouchableOpacity onPress={() => toggleGroupExpansion(item.groups.id)}>
           <View
             style={[
               styles.groupContainer,
@@ -163,13 +162,13 @@ userid: string;
               {item.groups.name}
             </Text>
           </View>
-        </Pressable>
+        </TouchableOpacity>
         {isExpanded && (
           <FlatList
             data={groupMembers}
             keyExtractor={(member) => member.userid}
             renderItem={({ item: member }) => (
-              <Pressable onPress={() => toggleMateSelection(member.userid)}>
+              <TouchableOpacity onPress={() => toggleMateSelection(member.userid)}>
                 <View
                   style={[
                     styles.subMateContainer,
@@ -186,7 +185,7 @@ userid: string;
                     {member.profiles.username}
                   </Text>
                 </View>
-              </Pressable>
+              </TouchableOpacity>
             )}
             nestedScrollEnabled
             style={styles.groupMembersList}
@@ -261,7 +260,7 @@ userid: string;
       />
 
       {/* Confirm Button */}
-      <Pressable
+      <TouchableOpacity
         style={[
           styles.confirmButton,
           selectedMates.length === 0 && styles.buttonDisabled,
@@ -270,7 +269,7 @@ userid: string;
         disabled={selectedMates.length === 0}
       >
         <Text style={styles.confirmButtonText}>Confirm Split</Text>
-      </Pressable>
+      </TouchableOpacity>
     </View>
   );
 }

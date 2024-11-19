@@ -5,6 +5,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { styles } from '@/constants/styles';
 import evenmatelogo from '@/assets/images/Evenmatelogo_1.png'; // Import the Evenmate logo
 
+
 export default function GroupsStack() {
   const router = useRouter();
 
@@ -45,6 +46,13 @@ export default function GroupsStack() {
         }}
       />
       <Stack.Screen
+        name="account"
+        options={{
+          headerShown : false,
+          title: 'Account',
+        }}
+      />
+      <Stack.Screen
         name="createGroup"
         options={{
           title: 'Create Group',
@@ -56,13 +64,7 @@ export default function GroupsStack() {
           title: 'Join Group',
         }}
       />
-      <Stack.Screen
-        name="account"
-        options={{
-          headerShown : false,
-          title: 'Account',
-        }}
-      />
+
     </Stack>
   );
 }

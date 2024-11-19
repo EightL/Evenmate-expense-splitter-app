@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { View, Text, StyleSheet, Pressable, ActivityIndicator, FlatList, Alert, Image, Modal } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ActivityIndicator, FlatList, Alert, Image, Modal, TouchableOpacity } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Stack } from 'expo-router';
 import { supabase } from '@/lib/supabase';
@@ -148,7 +148,7 @@ export default function GroupDetailScreen() {
     const day = createdAtDate.getDate();
 
     return (
-      <Pressable
+      <TouchableOpacity
         style={styles.mainContainer2}
         onPress={() =>
           router.push({
@@ -189,7 +189,7 @@ export default function GroupDetailScreen() {
           <Text style={styles.borrowText}>{isPaidByCurrentUser ? 'you lent' : 'you borrowed'}</Text>
           <Text style={isPaidByCurrentUser ? styles.lentAmount : styles.borrowAmount}>{isPaidByCurrentUser ? (item.amount - (item.amount / item.involved_people)).toFixed(2) : (item.amount / item.involved_people).toFixed(2)} CZK</Text>
         </View>
-      </Pressable>
+      </TouchableOpacity>
     );
   };
 
@@ -226,39 +226,39 @@ export default function GroupDetailScreen() {
           </View>
           {/* Buttons Container */}
           <View style={styles.buttonsContainer}>
-            <Pressable style={styles.button} onPress={handleToDo}>
+            <TouchableOpacity style={styles.button} onPress={handleToDo}>
               <MaterialIcons name="add-task" size={24} color="black" />
               <Text style={styles.buttonText}>To-Do</Text>
-            </Pressable>
-            <Pressable style={styles.button} onPress={handleGetEven}>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={handleGetEven}>
               <FontAwesome name="bars" size={24} color="black" />
               <Text style={styles.buttonText}>Get Even</Text>
-            </Pressable>
-            <Pressable style={styles.button} onPress={handleNotes}>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={handleNotes}>
               <FontAwesome name="sticky-note-o" size={24} color="black" />
               <Text style={styles.buttonText}>Notes</Text>
-            </Pressable>
+            </TouchableOpacity>
           </View>
         </View>
 
         {/* Right Container (Image) */}
         <View style={styles.rightContainer}>
-          <Pressable onPress={toggleModal}>
+          <TouchableOpacity onPress={toggleModal}>
             <Image
               source={groupData.avatar_url && !isImageLoading ? { uri: groupData.avatar_url } : defaultGroupPic}
               style={styles.image}
               onLoadEnd={() => setImageLoading(false)} // Set loading to false once image loads
               onError={() => setImageLoading(false)}  // Handle potential errors by stopping loading
             />
-          </Pressable>
+          </TouchableOpacity>
         </View>
       </View>
 
       <Modal visible={isModalVisible} transparent={true} animationType="none">
         <View style={styles.modalContainer}>
-          <Pressable style={styles.modalCloseButton} onPress={toggleModal}>
+          <TouchableOpacity style={styles.modalCloseButton} onPress={toggleModal}>
             <Text style={styles.modalCloseButtonText}>Close</Text>
-          </Pressable>
+          </TouchableOpacity>
           <Image
             source={groupData.avatar_url ? { uri: groupData.avatar_url } : defaultGroupPic}
             style={styles.modalImage}
@@ -272,7 +272,7 @@ export default function GroupDetailScreen() {
           {totalBalance.toFixed(2)} CZK
         </Text>
       </View>
-      <Pressable style={styles.balanceContainer} onPress={handleOverview}>
+      <TouchableOpacity style={styles.balanceContainer} onPress={handleOverview}>
         {groupMembers && groupMembers.length > 0 ? (
           <FlatList
             data={groupMembers}
@@ -283,7 +283,7 @@ export default function GroupDetailScreen() {
         ) : (
           <Text style={styles.balanceText}>No balance details yet</Text>
         )}
-      </Pressable>
+      </TouchableOpacity>
       <Text style={styles.sectionTitle}>Expenses</Text>
       <FlatList
         data={sortedExpensesData}

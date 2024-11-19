@@ -85,7 +85,7 @@ export default function TodoScreen() {
     };
   
     const renderTodoItem = ({ item }: { item: TodoItem }) => (
-        <Pressable
+        <TouchableOpacity
           style={[
             styles.todoItem,
             item.done ? styles.todoDone : styles.todoNotDone,
@@ -103,7 +103,7 @@ export default function TodoScreen() {
           >
             {item.name}
           </Text>
-        </Pressable>
+        </TouchableOpacity>
       );
   
     if (isLoading) {
@@ -126,9 +126,9 @@ export default function TodoScreen() {
         />
   
         {!isModalVisible && (
-          <Pressable style={styles.addButton} onPress={openModal}>
+          <TouchableOpacity style={styles.addButton} onPress={openModal}>
             <Text style={styles.addButtonText}>Add New To-Do</Text>
-          </Pressable>
+          </TouchableOpacity>
         )}
   
         <Modal visible={isModalVisible} transparent animationType="none">
@@ -161,12 +161,12 @@ export default function TodoScreen() {
                   onChangeText={setNewTodoText}
                 />
                 <View style={styles.modalButtonsContainer}>
-                  <Pressable style={styles.modalButton} onPress={addTodo}>
+                  <TouchableOpacity style={styles.modalButton} onPress={addTodo}>
                     <Text style={styles.modalButtonText}>Add</Text>
-                  </Pressable>
-                  <Pressable style={[styles.modalButton, styles.cancelButton]} onPress={closeModal}>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[styles.modalButton, styles.cancelButton]} onPress={closeModal}>
                     <Text style={styles.modalButtonText}>Cancel</Text>
-                  </Pressable>
+                  </TouchableOpacity>
                 </View>
               </Animated.View>
             </TouchableWithoutFeedback>

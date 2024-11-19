@@ -1,7 +1,7 @@
 // app/(user)/friendDetails/getEvenMate.tsx
 
 import React, { useEffect, useState } from 'react';
-import { View, TextInput, Text, Pressable, StyleSheet, Alert, ActivityIndicator, Keyboard, TouchableWithoutFeedback, Image } from 'react-native';
+import { View, TextInput, Text, Pressable, StyleSheet, Alert, ActivityIndicator, Keyboard, TouchableWithoutFeedback, Image, TouchableOpacity } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { handleUpdateBalances } from '@/api/updateBalances';
 import { useQueryClient } from '@tanstack/react-query';
@@ -124,9 +124,9 @@ export default function GetEvenInput() {
       </View>
 
       {/* Get Even Button */}
-      <Pressable style={styles.button} onPress={() => handleAdd()} disabled={amount.trim() === ''}>
+      <TouchableOpacity style={styles.button} onPress={() => handleAdd()} disabled={amount.trim() === ''}>
         <Text style={styles.buttonText}>Get Even</Text>
-      </Pressable>
+      </TouchableOpacity>
     </View>
     </TouchableWithoutFeedback>
   );

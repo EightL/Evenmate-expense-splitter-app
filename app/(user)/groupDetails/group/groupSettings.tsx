@@ -16,6 +16,7 @@ import {
   ScrollView,
   Image,
   ActivityIndicator,
+  TouchableOpacity
 } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -210,7 +211,7 @@ const handleSaveDetails = async () => {
         {isGroupImageUploading ? (
           <ActivityIndicator size="large" color="#4CAF50" />
         ) : (
-          <Pressable onPress={handleGroupImageChange}>
+          <TouchableOpacity onPress={handleGroupImageChange}>
             <Image
               source={
                 selectedImage
@@ -223,12 +224,12 @@ const handleSaveDetails = async () => {
               onLoadEnd={() => setGroupImageLoading(false)}
               onError={() => setGroupImageLoading(false)}
             />
-          </Pressable>
+          </TouchableOpacity>
         )}
       </View>
-      <Pressable style={styles.saveButton} onPress={handleSaveDetails}>
+      <TouchableOpacity style={styles.saveButton} onPress={handleSaveDetails}>
         <Text style={styles.saveButtonText}>Save Details</Text>
-      </Pressable>
+      </TouchableOpacity>
 
       {/* Invite to Group Section */}
       <Text style={styles.title}>Invite to Group</Text>
@@ -243,9 +244,9 @@ const handleSaveDetails = async () => {
       </View>
 
       {/* Leave Group Button */}
-      <Pressable style={styles.leaveButton} onPress={handleLeaveGroup}>
+      <TouchableOpacity style={styles.leaveButton} onPress={handleLeaveGroup}>
         <Text style={styles.leaveButtonText}>Leave Group</Text>
-      </Pressable>
+      </TouchableOpacity>
     </ScrollView>
   );
 }
