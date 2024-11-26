@@ -1,8 +1,7 @@
-import 'react-native-get-random-values'; // Import the polyfill first
+import 'react-native-get-random-values';
 import { Buffer } from 'buffer';
 
 // Set up Buffer globally
-// @ts-ignore
 global.Buffer = Buffer;
 
 import { useEffect, useRef, useState, useLayoutEffect } from 'react';
@@ -30,13 +29,13 @@ import { fetchBlob, uploadImageToStorage } from '@/api/profiles';
 
 import { v4 as uuidv4 } from 'uuid'; // Import the UUID generator
 
-const AccountSettings = () => {
+export default function AccountSettings () {
   const router = useRouter();
   // State variables
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [isImageLoading, setImageLoading] = useState(true);
-  // Get the current user ID
+
   const { data: currentUserId, error } = useGetCurrentUserId();
 
   // Fetch the user's profile data
@@ -410,5 +409,3 @@ const styles = StyleSheet.create({
       resizeMode: 'cover',
     },
   });
-
-export default AccountSettings;

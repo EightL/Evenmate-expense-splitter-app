@@ -4,6 +4,8 @@ import { useState } from 'react';
 import Button from '../../components/Button';
 import { Link, Stack } from 'expo-router';
 import { supabase } from '@/lib/supabase';
+import { signUp } from '@/api/sign-up/signup';
+
 
 const SignUpScreen = () => {
   // State variables
@@ -15,17 +17,7 @@ const SignUpScreen = () => {
   // Sign up with email and password
   async function signUpWithEmail() {
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          username, // Include username in the sign-up data
-        },
-      },
-    });
-
-    if (error) Alert.alert(error.message);
+    signUp(email, password, username)
     setLoading(false);
   }
 

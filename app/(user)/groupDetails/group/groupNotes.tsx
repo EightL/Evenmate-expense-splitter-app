@@ -10,12 +10,16 @@ import {
   ActivityIndicator,
   Alert,
   ScrollView,
-  TouchableOpacity
+  TouchableOpacity,
+  Image,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { fetchGroupNotes, updateGroupNotes } from '@/api/groups';
-
+import { useNavigation } from 'expo-router';
+import { useLayoutEffect } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import evenmatelogo from '@/assets/images/Evenmatelogo_1.png';
 
 type GroupNotesProps = {};
 
@@ -27,6 +31,28 @@ const GroupNotes: React.FC<GroupNotesProps> = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  const navigation = useNavigation();
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <Image source={evenmatelogo} style={styles.evenmatelogo}></Image>
+      ),
+      headerLeft: () => (
+        <TouchableOpacity
+            onPress={() => router.back()}
+            accessibilityLabel="Go Back"
+            accessibilityRole="button"
+        >
+            <Ionicons
+            name='arrow-back'
+            size={30}
+            color="#4CAF50" 
+            />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]);
 
   // Fetch notes when the component mounts
   useEffect(() => {
@@ -130,6 +156,13 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: '#333',
     textAlign: 'center',
+  },
+  evenmatelogo: {
+    width: 33,
+    height: 27,
+    marginRight: 0,
+    resizeMode: 'cover',
+    overflow: 'hidden',
   },
   textInput: {
     height: 200,

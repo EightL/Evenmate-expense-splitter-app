@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useLayoutEffect } from 'react';
 import { 
   Text,
   TextInput,
@@ -9,23 +9,46 @@ import {
   ScrollView,
   Keyboard,
   TouchableWithoutFeedback,
+  TouchableOpacity,
+  Image,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useNavigation } from 'expo-router';
 import { useQueryClient, InvalidateQueryFilters } from '@tanstack/react-query';
 import { useGetCurrentUserId } from '@/api/getCurrentUserId';
 import { createGroup, addUserToGroup } from '@/api/groups';
-
+import evenmatelogo from '@/assets/images/Evenmatelogo_1.png';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function CreateGroupScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
-
   const { data: currentUserId } = useGetCurrentUserId();
-
+  
   const [groupName, setGroupName] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
-
+  
+  const navigation = useNavigation();
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <Image source={evenmatelogo} style={styles.evenmatelogo}></Image>
+      ),
+      headerLeft: () => (
+        <TouchableOpacity
+            onPress={() => router.back()}
+            accessibilityLabel="Go Back"
+            accessibilityRole="button"
+        >
+            <Ionicons
+            name='arrow-back'
+            size={30}
+            color="#4CAF50" 
+            />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]);
 
   // When user clicks on create group button
   const handleCreateGroup = async () => {
@@ -117,5 +140,12 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  evenmatelogo: {
+    width: 33,
+    height: 27,
+    marginRight: 0,
+    resizeMode: 'cover',
+    overflow: 'hidden',
   },
 });

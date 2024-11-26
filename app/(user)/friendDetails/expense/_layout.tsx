@@ -5,6 +5,8 @@ import { Image, Pressable, StyleSheet } from 'react-native';
 import evenmatelogo from '@/assets/images/Evenmatelogo_1.png';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { TouchableOpacity } from 'react-native';
 
 export default function ExpenseDetailsStack() {
   const router = useRouter(); // Initialize the router
@@ -19,21 +21,17 @@ export default function ExpenseDetailsStack() {
             <Image source={evenmatelogo} style={styles.evenmatelogo} />
           ),
         headerLeft: () => (
-        <Pressable
+        <TouchableOpacity
             onPress={() => router.back()}
-            style={({ pressed }) => [
-            styles.backButton,
-            pressed && styles.pressedButton,
-            ]}
             accessibilityLabel="Go Back"
             accessibilityRole="button"
         >
-            <FontAwesome
-            name="arrow-left"
-            size={25}
-            color="#007AFF" // Blue color for back button
+            <Ionicons
+            name='arrow-back'
+            size={30}
+            color="#4CAF50" // Blue color for back button
             />
-        </Pressable>
+        </TouchableOpacity>
         ),
       }}/>
       <Stack.Screen
@@ -49,13 +47,8 @@ const styles = StyleSheet.create({
   evenmatelogo: {
     width: 33,
     height: 27,
-    marginRight: 0,
     resizeMode: 'cover',
     overflow: 'hidden',
-  },
-  backButton: {
-    marginLeft: 15, // Adds spacing from the left edge
-    padding: 5, // Increases the touchable area
   },
   pressedButton: {
     opacity: 0.5, // Provides visual feedback when pressed

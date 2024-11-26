@@ -1,10 +1,11 @@
 // app/(user)/expenseDetails/_layout.tsx
 import React from 'react';
 import { Stack } from 'expo-router';
-import { Image, Pressable, StyleSheet } from 'react-native';
+import { Image, Pressable, StyleSheet, TouchableOpacity} from 'react-native';
 import evenmatelogo from '@/assets/images/Evenmatelogo_1.png';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function ExpenseDetailsStack() {
   const router = useRouter(); // Initialize the router
@@ -18,22 +19,18 @@ export default function ExpenseDetailsStack() {
         headerRight: () => (
             <Image source={evenmatelogo} style={styles.evenmatelogo} />
           ),
-        headerLeft: () => (
-        <Pressable
-            onPress={() => router.back()}
-            style={({ pressed }) => [
-            styles.backButton,
-            pressed && styles.pressedButton,
-            ]}
-            accessibilityLabel="Go Back"
-            accessibilityRole="button"
-        >
-            <FontAwesome
-            name="arrow-left"
-            size={25}
-            color="#007AFF" // Blue color for back button
-            />
-        </Pressable>
+          headerLeft: () => (
+          <TouchableOpacity
+              onPress={() => router.back()}
+              accessibilityLabel="Go Back"
+              accessibilityRole="button"
+          >
+              <Ionicons
+              name='arrow-back'
+              size={30}
+              color="#4CAF50" // Blue color for back button
+              />
+          </TouchableOpacity>
         ),
       }}/>
     </Stack>

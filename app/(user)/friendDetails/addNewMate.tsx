@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   Modal,
   ScrollView,
+  Image,
 } from 'react-native';
 import { useRouter, Stack } from 'expo-router';
 import { supabase } from '@/lib/supabase';
@@ -19,6 +20,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { CameraView, Camera } from "expo-camera";
 import { useGetCurrentUserId } from '@/api/getCurrentUserId';
 import { getProfileByEmail, getExistingRelationship, createMateRelationship } from '@/api/mates';
+import { useLayoutEffect } from 'react';
+import evenmatelogo from '@/assets/images/Evenmatelogo_1.png';
+import { TouchableOpacity } from 'react-native';
+import { useNavigation } from 'expo-router';
 
 export default function AddNewMateScreen() {
   const router = useRouter();
@@ -26,7 +31,7 @@ export default function AddNewMateScreen() {
 
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
-
+  const navigation = useNavigation();
   // QR Scanner States
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [isScannerVisible, setScannerVisible] = useState(false);
@@ -43,6 +48,27 @@ export default function AddNewMateScreen() {
 
     getCameraPermissions();
   }, []);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <Image source={evenmatelogo} style={styles.evenmatelogo}></Image>
+      ),
+      headerLeft: () => (
+        <TouchableOpacity
+            onPress={() => router.back()}
+            accessibilityLabel="Go Back"
+            accessibilityRole="button"
+        >
+            <Ionicons
+            name='arrow-back'
+            size={30}
+            color="#4CAF50" 
+            />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]);  
 
   const handleAddMate = async () => {
     // Input Validation
@@ -249,6 +275,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginLeft: 10,
+  },
+  evenmatelogo: {
+    width: 33,
+    height: 27,
+    marginRight: 0,
+    resizeMode: 'cover',
+    overflow: 'hidden',
   },
   scannerContainer: {
     flex: 1,

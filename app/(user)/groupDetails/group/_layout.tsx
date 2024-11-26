@@ -5,6 +5,7 @@ import { FontAwesome } from '@expo/vector-icons'; // Ensure you've installed exp
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { TouchableOpacity } from 'react-native';
 
 export default function UserLayout() {
   const router = useRouter();
@@ -43,34 +44,26 @@ export default function UserLayout() {
           title: 'Groups',
           headerTitleAlign: 'center', // Center the title
           headerLeft: () => (
-            <Pressable
-              onPress={handleGoBack}
-              style={({ pressed }) => [
-                styles.backButton,
-                pressed && styles.pressedButton,
-              ]}
-              accessibilityLabel="Go Back"
-              accessibilityRole="button"
+            <TouchableOpacity
+                onPress={() => router.back()}
+                accessibilityLabel="Go Back"
+                accessibilityRole="button"
             >
-              <FontAwesome
-                name="arrow-left"
-                size={25}
-                color="#007AFF" // Blue color for back button
-              />
-            </Pressable>
+                <Ionicons
+                name='arrow-back'
+                size={30}
+                color="#4CAF50" // Blue color for back button
+                />
+            </TouchableOpacity>
           ),
           headerRight: () => (
-            <Pressable
+            <TouchableOpacity
               onPress={handleInviteToGroup}
-              style={({ pressed }) => [
-                styles.inviteButton,
-                pressed && styles.pressedButton,
-              ]}
               accessibilityLabel="Invite to Group"
               accessibilityRole="button"
             >
               <Ionicons name="settings" size={24} color="#000" />
-            </Pressable>
+            </TouchableOpacity>
           ),
         }}
       />
@@ -126,10 +119,7 @@ const styles = StyleSheet.create({
     marginLeft: 15,
   },
   inviteButton: {
-    marginRight: 15,
-  },
-  pressedButton: {
-    opacity: 0.7,
+    
   },
   backButton: {
     marginLeft: 15, // Adds spacing from the left edge

@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
+import { FontAwesome } from '@expo/vector-icons';
 import { deleteTodo, updateTodo, useTodoInfo } from '@/api/todo';
 
 export default function EditTodoScreen() {
@@ -102,21 +103,24 @@ export default function EditTodoScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Edit To-Do Details</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="To-Do Name"
-        value={todoName}
-        onChangeText={setTodoName}
-      />
-      <TextInput
-        style={styles.descriptionInput}
-        placeholder="To-Do Description"
-        value={todoDescription}
-        onChangeText={setTodoDescription}
-        multiline
-      />
-
+    <Text style={styles.title}>Edit To-Do Details</Text>
+    <TextInput
+      style={styles.input}
+      placeholder="To-Do Name"
+      value={todoName}
+      onChangeText={setTodoName}
+    />
+    <TextInput
+      style={styles.descriptionInput}
+      placeholder="To-Do Description"
+      value={todoDescription}
+      onChangeText={setTodoDescription}
+      multiline
+    />
+  
+    {/* Other content can remain here */}
+    
+    <View style={styles.buttonContainer}>
       <Pressable
         style={[
           styles.updateButton,
@@ -131,9 +135,7 @@ export default function EditTodoScreen() {
           <Text style={styles.updateButtonText}>Update To-Do</Text>
         )}
       </Pressable>
-
-      <View style={styles.spacer} />
-
+  
       <Pressable
         style={[
           styles.deleteButton,
@@ -145,10 +147,12 @@ export default function EditTodoScreen() {
         {isDeleting ? (
           <ActivityIndicator />
         ) : (
-          <Text style={styles.deleteButtonText}>Delete To-Do</Text>
+          <FontAwesome name="trash" size={24} color="#fff" />
         )}
       </Pressable>
-    </ScrollView>
+    </View>
+  </ScrollView>
+
   );
 }
 
@@ -177,18 +181,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
     textAlign: 'center',
   },
-  deleteButton: {
-    backgroundColor: '#FF3B30',
-    paddingVertical: 15,
-    paddingHorizontal: 25,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  deleteButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
   input: {
     width: '100%',
     borderColor: '#4CAF50',
@@ -211,9 +203,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  spacer: {
-    flex: 1,
-  },
   buttonDisabled: {
     opacity: 0.7,
   },
@@ -233,5 +222,34 @@ const styles = StyleSheet.create({
     fontSize: 16,
     height: 130, // Increase the height for the description field
     textAlignVertical: 'top',
+  },
+  buttonContainer: {
+    position: 'absolute',
+    bottom: 20, // Position the buttons above the screen's bottom edge
+    left: 20,
+    right: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  deleteButton: {
+    flex: 1,
+    backgroundColor: '#FF3B30',
+    paddingVertical: 15,
+    marginLeft: 10, // Space between buttons
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  updateButton: {
+    flex: 6,
+    backgroundColor: '#5AC07C',
+    paddingVertical: 15,
+    marginRight: 10, // Optional spacing for symmetry
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  updateButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });

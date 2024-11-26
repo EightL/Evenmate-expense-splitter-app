@@ -47,12 +47,9 @@ export default function ExpenseStack() {
             headerRight: () => (
               <Pressable
                 onPress={() => router.push('/expenseDetails/account')}
-                style={({ pressed }) => [
-                  styles.accountButton,
-                  pressed && styles.pressedButton,
-                ]}
                 accessibilityLabel="Account"
                 accessibilityRole="button"
+                style={{marginRight: 5}}
               >
                 <FontAwesome
                   name="user"

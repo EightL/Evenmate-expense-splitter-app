@@ -47,6 +47,19 @@ export default function FriendDetailScreen() {
           <Ionicons name="trash" size={24} color="#000" />
         </TouchableOpacity>
       ),
+      headerLeft: () => (
+        <TouchableOpacity
+            onPress={() => router.back()}
+            accessibilityLabel="Go Back"
+            accessibilityRole="button"
+        >
+            <Ionicons
+            name='arrow-back'
+            size={30}
+            color="#4CAF50" // Blue color for back button
+            />
+        </TouchableOpacity>
+      ),
     });
   }, [navigation]);
   

@@ -22,12 +22,9 @@ export default function GroupsStack() {
           headerRight: () => (
             <Pressable
               onPress={() => router.push('/groupDetails/account')}
-              style={({ pressed }) => [
-                styles.accountButton,
-                pressed && styles.pressedButton,
-              ]}
               accessibilityLabel="Account"
               accessibilityRole="button"
+              style={{marginRight: 5}}
             >
               <FontAwesome
                 name="user"

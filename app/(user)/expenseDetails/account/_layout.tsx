@@ -18,10 +18,6 @@ export default function ExpenseStack() {
           headerRight: () => (
             <Pressable
               onPress={() => router.push('/expenseDetails/account/accountSettings')}
-              style={({ pressed }) => [
-                styles.accountButton,
-                pressed && styles.pressedButton,
-              ]}
               accessibilityLabel="Account"
               accessibilityRole="button"
             >
@@ -35,17 +31,13 @@ export default function ExpenseStack() {
           headerLeft: () => (
             <Pressable
               onPress={() => router.back()}
-              style={({ pressed }) => [
-                styles.backButton,
-                pressed && styles.pressedButton,
-              ]}
               accessibilityLabel="Go Back"
               accessibilityRole="button"
             >
-              <FontAwesome
-                name="arrow-left"
+              <Ionicons
+                name='arrow-back'
                 size={25}
-                color="#007AFF"
+                color="#4CAF50"
               />
             </Pressable>
           ),
@@ -61,17 +53,13 @@ export default function ExpenseStack() {
         headerLeft: () => (
         <Pressable
             onPress={() => router.back()}
-            style={({ pressed }) => [
-            styles.backButton,
-            pressed && styles.pressedButton,
-            ]}
             accessibilityLabel="Go Back"
             accessibilityRole="button"
         >
-            <FontAwesome
-            name="arrow-left"
+            <Ionicons
+            name="arrow-back"
             size={25}
-            color="#007AFF"
+            color="#4CAF50"
             />
         </Pressable>
         ),

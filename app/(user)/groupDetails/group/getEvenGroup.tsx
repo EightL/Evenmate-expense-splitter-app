@@ -3,17 +3,41 @@ import { View, Text, StyleSheet, FlatList, Pressable, Image, TouchableOpacity } 
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useGroupMembers } from '@/api/groups';
 import defaultProfilePic from '@/assets/images/defaultProfilePic.png';
-
+import { useNavigation } from 'expo-router';
+import { useLayoutEffect } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import evenmatelogo from '@/assets/images/Evenmatelogo_1.png';
 export default function GetEvenGroupScreen() {
   const {groupId, groupName, myAvatar } = useLocalSearchParams();
   const router = useRouter();
   const { data: groupMembers, error } = useGroupMembers(groupId);
-  console.log("groupMembers", groupMembers);
   const [isImageLoading, setImageLoading] = React.useState(true);
 
   if (error) {
     return <Text style={styles.errorText}>Failed to load group members</Text>;
   }
+
+  const navigation = useNavigation();
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <Image source={evenmatelogo} style={styles.evenmatelogo}></Image>
+      ),
+      headerLeft: () => (
+        <TouchableOpacity
+            onPress={() => router.back()}
+            accessibilityLabel="Go Back"
+            accessibilityRole="button"
+        >
+            <Ionicons
+            name='arrow-back'
+            size={30}
+            color="#4CAF50" 
+            />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]);
 
   type GroupMember = {
     id: string;
@@ -136,5 +160,12 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
     overflow: 'hidden',
     marginRight: 10,
+  },
+  evenmatelogo: {
+    width: 33,
+    height: 27,
+    marginRight: 0,
+    resizeMode: 'cover',
+    overflow: 'hidden',
   },
 });

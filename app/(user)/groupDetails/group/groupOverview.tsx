@@ -1,10 +1,14 @@
 // app/(user)/groupDetails/group/groupOverview.tsx
 
 import React, { useMemo, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, Alert, TouchableOpacity, Image } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useGroupMembersWithBalance } from '@/api/groups';
 import { supabase } from '@/lib/supabase'; // Ensure supabase is correctly imported
+import { useNavigation } from 'expo-router';
+import { useLayoutEffect } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import evenmatelogo from '@/assets/images/Evenmatelogo_1.png';
 
 type GroupMember = {
   userid: string;
@@ -20,6 +24,28 @@ export default function GroupOverviewScreen() {
 
   const [session, setSession] = useState<{ user: { id: string } } | null>(null);
   const [isSessionLoading, setIsSessionLoading] = useState<boolean>(true);
+
+  const navigation = useNavigation();
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <Image source={evenmatelogo} style={styles.evenmatelogo}></Image>
+      ),
+      headerLeft: () => (
+        <TouchableOpacity
+            onPress={() => router.back()}
+            accessibilityLabel="Go Back"
+            accessibilityRole="button"
+        >
+            <Ionicons
+            name='arrow-back'
+            size={30}
+            color="#4CAF50" 
+            />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]);
 
   // Retrieve current user session
   useEffect(() => {
@@ -180,6 +206,13 @@ const styles = StyleSheet.create({
   totalBalance: {
     fontSize: 22,
     fontWeight: '700',
+  },
+  evenmatelogo: {
+    width: 33,
+    height: 27,
+    marginRight: 0,
+    resizeMode: 'cover',
+    overflow: 'hidden',
   },
   subTitle: {
     fontSize: 22,

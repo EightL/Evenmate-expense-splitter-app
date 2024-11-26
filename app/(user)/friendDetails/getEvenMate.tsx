@@ -9,9 +9,14 @@ import { useGetCurrentUserId } from '@/api/getCurrentUserId';
 import defaultProfilePic from '@/assets/images/defaultProfilePic.png';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { useUserInfo } from '@/api/profiles';
+import { Ionicons } from '@expo/vector-icons';
+import { useLayoutEffect } from 'react';
+import { useNavigation } from 'expo-router';
+import evenmatelogo from '@/assets/images/Evenmatelogo_1.png';
 
 export default function GetEvenInput() {
   const router = useRouter();
+  const navigation = useNavigation();
   const { name, mateId, balance, avatar_url, currentUserId, myAvatar } = useLocalSearchParams<{ name: string; mateId: string; balance: string; avatar_url: string, currentUserId: string; myAvatar: string }>();
   const [amount, setAmount] = useState('');
   const queryClient = useQueryClient();
@@ -22,6 +27,27 @@ export default function GetEvenInput() {
       setAmount((-parseFloat(balance)).toString()); // Invert the balance sign here
     }
   }, [balance]);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <Image source={evenmatelogo} style={styles.evenmatelogo}></Image>
+      ),
+      headerLeft: () => (
+        <TouchableOpacity
+            onPress={() => router.back()}
+            accessibilityLabel="Go Back"
+            accessibilityRole="button"
+        >
+            <Ionicons
+            name='arrow-back'
+            size={30}
+            color="#4CAF50" // Blue color for back button
+            />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]);
 
   const handleAdd = async () => {
     if (amount.trim() !== '') {
@@ -185,5 +211,12 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 20, // Increased font size
     fontWeight: 'bold',
+  },
+  evenmatelogo: {
+    width: 33,
+    height: 27,
+    marginRight: 0,
+    resizeMode: 'cover',
+    overflow: 'hidden',
   },
 });

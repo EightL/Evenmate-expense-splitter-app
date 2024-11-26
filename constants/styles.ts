@@ -6,7 +6,7 @@ export const styles = StyleSheet.create({
       padding: 5, // Increases the touchable area
     },
     accountButton: {
-      marginRight: 15, // Adds spacing from the right edge
+      marginRight: 10, // Adds spacing from the right edge
       padding: 5,
     },
     pressedButton: {
@@ -203,7 +203,6 @@ export const styles = StyleSheet.create({
     evenmatelogo: {
       width: 33,
       height: 27,
-      marginLeft: 15,
       resizeMode: 'cover',
       overflow: 'hidden',
     },

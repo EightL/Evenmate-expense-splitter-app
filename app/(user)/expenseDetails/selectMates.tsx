@@ -12,21 +12,26 @@ import {
   LayoutAnimation,
   Platform,
   UIManager,
+  Image,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useMatesList } from '@/api/mates';
 import { useGroupsList, useGroupMembers } from '@/api/groups';
 import { supabase } from '@/lib/supabase';
 import { useGetCurrentUserId } from '@/api/getCurrentUserId';
+import { Ionicons } from '@expo/vector-icons';
+import evenmatelogo from '@/assets/images/Evenmatelogo_1.png';
+import { useLayoutEffect } from 'react';
+import { useNavigation } from 'expo-router';
 
 export default function MatesScreen() {
-  const router = useRouter(); // Initialize the router
+  const router = useRouter();
   const { expenseName, cost, selectedIcon } = useLocalSearchParams();
   // State to track selected option: 'Mates' or 'Group'
   const [selectedOption, setSelectedOption] = useState<'Mates' | 'Group'>('Mates');
   const [selectedMates, setSelectedMates] = useState<string[]>([]);
   const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
-
+  const navigation = useNavigation();
   // State for refreshing FlatList
   const [refreshing, setRefreshing] = useState(false);
 
@@ -57,6 +62,27 @@ export default function MatesScreen() {
     }
     setRefreshing(false);
   };
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <Image source={evenmatelogo} style={styles.evenmatelogo}></Image>
+      ),
+      headerLeft: () => (
+        <TouchableOpacity
+            onPress={() => router.back()}
+            accessibilityLabel="Go Back"
+            accessibilityRole="button"
+        >
+            <Ionicons
+            name='arrow-back'
+            size={30}
+            color="#4CAF50" // Blue color for back button
+            />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]); 
 
   // Toggle selection for mates
   const toggleMateSelection = (mateId: string) => {
@@ -433,5 +459,12 @@ const styles = StyleSheet.create({
       buttonContainer: {
         flexDirection: 'row',
         marginBottom: 20,
+      },
+      evenmatelogo: {
+        width: 33,
+        height: 27,
+        marginRight: 0,
+        resizeMode: 'cover',
+        overflow: 'hidden',
       },
     });

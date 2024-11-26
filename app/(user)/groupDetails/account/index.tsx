@@ -1,5 +1,3 @@
-// app/(user)/account.tsx
-
 import { useState } from 'react';
 import {
   View,

@@ -1,9 +1,8 @@
 // app/(user)/friendDetails/_layout.tsx
-import React from 'react';
 import { Pressable, StyleSheet, Image } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { FontAwesome, Ionicons } from '@expo/vector-icons';
-
+// Import the Evenmate logo
 import evenmatelogo from '@/assets/images/Evenmatelogo_1.png';
 
 export default function ExpenseStack() {
@@ -18,35 +17,27 @@ export default function ExpenseStack() {
           headerTitleAlign: 'center', // Center the title
           headerRight: () => (
             <Pressable
-              onPress={() => router.push('/friendDetails/account/accountSettings')} // Wrap in an anonymous function
-              style={({ pressed }) => [
-                styles.accountButton,
-                pressed && styles.pressedButton,
-              ]}
+              onPress={() => router.push('/friendDetails/account/accountSettings')}
               accessibilityLabel="Account"
               accessibilityRole="button"
             >
               <Ionicons
                 name="settings"
                 size={25}
-                color="#000" // Blue color for the account icon
+                color="#000"
               />
             </Pressable>
           ),
           headerLeft: () => (
             <Pressable
               onPress={() => router.back()}
-              style={({ pressed }) => [
-                styles.backButton,
-                pressed && styles.pressedButton,
-              ]}
               accessibilityLabel="Go Back"
               accessibilityRole="button"
             >
-              <FontAwesome
-                name="arrow-left"
+              <Ionicons
+                name='arrow-back'
                 size={25}
-                color="#007AFF" // Blue color for back button
+                color="#4CAF50"
               />
             </Pressable>
           ),
@@ -62,17 +53,13 @@ export default function ExpenseStack() {
         headerLeft: () => (
         <Pressable
             onPress={() => router.back()}
-            style={({ pressed }) => [
-            styles.backButton,
-            pressed && styles.pressedButton,
-            ]}
             accessibilityLabel="Go Back"
             accessibilityRole="button"
         >
-            <FontAwesome
-            name="arrow-left"
+            <Ionicons
+            name="arrow-back"
             size={25}
-            color="#007AFF" // Blue color for back button
+            color="#4CAF50"
             />
         </Pressable>
         ),
@@ -83,15 +70,15 @@ export default function ExpenseStack() {
 
 const styles = StyleSheet.create({
   logoutButton: {
-    marginLeft: 15, // Adds spacing from the left edge
-    padding: 5, // Increases the touchable area
+    marginLeft: 15,
+    padding: 5,
   },
   accountButton: {
-    marginRight: 15, // Adds spacing from the right edge
+    marginRight: 15,
     padding: 5,
   },
   pressedButton: {
-    opacity: 0.5, // Provides visual feedback when pressed
+    opacity: 0.5, 
   },
   evenmatelogo: {
     width: 33,
@@ -101,7 +88,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   backButton: {
-    marginLeft: 15, // Adds spacing from the left edge
-    padding: 5, // Increases the touchable area
+    marginLeft: 15,
+    padding: 5,
   },
 });

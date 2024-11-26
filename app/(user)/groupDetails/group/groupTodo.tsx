@@ -12,10 +12,14 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
+  Image,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useTodoList, createTodo, changeTodoStatus } from '@/api/todo';
-
+import { useNavigation } from 'expo-router';
+import evenmatelogo from '@/assets/images/Evenmatelogo_1.png';
+import { useLayoutEffect } from 'react';
+import { Ionicons } from '@expo/vector-icons';
 
 type TodoItem = {
   id: string;
@@ -33,12 +37,35 @@ export default function TodoScreen() {
     const [isModalVisible, setModalVisible] = useState(false);
     const slideAnim = useState(new Animated.Value(0))[0];
   
+    const navigation = useNavigation();
+    useLayoutEffect(() => {
+      navigation.setOptions({
+        headerRight: () => (
+          <Image source={evenmatelogo} style={styles.evenmatelogo}></Image>
+        ),
+        headerLeft: () => (
+          <TouchableOpacity
+              onPress={() => router.back()}
+              accessibilityLabel="Go Back"
+              accessibilityRole="button"
+          >
+              <Ionicons
+              name='arrow-back'
+              size={30}
+              color="#4CAF50" 
+              />
+          </TouchableOpacity>
+        ),
+      });
+    }, [navigation]);
+
     React.useEffect(() => {
       if (TodoList) {
         setTodos(TodoList);
       }
     }, [TodoList]);
   
+
     const toggleTodo = async (id: string, currentDone: boolean) => {
       try {
         await changeTodoStatus(id, !currentDone);
@@ -309,5 +336,12 @@ const styles = StyleSheet.create({
   todoTextNotDone: {
     fontWeight: 'bold', // Bold text for not done todos
     color: '#000', // White text for better visibility on dark green background
+  },
+  evenmatelogo: {
+    width: 33,
+    height: 27,
+    marginRight: 0,
+    resizeMode: 'cover',
+    overflow: 'hidden',
   },
 });

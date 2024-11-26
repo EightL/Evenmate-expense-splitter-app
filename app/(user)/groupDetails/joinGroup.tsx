@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect } from 'react';
 import {
   Text,
   TextInput,
@@ -8,27 +8,50 @@ import {
   StyleSheet,
   View,
   Modal,
+  TouchableOpacity,
+  Image,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useNavigation } from 'expo-router';
 import { Camera, CameraView } from 'expo-camera';
 import * as Clipboard from 'expo-clipboard';
 import { useQueryClient, InvalidateQueryFilters  } from '@tanstack/react-query';
 import { useGetCurrentUserId } from '@/api/getCurrentUserId';
 import { checkUserMembership, addUserToGroup } from '@/api/groups';
 import { Ionicons } from '@expo/vector-icons';
-
+import evenmatelogo from '@/assets/images/Evenmatelogo_1.png';
 
 export default function JoinGroup() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const navigation = useNavigation();
 
   const { data: currentUserId, error: currentUserError } = useGetCurrentUserId();
-
   const [groupId, setGroupId] = useState('');
   const [loading, setLoading] = useState(false);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [isScannerVisible, setScannerVisible] = useState(false);
   const [scanned, setScanned] = useState(false);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <Image source={evenmatelogo} style={styles.evenmatelogo}></Image>
+      ),
+      headerLeft: () => (
+        <TouchableOpacity
+            onPress={() => router.back()}
+            accessibilityLabel="Go Back"
+            accessibilityRole="button"
+        >
+            <Ionicons
+            name='arrow-back'
+            size={30}
+            color="#4CAF50" 
+            />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]);
 
   // Get camera permissions
   useEffect(() => {
@@ -124,7 +147,7 @@ export default function JoinGroup() {
       {loading ? (
         <ActivityIndicator/>
       ) : (
-        <Pressable style={styles.button} onPress={() => handleJoinGroup()}>
+        <Pressable style={styles.button} onPress={() => handleJoinGroup(groupId)}>
           <Text style={styles.buttonText}>Add</Text>
         </Pressable>
       )}
@@ -205,6 +228,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
+  evenmatelogo: {
+    width: 33,
+    height: 27,
+    marginRight: 0,
+    resizeMode: 'cover',
+    overflow: 'hidden',
+  },
   scanButton: {
     flexDirection: 'row',
     backgroundColor: '#2196F3',
@@ -239,5 +269,3 @@ const styles = StyleSheet.create({
     margin: 20,
   },
 });
-
-export default JoinGroup;

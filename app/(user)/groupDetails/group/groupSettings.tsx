@@ -31,12 +31,14 @@ import defaultGroupPic from '@/assets/images/defaultGroupPic.png';
 import { supabase }  from '@/lib/supabase';
 import { v4 as uuidv4 } from 'uuid';
 import { fetchBlob, uploadGroupImage } from '@/api/profiles';
+import { useLayoutEffect } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import evenmatelogo from '@/assets/images/Evenmatelogo_1.png';
 
 
 export default function groupSettings() {
   const queryClient = useQueryClient();
   const router = useRouter();
-  const navigation = useNavigation();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isGroupImageLoading, setGroupImageLoading] = useState(false);
   const [isGroupImageUploading, setGroupImageUploading] = useState(false);
@@ -55,6 +57,27 @@ export default function groupSettings() {
     }
   }, [groupData]);
 
+  const navigation = useNavigation();
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <Image source={evenmatelogo} style={styles.evenmatelogo}></Image>
+      ),
+      headerLeft: () => (
+        <TouchableOpacity
+            onPress={() => router.back()}
+            accessibilityLabel="Go Back"
+            accessibilityRole="button"
+        >
+            <Ionicons
+            name='arrow-back'
+            size={30}
+            color="#4CAF50" 
+            />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]);
 
   const handleGroupImageChange = async () => {
     // Request permission to access the media library
@@ -280,6 +303,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 10,
+  },
+  evenmatelogo: {
+    width: 33,
+    height: 27,
+    marginRight: 0,
+    resizeMode: 'cover',
+    overflow: 'hidden',
   },
   subtitle: {
     fontSize: 16,

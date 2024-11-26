@@ -23,11 +23,11 @@ import defaultProfilePic from '@/assets/images/defaultProfilePic.png';
 import * as Clipboard from 'expo-clipboard';
 import { styles } from '@/constants/styles';
 
-type GroupItem = {
+interface GroupItem {
   id: string;
   name: string;
   notes: string;
-};
+}
 
 // Copy text to clipboard
 const copyToClipboard = async (text: string) => {
@@ -54,10 +54,12 @@ const AccountScreen = () => {
   // Fetch user groups data
   const {
     data: groupsDataRaw,
-  } = useGroupsList(currentUserId || null);
+  } = useGroupsList(currentUserId || null) as { data: { groups: { id: string; name: string; notes: string } }[] };
 
+  // const { groupsData } = map_groupsData(groupsDataRaw);
+  
   // Update user profile
-  const groupsData: GroupItem[] | undefined = groupsDataRaw?.map(item => ({
+  const groupsData: GroupItem[] | undefined = groupsDataRaw?.map((item) => ({
     id: item.groups.id,
     name: item.groups.name,
     notes: item.groups.notes,

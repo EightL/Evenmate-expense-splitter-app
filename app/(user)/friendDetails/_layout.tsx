@@ -24,12 +24,9 @@ export default function MatesStack() {
           headerRight: () => (
             <Pressable
               onPress={() => router.push('/friendDetails/account')} // Navigate to the account screen
-              style={({ pressed }) => [
-                styles.accountButton,
-                pressed && styles.pressedButton,
-              ]}
               accessibilityLabel="Account"
               accessibilityRole="button"
+              style={{marginRight: 5}}
             >
               <FontAwesome
                 name="user"
