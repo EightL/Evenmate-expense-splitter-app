@@ -14,21 +14,22 @@ import {
 } from 'react-native';
 import { useRouter, useNavigation } from 'expo-router';
 import { useQueryClient, InvalidateQueryFilters } from '@tanstack/react-query';
-import { useGetCurrentUserId } from '@/api/getCurrentUserId';
-import { createGroup, addUserToGroup } from '@/api/groups';
 import evenmatelogo from '@/assets/images/Evenmatelogo_1.png';
 import { Ionicons } from '@expo/vector-icons';
+import { useGetCurrentUserId } from '@/api/getCurrentUserId';
+import { createGroup, addUserToGroup } from '@/api/groups';
 
 export default function CreateGroupScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const navigation = useNavigation();
   const { data: currentUserId } = useGetCurrentUserId();
   
   const [groupName, setGroupName] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
   
-  const navigation = useNavigation();
+  // Header with button and logo of the app
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (

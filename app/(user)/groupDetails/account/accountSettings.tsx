@@ -25,8 +25,6 @@ import { useGetCurrentUserId } from '@/api/getCurrentUserId';
 import * as ImagePicker from 'expo-image-picker';
 import defaultProfilePic from '@/assets/images/defaultProfilePic.png';
 import { fetchBlob, uploadImageToStorage } from '@/api/profiles';
-
-
 import { v4 as uuidv4 } from 'uuid'; // Import the UUID generator
 
 export default function AccountSettings () {

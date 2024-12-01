@@ -34,7 +34,7 @@ const copyToClipboard = async (text: string) => {
 };
 
 // Account screen component
-const AccountScreen = () => {
+export default function AccountScreen () {
   const router = useRouter();
   const [isModalVisible, setModalVisible] = useState(false);
   const [isImageLoading, setImageLoading] = useState(true);
@@ -187,6 +187,3 @@ const AccountScreen = () => {
     </View>
   );
 };
-
-
-export default AccountScreen;

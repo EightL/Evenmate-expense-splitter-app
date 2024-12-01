@@ -6,8 +6,9 @@ import { StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 
 
-export default function ExpenseDetailsStack() {
+export default function TodoStack() {
   const router = useRouter();
+
   return (
     <Stack>
       <Stack.Screen
@@ -18,6 +19,7 @@ export default function ExpenseDetailsStack() {
           headerRight: () => (
             <Image source={evenmatelogo} style={styles.evenmatelogo} />
             ),
+          // go back button
           headerLeft: () => (
           <TouchableOpacity
               onPress={() => router.back()}
@@ -27,7 +29,7 @@ export default function ExpenseDetailsStack() {
               <Ionicons
               name='arrow-back'
               size={30}
-              color="#4CAF50" // Blue color for back button
+              color="#4CAF50" // Blue color
               />
           </TouchableOpacity>
           ),
@@ -44,5 +46,4 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
     overflow: 'hidden',
   },
-
 });

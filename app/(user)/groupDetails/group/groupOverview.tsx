@@ -1,14 +1,13 @@
-// app/(user)/groupDetails/group/groupOverview.tsx
-
 import React, { useMemo, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator, Alert, TouchableOpacity, Image } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useGroupMembersWithBalance } from '@/api/groups';
-import { supabase } from '@/lib/supabase'; // Ensure supabase is correctly imported
+import { supabase } from '@/lib/supabase'; 
 import { useNavigation } from 'expo-router';
 import { useLayoutEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import evenmatelogo from '@/assets/images/Evenmatelogo_1.png';
+import { useGroupMembersWithBalance } from '@/api/groups';
+
 
 type GroupMember = {
   userid: string;
@@ -20,12 +19,13 @@ type GroupMember = {
 
 export default function GroupOverviewScreen() {
   const router = useRouter();
+  const navigation = useNavigation();
   const { id: groupId, name: groupName, totalBalance } = useLocalSearchParams<{ id: string; name: string; totalBalance: number }>();
 
   const [session, setSession] = useState<{ user: { id: string } } | null>(null);
   const [isSessionLoading, setIsSessionLoading] = useState<boolean>(true);
 
-  const navigation = useNavigation();
+  // Header buttons
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -47,7 +47,7 @@ export default function GroupOverviewScreen() {
     });
   }, [navigation]);
 
-  // Retrieve current user session
+  // Get current user session
   useEffect(() => {
     const fetchSession = async () => {
       setIsSessionLoading(true);
@@ -56,8 +56,7 @@ export default function GroupOverviewScreen() {
         if (error) {
           console.error('Error fetching session:', error.message);
           Alert.alert('Authentication Error', 'Failed to retrieve user session.');
-          // Optionally, navigate to the sign-in screen
-          router.replace('/(auth)/sign-in');
+          router.replace('/(auth)/sign-in');         // Navigate to the sign-in screen
           setIsSessionLoading(false);
           return;
         }

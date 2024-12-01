@@ -7,17 +7,22 @@ import { useNavigation } from 'expo-router';
 import { useLayoutEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import evenmatelogo from '@/assets/images/Evenmatelogo_1.png';
+
+
 export default function GetEvenGroupScreen() {
-  const {groupId, groupName, myAvatar } = useLocalSearchParams();
   const router = useRouter();
-  const { data: groupMembers, error } = useGroupMembers(groupId);
+  const navigation = useNavigation();
+  const {groupId, groupName, myAvatar } = useLocalSearchParams();
+
   const [isImageLoading, setImageLoading] = React.useState(true);
+
+  const { data: groupMembers, error } = useGroupMembers(groupId);
+
 
   if (error) {
     return <Text style={styles.errorText}>Failed to load group members</Text>;
   }
 
-  const navigation = useNavigation();
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -25,15 +30,15 @@ export default function GetEvenGroupScreen() {
       ),
       headerLeft: () => (
         <TouchableOpacity
-            onPress={() => router.back()}
-            accessibilityLabel="Go Back"
-            accessibilityRole="button"
+          onPress={() => router.back()}
+          accessibilityLabel="Go Back"
+          accessibilityRole="button"
         >
-            <Ionicons
-            name='arrow-back'
-            size={30}
-            color="#4CAF50" 
-            />
+          <Ionicons
+          name='arrow-back'
+          size={30}
+          color="#4CAF50" 
+          />
         </TouchableOpacity>
       ),
     });
@@ -48,6 +53,7 @@ export default function GetEvenGroupScreen() {
     };
   };
 
+  // Redirects to get even page
   const handleGetEven = (mateId, memberName) => {
     router.push({
       pathname: '/groupDetails/group/getEvenMate',
@@ -60,6 +66,7 @@ export default function GetEvenGroupScreen() {
     });
   };
 
+  // Renders all group members
   const renderMemberItem = ({ item }: { item: GroupMember }) => (
     <TouchableOpacity
       style={styles.memberContainer}
@@ -68,8 +75,7 @@ export default function GetEvenGroupScreen() {
       <Image
         source={
           item.profiles.avatar_url && !isImageLoading
-            ? { uri: item.profiles.avatar_url }
-            : defaultProfilePic
+            ? { uri: item.profiles.avatar_url } : defaultProfilePic
         }
         style={styles.profileImage}
         onLoadEnd={() => setImageLoading(false)}
@@ -126,10 +132,10 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   memberContainer: {
-    flexDirection: 'row', // Align items in a row
-    justifyContent: 'space-between', // Space between items
-    alignItems: 'center', // Center items vertically
-    width: '100%', // Full width of the parent container
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
     padding: 10,
     borderRadius: 15,
     backgroundColor: '#D4F0DD',
@@ -139,7 +145,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
     marginLeft: 10,
-    flex: 3, // Take 3/4 of the space
+    flex: 3, // Takes 3/4 of the space
   },
   emptyText: {
     fontSize: 16,

@@ -5,21 +5,20 @@ import {
   View,
   Text,
   TextInput,
-  Pressable,
   TouchableOpacity,
   Modal,
   Animated,
-  Platform,
   TouchableWithoutFeedback,
   Keyboard,
   Image,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useTodoList, createTodo, changeTodoStatus } from '@/api/todo';
 import { useNavigation } from 'expo-router';
 import evenmatelogo from '@/assets/images/Evenmatelogo_1.png';
 import { useLayoutEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
+import { useTodoList, createTodo, changeTodoStatus } from '@/api/todo';
+
 
 type TodoItem = {
   id: string;
@@ -30,6 +29,7 @@ type TodoItem = {
 export default function TodoScreen() {
     const router = useRouter();
     const { groupId } = useLocalSearchParams();
+    const navigation = useNavigation();
     const { data: TodoList, error, isLoading } = useTodoList(groupId);
   
     const [todos, setTodos] = useState<TodoItem[]>([]);
@@ -37,7 +37,7 @@ export default function TodoScreen() {
     const [isModalVisible, setModalVisible] = useState(false);
     const slideAnim = useState(new Animated.Value(0))[0];
   
-    const navigation = useNavigation();
+    // Header button and logo
     useLayoutEffect(() => {
       navigation.setOptions({
         headerRight: () => (
@@ -65,7 +65,7 @@ export default function TodoScreen() {
       }
     }, [TodoList]);
   
-
+    // Changing state of ToDo from done<-->notDone
     const toggleTodo = async (id: string, currentDone: boolean) => {
       try {
         await changeTodoStatus(id, !currentDone);
@@ -79,6 +79,7 @@ export default function TodoScreen() {
       }
     };
   
+    // Adds new ToDo
     const addTodo = async () => {
       if (!newTodoText.trim()) return;
   
@@ -111,6 +112,7 @@ export default function TodoScreen() {
       });
     };
   
+    // Renders all the ToDos for the group
     const renderTodoItem = ({ item }: { item: TodoItem }) => (
         <TouchableOpacity
           style={[
@@ -256,12 +258,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: '#4CAF50',
   },
-  titleSmaller:{
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    
-  },
   todoText: {
     fontSize: 16,
     flex: 1,
@@ -274,11 +270,6 @@ const styles = StyleSheet.create({
     flex: 0.8,
     justifyContent: 'flex-end',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalOverlayIOS: {
-    flex: 0.6,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', 
   },
   modalContainer: {
     backgroundColor: '#fff',
@@ -293,14 +284,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   input: {
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 10,
-    fontSize: 16,
-    marginBottom: 15,
-  },
-  inputDescription: {
     borderColor: '#ccc',
     borderWidth: 1,
     borderRadius: 8,
@@ -328,14 +311,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#ccc',
   },
   todoDone: {
-    backgroundColor: '#D4DDD7', // Light green for done todos
+    backgroundColor: '#D4DDD7', // Light green
   },
   todoNotDone: {
-    backgroundColor: '#D4F0DD', // Dark green for not done todos
+    backgroundColor: '#D4F0DD', // Dark green
   },
   todoTextNotDone: {
-    fontWeight: 'bold', // Bold text for not done todos
-    color: '#000', // White text for better visibility on dark green background
+    fontWeight: 'bold',
+    color: '#000',
   },
   evenmatelogo: {
     width: 33,

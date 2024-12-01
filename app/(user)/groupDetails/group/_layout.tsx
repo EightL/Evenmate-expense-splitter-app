@@ -1,8 +1,6 @@
 import React from 'react';
 import { Pressable, Alert, StyleSheet } from 'react-native';
-import { Stack, useLocalSearchParams, usePathname } from 'expo-router';
-import { FontAwesome } from '@expo/vector-icons'; // Ensure you've installed expo/vector-icons
-import { supabase } from '@/lib/supabase';
+import { Stack, usePathname } from 'expo-router';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { TouchableOpacity } from 'react-native';
@@ -52,7 +50,7 @@ export default function UserLayout() {
                 <Ionicons
                 name='arrow-back'
                 size={30}
-                color="#4CAF50" // Blue color for back button
+                color="#4CAF50" // Blue color
                 />
             </TouchableOpacity>
           ),
@@ -67,49 +65,49 @@ export default function UserLayout() {
           ),
         }}
       />
-        <Stack.Screen
+      {/* Other screens, some hidden headers, some just renamed */}
+      <Stack.Screen
         name="expense"
         options={{
           headerShown: false,
         }}
       />
-        <Stack.Screen
+      <Stack.Screen
         name="getEvenGroup"
         options={{
           title: 'Get Even',
         }}
       />
       <Stack.Screen
-      name="groupNotes"
-      options={{
-        title: 'Group Notes',
+        name="groupNotes"
+        options={{
+          title: 'Group Notes',
       }}/>
       <Stack.Screen
-      name="groupOverview"
-      options={{
-        title: 'Group Overview',
+        name="groupOverview"
+        options={{
+          title: 'Group Overview',
       }}/>
       <Stack.Screen
-      name="groupSettings"
-      options={{
-        title: 'Group Settings',
+        name="groupSettings"
+        options={{
+          title: 'Group Settings',
       }}/>
       <Stack.Screen
-      name="getEvenMate"
-      options={{
-        title: 'Get Even',
+        name="getEvenMate"
+        options={{
+          title: 'Get Even',
       }}/>
       <Stack.Screen
-      name="groupTodo"
-      options={{
-        title: 'To-Do',
+        name="groupTodo"
+        options={{
+          title: 'To-Do',
       }}/>
       <Stack.Screen
-      name="todoDetails"
-      options={{
-        headerShown: false,
+        name="todoDetails"
+        options={{
+          headerShown: false,
       }}/>
-      {/* Other screens */}
     </Stack>
   );
 }
@@ -122,7 +120,7 @@ const styles = StyleSheet.create({
     
   },
   backButton: {
-    marginLeft: 15, // Adds spacing from the left edge
-    padding: 5, // Increases the touchable area
+    marginLeft: 15,
+    padding: 5,
   },
 });

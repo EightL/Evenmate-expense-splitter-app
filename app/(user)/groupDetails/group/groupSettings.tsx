@@ -1,5 +1,3 @@
-
-// app/(user)/groupDetails/groupSettings.tsx
 import 'react-native-get-random-values'
 import { Buffer } from 'buffer';
 global.Buffer = Buffer;
@@ -10,7 +8,6 @@ import {
   Text, 
   StyleSheet, 
   Dimensions, 
-  Pressable, 
   Alert, 
   TextInput,
   ScrollView,
@@ -20,36 +17,35 @@ import {
 } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import * as Clipboard from 'expo-clipboard';
 import * as ImagePicker from 'expo-image-picker';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigation } from 'expo-router';
-import { useGetCurrentUserId } from '@/api/getCurrentUserId';
-import { leaveGroup, updateGroupSetting } from '@/api/groups'; // Ensure updateGroupName is implemented
-import { useGroupInfo } from '@/api/groups';
 import defaultGroupPic from '@/assets/images/defaultGroupPic.png';
-import { supabase }  from '@/lib/supabase';
 import { v4 as uuidv4 } from 'uuid';
-import { fetchBlob, uploadGroupImage } from '@/api/profiles';
 import { useLayoutEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import evenmatelogo from '@/assets/images/Evenmatelogo_1.png';
+import { useGetCurrentUserId } from '@/api/getCurrentUserId';
+import { leaveGroup, updateGroupSetting } from '@/api/groups';
+import { useGroupInfo } from '@/api/groups';
+import { uploadGroupImage } from '@/api/profiles';
 
 
 export default function groupSettings() {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const navigation = useNavigation();
+  const { groupId } = useLocalSearchParams<{ groupId: string }>();
+
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isGroupImageLoading, setGroupImageLoading] = useState(false);
   const [isGroupImageUploading, setGroupImageUploading] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { groupId } = useLocalSearchParams<{ groupId: string }>();
   const [groupName, setGroupName] = useState('');
 
   const { data: currentUserId, error: currentUserError } = useGetCurrentUserId();
   const { data: groupData, error: groupError } = useGroupInfo(groupId);
 
-  console.log("groupdata: ", groupData);
   // Initialize groupName with groupData.name when groupData is loaded
   useEffect(() => {
     if (groupData && groupData.name) {
@@ -57,7 +53,6 @@ export default function groupSettings() {
     }
   }, [groupData]);
 
-  const navigation = useNavigation();
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -79,6 +74,7 @@ export default function groupSettings() {
     });
   }, [navigation]);
 
+  // Changing group picture
   const handleGroupImageChange = async () => {
     // Request permission to access the media library
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -135,7 +131,7 @@ export default function groupSettings() {
     }
   };
 
-
+  // Handeling leaving a group
   const handleLeaveGroup = () => {
     Alert.alert(
       'Leave Group',
@@ -179,7 +175,7 @@ const handleSaveDetails = async () => {
   try {
     setLoading(true);
 
-    let imageUrl = groupData.avatar_url || ''; // Assuming groupData has avatar_url
+    let imageUrl = groupData.avatar_url || '';
     console.log('Initial imageUrl:', imageUrl);
 
     if (selectedImage) {
@@ -195,9 +191,7 @@ const handleSaveDetails = async () => {
       }
     }
 
-    // Update group details with new name and image URL
-    // Assuming you have an API function to update group info
-    
+    // Update group details with new name and image URL    
     await updateGroupSetting(groupId, groupName, imageUrl);
 
     Alert.alert('Success', 'Group details have been updated.');
@@ -217,7 +211,7 @@ const handleSaveDetails = async () => {
     );
   }
 
-  const qrData = groupId; // Customize as needed
+  const qrData = groupId;
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -361,20 +355,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  copyContainer: {
-    width: '100%',
-    padding: 15,
-    borderRadius: 10,
-    backgroundColor: '#E0F7E9',
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  groupIdLabel: {
-    fontSize: 16,
-    marginBottom: 5,
-    color: '#333',
-    textAlign: 'center',
-  },
   groupId: {
     fontSize: 18,
     fontWeight: '600',
@@ -397,6 +377,5 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
-
   },
 });

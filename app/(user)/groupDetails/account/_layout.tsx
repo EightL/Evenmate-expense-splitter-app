@@ -1,10 +1,10 @@
 import { Pressable, StyleSheet, Image } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { FontAwesome, Ionicons } from '@expo/vector-icons';
-// Import the Evenmate logo
-import evenmatelogo from '@/assets/images/Evenmatelogo_1.png';
+import evenmatelogo from '@/assets/images/Evenmatelogo_1.png'; // Import the Evenmate logo
 
-export default function ExpenseStack() {
+
+export default function AccountStack() {
   const router = useRouter();
 
   return (
@@ -14,6 +14,7 @@ export default function ExpenseStack() {
         options={{
           title: 'Account',
           headerTitleAlign: 'center', // Center the title
+          // Account settings button in the header
           headerRight: () => (
             <Pressable
               onPress={() => router.push('/groupDetails/account/accountSettings')}
@@ -27,6 +28,7 @@ export default function ExpenseStack() {
               />
             </Pressable>
           ),
+          // Go back arrow in the header
           headerLeft: () => (
             <Pressable
               onPress={() => router.back()}
@@ -49,6 +51,7 @@ export default function ExpenseStack() {
         headerRight: () => (
             <Image source={evenmatelogo} style={styles.evenmatelogo} />
           ),
+        // Go back button
         headerLeft: () => (
         <Pressable
             onPress={() => router.back()}

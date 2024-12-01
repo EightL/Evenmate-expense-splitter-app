@@ -26,27 +26,28 @@ type User = {
 export default function ExpenseDetailScreenInMates() {
   const router = useRouter();
   const { id: expenseId, mateid } = useLocalSearchParams();
-  // const [expense, setExpense] = useState<Expense | null>(null);
+
   const [splitDetails, setSplitDetails] = useState<{ username: string; share: number }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const { data: expense, error: error10 } = useExpenseInfo(expenseId);
   const { data: User, error : error2 } = useUserInfo(expense?.paid_by);
-  // const { expenseData, splitDetails } = await fetchExpenseDetails(expenseId as string);
 
+  // Fetch details for the expense
   useEffect(() => {
     const fetchDetails = async () => {
       try {
         // setIsLoading(true);
         const { expenseData, splitDetails } = await fetchExpenseDetails(expenseId as string);
 
-        // setExpense(expenseData);
         setSplitDetails(splitDetails);
-      } catch (error: any) {
+      }
+      catch (error: any) {
         console.error('Error fetching expense details:', error.message);
         setError(error.message);
-      } finally {
+      }
+      finally {
         setIsLoading(false);
       }
     };
@@ -98,10 +99,6 @@ export default function ExpenseDetailScreenInMates() {
 }
 
 const styles = StyleSheet.create({
-  loader: {
-    flex: 1,
-    justifyContent: 'center',
-  },
   container: {
     flex: 1,
     padding: 20,

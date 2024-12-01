@@ -3,7 +3,7 @@ import { Pressable, Image} from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import { styles } from '@/constants/styles';
-import evenmatelogo from '@/assets/images/Evenmatelogo_1.png'; // Import the Evenmate logo
+import evenmatelogo from '@/assets/images/Evenmatelogo_1.png';
 
 
 export default function GroupsStack() {
@@ -61,7 +61,6 @@ export default function GroupsStack() {
           title: 'Join Group',
         }}
       />
-
     </Stack>
   );
 }

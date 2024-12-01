@@ -1,12 +1,9 @@
-// app/(user)/groupDetails/group/groupNotes.tsx
-
 import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TextInput,
-  Pressable,
   ActivityIndicator,
   Alert,
   ScrollView,
@@ -14,17 +11,18 @@ import {
   Image,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { supabase } from '@/lib/supabase';
-import { fetchGroupNotes, updateGroupNotes } from '@/api/groups';
 import { useNavigation } from 'expo-router';
 import { useLayoutEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import evenmatelogo from '@/assets/images/Evenmatelogo_1.png';
+import { fetchGroupNotes, updateGroupNotes } from '@/api/groups';
+
 
 type GroupNotesProps = {};
 
 const GroupNotes: React.FC<GroupNotesProps> = () => {
   const router = useRouter();
+  const navigation = useNavigation();
   const { id, name } = useLocalSearchParams();
 
   const [notes, setNotes] = useState<string>('');
@@ -32,7 +30,7 @@ const GroupNotes: React.FC<GroupNotesProps> = () => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const navigation = useNavigation();
+  // Header buttons
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -54,7 +52,7 @@ const GroupNotes: React.FC<GroupNotesProps> = () => {
     });
   }, [navigation]);
 
-  // Fetch notes when the component mounts
+  // Fetch notes on mount
   useEffect(() => {
     const fetchNotes = async () => {
       setIsLoading(true);
@@ -77,7 +75,7 @@ const GroupNotes: React.FC<GroupNotesProps> = () => {
     }
   }, [id]);
 
-  // Handler to save notes
+  // Handle saving notes
   const handleSaveNotes = async () => {
     setIsSaving(true);
     try {

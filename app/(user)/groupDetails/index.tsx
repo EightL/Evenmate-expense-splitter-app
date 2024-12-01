@@ -50,10 +50,12 @@ export default function GroupsScreen() {
     return <Text>Failed to load groups</Text>;
   }
 
+  // Create new group
   const handleCreateNewGroup = () => {
     router.push('/groupDetails/createGroup');
   };
 
+  // Join new group
   const handleJoinGroup = () => {
     router.push('/groupDetails/joinGroup');
   };
@@ -69,6 +71,7 @@ export default function GroupsScreen() {
     };
   };
 
+  // Render users list of groups
   const renderGroups = ({ item }: { item: Group }) => {
     // Normalize the total balance to convert small values close to zero to zero
     const totalBalance = groupBalanceMap[item.groupid] || 0;

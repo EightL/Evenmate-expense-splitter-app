@@ -17,11 +17,12 @@ import { deleteTodo, updateTodo, useTodoInfo } from '@/api/todo';
 export default function EditTodoScreen() {
   const router = useRouter();
   const { id: todoId } = useLocalSearchParams();
+  const queryClient = useQueryClient();
+
   const [todoName, setTodoName] = useState('');
   const [todoDescription, setTodoDescription] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const queryClient = useQueryClient();
 
   const { data: todo, isLoading, error } = useTodoInfo(todoId);
 
@@ -32,6 +33,7 @@ export default function EditTodoScreen() {
     }
   }, [todo]);
 
+  // handeling of when user presses delete
   const handleDeleteTodo = async () => {
     Alert.alert(
       'Confirm Deletion',
@@ -49,12 +51,15 @@ export default function EditTodoScreen() {
               setIsDeleting(true);
               await deleteTodo(todoId);
 
-              queryClient.invalidateQueries(); // Refresh queries
+              // Refresh data
+              queryClient.invalidateQueries();
               router.back();
-            } catch (error: any) {
+            }
+            catch (error: any) {
               console.error('Error deleting to-do:', error.message);
               Alert.alert('Error', error.message);
-            } finally {
+            }
+            finally {
               setIsDeleting(false);
             }
           },
@@ -64,6 +69,7 @@ export default function EditTodoScreen() {
     );
   };
 
+  // When user presses update
   const handleUpdateTodo = async () => {
     if (!todoName.trim() || !todoDescription.trim()) {
       Alert.alert('Validation Error', 'Please enter both name and description.');
@@ -77,10 +83,12 @@ export default function EditTodoScreen() {
       queryClient.invalidateQueries(); // Refresh queries
       Alert.alert('Success', 'To-do updated successfully.');
       router.back();
-    } catch (error: any) {
+    }
+    catch (error: any) {
       console.error('Error updating to-do:', error.message);
       Alert.alert('Error', error.message);
-    } finally {
+    }
+    finally {
       setIsUpdating(false);
     }
   };
@@ -103,56 +111,51 @@ export default function EditTodoScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-    <Text style={styles.title}>Edit To-Do Details</Text>
-    <TextInput
-      style={styles.input}
-      placeholder="To-Do Name"
-      value={todoName}
-      onChangeText={setTodoName}
-    />
-    <TextInput
-      style={styles.descriptionInput}
-      placeholder="To-Do Description"
-      value={todoDescription}
-      onChangeText={setTodoDescription}
-      multiline
-    />
-  
-    {/* Other content can remain here */}
-    
-    <View style={styles.buttonContainer}>
-      <Pressable
-        style={[
-          styles.updateButton,
-          (isUpdating || isDeleting) && styles.buttonDisabled,
-        ]}
-        onPress={handleUpdateTodo}
-        disabled={isUpdating || isDeleting}
-      >
-        {isUpdating ? (
-          <ActivityIndicator />
-        ) : (
-          <Text style={styles.updateButtonText}>Update To-Do</Text>
-        )}
-      </Pressable>
-  
-      <Pressable
-        style={[
-          styles.deleteButton,
-          (isUpdating || isDeleting) && styles.buttonDisabled,
-        ]}
-        onPress={handleDeleteTodo}
-        disabled={isUpdating || isDeleting}
-      >
-        {isDeleting ? (
-          <ActivityIndicator />
-        ) : (
-          <FontAwesome name="trash" size={24} color="#fff" />
-        )}
-      </Pressable>
-    </View>
-  </ScrollView>
+      <Text style={styles.title}>Edit To-Do Details</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="To-Do Name"
+        value={todoName}
+        onChangeText={setTodoName}
+      />
+      <TextInput
+        style={styles.descriptionInput}
+        placeholder="To-Do Description"
+        value={todoDescription}
+        onChangeText={setTodoDescription}
+        multiline
+      />
 
+      <View style={styles.buttonContainer}>
+        <Pressable
+          style={[
+            styles.updateButton,
+            (isUpdating || isDeleting) && styles.buttonDisabled,
+          ]}
+          onPress={handleUpdateTodo}
+          disabled={isUpdating || isDeleting}
+        >
+          {isUpdating ? (
+            <ActivityIndicator /> ) : (
+            <Text style={styles.updateButtonText}>Update To-Do</Text>
+          )}
+        </Pressable>
+    
+        <Pressable
+          style={[
+            styles.deleteButton,
+            (isUpdating || isDeleting) && styles.buttonDisabled,
+          ]}
+          onPress={handleDeleteTodo}
+          disabled={isUpdating || isDeleting}
+        >
+          {isDeleting ? (
+            <ActivityIndicator /> ) : (
+            <FontAwesome name="trash" size={24} color="#fff" />
+          )}
+        </Pressable>
+      </View>
+    </ScrollView>
   );
 }
 
@@ -220,12 +223,12 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     marginBottom: 20,
     fontSize: 16,
-    height: 130, // Increase the height for the description field
+    height: 130,
     textAlignVertical: 'top',
   },
   buttonContainer: {
     position: 'absolute',
-    bottom: 20, // Position the buttons above the screen's bottom edge
+    bottom: 20,
     left: 20,
     right: 20,
     flexDirection: 'row',
@@ -238,18 +241,5 @@ const styles = StyleSheet.create({
     marginLeft: 10, // Space between buttons
     borderRadius: 10,
     alignItems: 'center',
-  },
-  updateButton: {
-    flex: 6,
-    backgroundColor: '#5AC07C',
-    paddingVertical: 15,
-    marginRight: 10, // Optional spacing for symmetry
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  updateButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
   },
 });

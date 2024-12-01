@@ -9,6 +9,7 @@ import { useRouter } from 'expo-router';
 
 export default function ExpenseDetailsStack() {
   const router = useRouter();
+
   return (
     <Stack>
       <Stack.Screen

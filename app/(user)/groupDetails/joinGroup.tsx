@@ -13,12 +13,12 @@ import {
 } from 'react-native';
 import { useRouter, useNavigation } from 'expo-router';
 import { Camera, CameraView } from 'expo-camera';
-import * as Clipboard from 'expo-clipboard';
 import { useQueryClient, InvalidateQueryFilters  } from '@tanstack/react-query';
-import { useGetCurrentUserId } from '@/api/getCurrentUserId';
-import { checkUserMembership, addUserToGroup } from '@/api/groups';
 import { Ionicons } from '@expo/vector-icons';
 import evenmatelogo from '@/assets/images/Evenmatelogo_1.png';
+import { useGetCurrentUserId } from '@/api/getCurrentUserId';
+import { checkUserMembership, addUserToGroup } from '@/api/groups';
+
 
 export default function JoinGroup() {
   const router = useRouter();
@@ -32,6 +32,7 @@ export default function JoinGroup() {
   const [isScannerVisible, setScannerVisible] = useState(false);
   const [scanned, setScanned] = useState(false);
 
+  // Header with go back button and app logo
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -39,15 +40,15 @@ export default function JoinGroup() {
       ),
       headerLeft: () => (
         <TouchableOpacity
-            onPress={() => router.back()}
-            accessibilityLabel="Go Back"
-            accessibilityRole="button"
+          onPress={() => router.back()}
+          accessibilityLabel="Go Back"
+          accessibilityRole="button"
         >
-            <Ionicons
-            name='arrow-back'
-            size={30}
-            color="#4CAF50" 
-            />
+          <Ionicons
+          name='arrow-back'
+          size={30}
+          color="#4CAF50" 
+          />
         </TouchableOpacity>
       ),
     });
@@ -63,6 +64,7 @@ export default function JoinGroup() {
     getCameraPermissions();
   }, []);
 
+  // Join entered group
   const handleJoinGroup = async (enteredGroupId: string) => {
     const finalGroupId = enteredGroupId ?? groupId;
 
@@ -182,12 +184,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'flex-start',
-  },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
   },
   title: {
     fontSize: 24,

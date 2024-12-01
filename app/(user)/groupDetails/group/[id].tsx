@@ -1,23 +1,19 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import { View, Text, StyleSheet, Pressable, ActivityIndicator, FlatList, Alert, Image, Modal, TouchableOpacity } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { View, Text, StyleSheet, ActivityIndicator, FlatList, Image, Modal, TouchableOpacity } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Stack } from 'expo-router';
-import { supabase } from '@/lib/supabase';
-import { useSharedGroups } from '@/api/Rel_inGroup';
 import { useGroupExpensesList } from '@/api/expenses';
 import { useGroupMembersWithBalance, useGroupInfo } from '@/api/groups';
 import defaultGroupPic from '@/assets/images/defaultGroupPic.png';
 import { FontAwesome } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Ionicons } from '@expo/vector-icons';
 import { useGetCurrentUserId } from '@/api/getCurrentUserId';
 import { useUserInfo } from '@/api/profiles';
 import defaultProfilePic from '@/assets/images/defaultProfilePic.png';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useInvolvedPeople } from '@/api/involvedUsers';
+
 
 export default function GroupDetailScreen() {
-  const THRESHOLD = 0.01; // Define the threshold for treating values close to zero as zero
+  const THRESHOLD = 0.01; // Define threshold for treating values close to zero as zero (when showing balances)
 
   const router = useRouter();
   const { id: groupId, name } = useLocalSearchParams();
@@ -137,6 +133,7 @@ export default function GroupDetailScreen() {
 
   const sortedExpensesData = expensesData?.slice().sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
+  // Render list of expenses
   const renderExpenses = ({ item }: { item: Expense }) => {
     const paidByUsername = userIdToUsernameMap.get(item.paid_by) || 'Unknown';
     const isUserInvolved = null;
@@ -193,6 +190,7 @@ export default function GroupDetailScreen() {
     );
   };
 
+  // Renders all group members with their balances
   const renderMembers = ({ item }: { item: groupMember }) => {
     // Normalize the balance to convert small values close to zero to zero
     const normalizedBalance = Math.abs(item.balance) < THRESHOLD ? 0 : item.balance;
@@ -306,11 +304,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 15,
   },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
   sectionTitle: {
     fontSize: 22,
     fontWeight: 'bold',
@@ -331,18 +324,6 @@ const styles = StyleSheet.create({
   balanceText: {
     fontSize: 16,
     color: '#333',
-  },
-  expenseContainer: {
-    width: '100%',
-    padding: 15,
-    backgroundColor: '#D4F0DD',
-    borderRadius: 10,
-    marginBottom: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
   },
   expenseDetail: {
     fontSize: 14,
@@ -506,11 +487,5 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: '#fff',
     alignItems: 'center',
-  },
-  iconImage: {
-    width: '100%',
-    height: undefined,
-    aspectRatio: 20 / 21,
-    resizeMode: 'cover',    
   },
 });

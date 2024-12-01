@@ -27,12 +27,14 @@ type Expense = {
 
 export default function EditExpenseScreen() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { id, mateid } = useLocalSearchParams<{ id: string }>();
+
   const [expenseName, setExpenseName] = useState('');
   const [cost, setCost] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const queryClient = useQueryClient();
+
   const { data: currentUserId } = useGetCurrentUserId();
   const { data: mateIds } = useInvolvedPeople(id);
   const { data: expense, isLoading: isExpenseLoading, error } = useExpenseInfo(id);
@@ -44,6 +46,7 @@ export default function EditExpenseScreen() {
     }
   }, [expense]);
 
+  // Handeling of deleting expense
   const handleDeleteExpense = async () => {
     Alert.alert(
       'Confirm Deletion',
@@ -89,6 +92,7 @@ export default function EditExpenseScreen() {
     );
   };
 
+  // Handeling expense update information
   const handleUpdateExpense = async () => {
     if (!expenseName.trim() || !cost.trim()) {
       Alert.alert('Validation Error', 'Please enter both name and cost.');
@@ -207,7 +211,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loader: {
-    // Optional additional styling
   },
   errorContainer: {
     flex: 1,

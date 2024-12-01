@@ -1,35 +1,32 @@
-// app/(user)/friendDetails/getEvenMate.tsx
-
 import React, { useEffect, useState } from 'react';
-import { View, TextInput, Text, Pressable, StyleSheet, Alert, ActivityIndicator, Keyboard, TouchableWithoutFeedback, Image, TouchableOpacity } from 'react-native';
+import { View, TextInput, Text, StyleSheet, Alert, Keyboard, TouchableWithoutFeedback, Image, TouchableOpacity } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { handleUpdateBalances } from '@/api/updateBalances';
 import { useQueryClient } from '@tanstack/react-query';
-import { useGetCurrentUserId } from '@/api/getCurrentUserId';
-import { useGetBalance } from '@/api/getBalance';
 import defaultProfilePic from '@/assets/images/defaultProfilePic.png';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { useLayoutEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from 'expo-router';
 import evenmatelogo from '@/assets/images/Evenmatelogo_1.png';
+import { handleUpdateBalances } from '@/api/updateBalances';
+import { useGetCurrentUserId } from '@/api/getCurrentUserId';
+import { useGetBalance } from '@/api/getBalance';
+
+
 export default function GetEvenInput() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [isImageLoading, setImageLoading] = useState(true);
+  const navigation = useNavigation();
   const { name, mateId, groupId, myAvatar } = useLocalSearchParams<{ name: string; mateId: string; groupId: string; myAvatar: string }>();
-  const { data: currentUserId, error: currentUserError } = useGetCurrentUserId();
 
-  // const { data: mateData, error: mateError, isLoading: mateLoading } = useUserInfo(mateId);
-  // if (mateLoading) {
-  //   return <ActivityIndicator />;
-  // }
+  const [isImageLoading, setImageLoading] = useState(true);
   const [amount, setAmount] = useState('');
+
+  const { data: currentUserId, error: currentUserError } = useGetCurrentUserId();
   const { data: balance } = useGetBalance(currentUserId, mateId);
 
   const avatar_url = null;
 
-  const navigation = useNavigation();
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -37,15 +34,15 @@ export default function GetEvenInput() {
       ),
       headerLeft: () => (
         <TouchableOpacity
-            onPress={() => router.back()}
-            accessibilityLabel="Go Back"
-            accessibilityRole="button"
+          onPress={() => router.back()}
+          accessibilityLabel="Go Back"
+          accessibilityRole="button"
         >
-            <Ionicons
-            name='arrow-back'
-            size={30}
-            color="#4CAF50" 
-            />
+          <Ionicons
+          name='arrow-back'
+          size={30}
+          color="#4CAF50" 
+          />
         </TouchableOpacity>
       ),
     });
@@ -53,11 +50,11 @@ export default function GetEvenInput() {
 
   useEffect(() => {
     if (balance?.balance) {
-      setAmount((-parseFloat(balance.balance)).toString()); // Invert the balance sign here
+      setAmount((-parseFloat(balance.balance)).toString()); // Invert the balance sign
     }
   }, [balance]);
 
-  // console.log('groupId:', groupId);
+  // Adds getEven as expense
   const handleAdd = async () => {
     if (amount.trim() !== '') {
       const numericAmount = parseFloat(amount);
@@ -72,6 +69,7 @@ export default function GetEvenInput() {
           mateIds: [mateId],
           share: numericAmount,
         });
+        // Refetch data next time request is made
         queryClient.invalidateQueries({ queryKey: ['mates', currentUserId] });
         queryClient.invalidateQueries({ queryKey: ['mates', mateId] });
         queryClient.invalidateQueries({ queryKey: ['groupMembersWithBalance', groupId] });
@@ -196,12 +194,12 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: '#4CAF50',
-    padding: 15, // Increased padding
+    padding: 15,
     borderRadius: 10,
-    width: 205, // Increased width
+    width: 205,
     textAlign: 'center',
     marginRight: 10,
-    fontSize: 18, // Increased font size
+    fontSize: 18,
   },
   currencyContainer: {
     paddingHorizontal: 15,
@@ -210,19 +208,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#D4F0DD',
   },
   currencyText: {
-    fontSize: 18, // Increased font size
+    fontSize: 18,
     fontWeight: 'bold',
   },
   button: {
     backgroundColor: '#4CAF50',
-    paddingVertical: 20, // Increased vertical padding
-    paddingHorizontal: 100, // Increased horizontal padding
+    paddingVertical: 20,
+    paddingHorizontal: 100,
     borderRadius: 10,
     alignItems: 'center',
   },
   buttonText: {
     color: '#fff',
-    fontSize: 20, // Increased font size
+    fontSize: 20,
     fontWeight: 'bold',
   },
   evenmatelogo: {
