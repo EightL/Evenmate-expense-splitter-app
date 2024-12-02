@@ -1,50 +1,104 @@
-# Welcome to your Expo app 👋
+# Project: Evenmate
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+## Authors
+- **Martin Ševčík**
+- **Jakub Lůčný**  
+*VUT FIT 2024*
 
-## Get started
+---
 
-1. Install dependencies
+## Directory Structure
+The following is the structure of the Evenmate project:
 
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-    npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+Evenmate/                
+├── api/                           # Backend API functions (Authors: Martin Ševčík, Jakub Lůčný)        
+│   ├── expenses/      
+│   │   └── index.ts
+│   ├── getBalance/
+│   │   └── index.ts 
+│   ├── groups/
+│   │   └── index.ts
+│   ├── involvedUsers/
+│   │   └── index.ts
+│   ├── mates/
+│   │   └── index.ts
+│   ├── profiles/
+│   │   └── index.ts
+│   ├── Rel_inGroup/
+│   │   └── index.ts
+│   ├── sign-up/
+│   │   └── index.ts
+│   ├── updateBalances/
+│   │   └── index.ts
+│   ├── getCurrentUserId.ts      
+│   
+├── app/                            # Main Frontend app directory (Authors: Martin Ševčík, Jakub Lůčný)
+│   └── (auth)/                     # Authentication-related components (Author: Jakub Lůčný)
+│   │   ├── _layout.tsx
+│   │   ├── sign-in.tsx
+│   │   └── sign-up.tsx
+│   └── (shared)/                   # Shared components and functions (Authors: Martin Ševčík)
+│   │   ├── account/                # Account settings
+│   │   │   ├── _layout.tsx
+│   │   │   ├── accountSettings.tsx
+│   │   │   └── index.tsx
+│   │   ├── expense/                # Expense management
+│   │   │   ├── _layout.tsx
+│   │   │   ├── [id].tsx
+│   │   │   └── editExpense/
+│   │   │       ├── _layout.tsx
+│   │   │       └── [id].tsx
+│   └── (user)/                     # User profile management, Core of the App
+│   │   ├── expenseDetails/         # Expense details (Authors: Martin Ševčík)
+│   │   │   ├── _layout.tsx
+│   │   │   ├── index.tsx
+│   │   │   └── selectMates.tsx
+│   │   ├── friendDetails/          # Friend details (Authors: Martin Ševčík)
+│   │   │   ├── _layout.tsx
+│   │   │   ├── index.tsx
+│   │   │   ├── [id].tsx
+│   │   │   ├── addNewMate.tsx
+│   │   │   └── getEvenMate.tsx
+│   │   ├── groupDetails/           # Group details (Authors: Jakub Lůčný)
+│   │   │   ├── _layout.tsx
+│   │   │   ├── index.tsx
+│   │   │   ├── createGroup.tsx
+│   │   │   ├── joinGroup.tsx
+│   │   │   └── group/
+│   │   │       ├── _layout.tsx
+│   │   │       ├── [id].tsx
+│   │   │       ├── index.tsx
+│   │   │       ├── getEvenGroup.tsx
+│   │   │       ├── getEvenMate.tsx
+│   │   │       ├── groupNotes.tsx
+│   │   │       ├── groupTodo.tsx
+│   │   │       ├── groupSettings.tsx
+│   │   │       ├── groupOverview.tsx
+│   │   │       └── todoDetails/
+│   │   │           ├── _layout.tsx
+│   │   │           └── [id].tsx
+│   │   ├── _layout.tsx
+│   │   └── index.tsx
+│   ├── _layout.tsx
+│   ├── +html.tsx
+│   ├── +not_found.tsx
+│   └── index.tsx
+├── lib/                            # Authentication functions, Supabase (Authors: Martin Ševčík, Jakub Lůčný)
+│   ├── auth.tsx
+│   └── supabase.tsx
+├── providers/                      # Context providers (Authors: Martin Ševčík, Jakub Lůčný)
+│   ├── AuthProvider.tsx
+│   └── QueryProvider.tsx
+├── constants/                      # Constants (Authors: Martin Ševčík, Jakub Lůčný)
+│   ├── Colors.ts                   # Predefined colors by Expo
+│   └── styles.ts                   # Shared styles across _layouts
+├── assets/                         # Images and other assets
+│   └── images/
+│       ├── cat-png.png
+│       ├── defaultProfilePic.png
+│       ├── defaultGroupPic.png
+│       └── Evenmatelogo_1.png
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+---
