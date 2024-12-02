@@ -1,7 +1,12 @@
-// api/Rel_inGroup/index.ts
+// /api/Rel_inGruop/index.ts
+// ITU Project, "Evenmate"
+// Author(s): Martin Ševčík, Jakub Lůčný
+// VUT FIT 2024
+
 import { supabase } from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
 
+// Retrieve all groups of specific user that are shared with another user
 export const useSharedGroups = (currentUserId: string | undefined, mateId: string | string[]) => {
   return useQuery({
     queryKey: ['sharedGroups', currentUserId, mateId],

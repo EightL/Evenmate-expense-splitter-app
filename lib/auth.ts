@@ -1,8 +1,14 @@
-// lib/auth.ts
+// /lib/auth.ts
+// ITU Project, "Evenmate"
+// Author(s): Jakub Lůčný, Martin Ševčík
+// VUT FIT 2024
+
+
 import { Alert } from 'react-native';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'expo-router';
 
+// Handles the logout process
 export const handleLogout = async (router: ReturnType<typeof useRouter>) => {
   Alert.alert(
     'Logout',

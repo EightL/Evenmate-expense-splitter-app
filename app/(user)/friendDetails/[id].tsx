@@ -1,4 +1,8 @@
-// app/(user)/friendDetails/[id].tsx
+// /app/(user)/friendDetails/[id].tsx
+// ITU Project, "Evenmate"
+// Author(s): Martin Ševčík
+// VUT FIT 2024
+
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, ActivityIndicator, FlatList, Image, TouchableOpacity } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -22,21 +26,15 @@ export default function FriendDetailScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { id: mateId, name, balance, bankAccount, email } = useLocalSearchParams();
-  const { data: mateData } = useUserInfo(mateId); // Isnt used but made something else work
+  const { data: mateData } = useUserInfo(mateId);
   const navigation = useNavigation();
   const [isImageLoading, setImageLoading] = useState(true);
-  
-  // console.log("TADY balance: ", balance);
-  
-  // Get current user's ID
-  const { data: currentUserId, error: error1 } = useGetCurrentUserId();
-  const { data: currentuserdata } = useUserInfo(currentUserId); // Isnt used but made something else work
-
-  // Use useSharedGroups hook
+  const { data: currentUserId } = useGetCurrentUserId();
+  const { data: currentuserdata } = useUserInfo(currentUserId);
   const { data: sharedGroups, isLoading, error } = useSharedGroups(currentUserId, mateId);
+  const { data: expensesList } = useMateExpenses(currentUserId, mateId);
 
-  const { data: expensesList, error: error2 } = useMateExpenses(currentUserId, mateId);
-
+  // Header
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -66,8 +64,8 @@ export default function FriendDetailScreen() {
   const avatar_url = mateData?.avatar_url;
   const myAvatar = currentuserdata?.avatar_url;
 
+  // Handle get even
   const handleGetEven = () => {
-  
     router.push({
       pathname: `/friendDetails/getEvenMate`,
       params: {
@@ -81,6 +79,7 @@ export default function FriendDetailScreen() {
     });
   };
 
+  // Handle remove friend
   const handleRemoveFriend = () => {
     Alert.alert(
       'Confirm Removal',
@@ -124,25 +123,25 @@ export default function FriendDetailScreen() {
     paid_by: string;
     involved_people: number;
   };
+
   const sortedExpensesData = expensesList?.slice().sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
+  // Rendering each expense
   const renderExpenses = ({ item }: { item: Expense }) => {
-
     // Convert the created_at timestamp to a Date object
     const createdAtDate = new Date(item.created_at);
     const isPaidByCurrentUser = item.paid_by === currentUserId;
     // Extract the month and day
     const month = createdAtDate.toLocaleString('default', { month: 'short' });
     const day = createdAtDate.getDate();
-
-
     const paidByUser = currentUserId === item.paid_by ? "You" : name;
+
     return (
       <TouchableOpacity
         style={styles.mainContainer2}
         onPress={() =>
           router.push({
-            pathname: `/friendDetails/expense/${encodeURIComponent(item.id)}`,
+            pathname: `/expense/${encodeURIComponent(item.id)}`,
             params: {
               expid: item.id,
               name: item.name,
@@ -183,6 +182,7 @@ export default function FriendDetailScreen() {
     );
   };
 
+  // Copy to clipboard
   const copyToClipboard = async (text: string) => {
     await Clipboard.setStringAsync(text);
     Alert.alert('Copied to Clipboard');
@@ -191,19 +191,13 @@ export default function FriendDetailScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
+        {/* Name and Balance */}
         <View>
           <Text style={styles.name}>{name}</Text>
           <Text style={styles.balance}>
-            {Number(balance) >= 0 ? (
-              <>
-                You lent: <Text style={styles.numberPositive}>{Number(balance).toFixed(2)} CZK</Text>
-              </>
-            ) : (
-              <>
-                You owe: <Text style={styles.numberNegative}>{Number(balance).toFixed(2)} CZK</Text>
-              </>
-            )}
+            {Number(balance) >= 0 ? ( <> You lent: <Text style={styles.numberPositive}>{Number(balance).toFixed(2)} CZK</Text> </> ) : ( <> You owe: <Text style={styles.numberNegative}>{Number(balance).toFixed(2)} CZK</Text> </> )}
           </Text>
+        {/* Profile Image */}
         </View>
           {mateData && mateData.avatar_url ? (
             <Image
@@ -218,6 +212,7 @@ export default function FriendDetailScreen() {
             />
           )}
       </View>
+      {/* Bank account */}
       <View style={styles.infoRow}>
         <Text style={styles.label}>Bank account:</Text>
         <TouchableOpacity style={styles.infoBox} onPress={() => copyToClipboard(bankAccount)}>
@@ -236,11 +231,7 @@ export default function FriendDetailScreen() {
       <View style={styles.detailContainer}>
         <Text style={styles.label}>Shared Groups:</Text>
       </View>
-      {isLoading ? (
-        <ActivityIndicator size="small" color="#4CAF50" />
-      ) : error ? (
-        <Text>Error loading shared groups: {error.message}</Text>
-      ) : sharedGroups && sharedGroups.length > 0 ? (
+      {isLoading ? ( <ActivityIndicator size="small" color="#4CAF50" /> ) : error ? ( <Text>Error loading shared groups: {error.message}</Text> ) : sharedGroups && sharedGroups.length > 0 ? (
         <View style={styles.groupsContainer}>
           {sharedGroups.map((group) => (
             <TouchableOpacity style={styles.groupBubble} key={group.id} onPress={() =>
@@ -256,10 +247,12 @@ export default function FriendDetailScreen() {
         <Text style={styles.numberNegative}>No shared groups</Text>
       )}
 
+      {/* Get Even Button */}
       <TouchableOpacity style={styles.button} onPress={handleGetEven}>
         <Text style={styles.buttonText}>Get Even</Text>
       </TouchableOpacity>
 
+      {/* Expense History */}
       <Text style={styles.header}>Expense History</Text>
       <FlatList
         style={{ width: '100%' }}
@@ -313,9 +306,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     fontWeight: 'bold'
   },
-  detail: {
-    fontSize: 20,
-  },
   infoBox: {
     backgroundColor: '#D4F0DD',
     paddingVertical: 8,
@@ -335,18 +325,16 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 30,
-    backgroundColor: '#4CAF50', // Green background
+    backgroundColor: '#4CAF50',
     paddingVertical: 15,
     paddingHorizontal: 25,
     borderRadius: 10,
     alignItems: 'center',
-    width: '100%', // Make button full-width
-    // Add shadow for iOS
+    width: '100%',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    // Elevation for Android
     elevation: 5,
   },
   buttonText: {
@@ -354,23 +342,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  removeFriendButton: {
-    marginTop: 15,
-    paddingVertical: 15,
-    borderRadius: 8,
-    width: '100%',
-    alignItems: 'center',
-    backgroundColor: '#FF3B30',
-  },
   label: {
     fontSize: 18,
     fontWeight: 'bold',
     marginRight: 10,
-  },
-  removeFriendButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
   },
   groupName: {
     fontSize: 18,
@@ -394,26 +369,10 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     
   },
-  expenseContainer: {
-    width: '100%',
-    padding: 8,
-    backgroundColor: '#D4F0DD',
-    borderRadius: 10,
-    marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
   expenseName: {
     fontSize: 18,
     fontWeight: '600',
     marginBottom: 5,
-  },
-  expenseDetail: {
-    fontSize: 14,
-    color: '#555',
   },
   detailContainer: {
     flexDirection: 'row',
@@ -496,12 +455,6 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: '#fff',
     alignItems: 'center',
-  },
-  iconImage: {
-    width: '100%',
-    height: undefined,
-    aspectRatio: 20 / 21,
-    resizeMode: 'cover',    
   },
 
 });

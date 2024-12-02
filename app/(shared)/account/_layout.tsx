@@ -1,23 +1,28 @@
+// /app/(shared)/account/_layout.tsx
+// ITU Project, "Evenmate"
+// Author(s): Martin Ševčík
+// VUT FIT 2024
+
 import { Pressable, StyleSheet, Image } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { FontAwesome, Ionicons } from '@expo/vector-icons';
-import evenmatelogo from '@/assets/images/Evenmatelogo_1.png'; // Import the Evenmate logo
+// Import the Evenmate logo
+import evenmatelogo from '@/assets/images/Evenmatelogo_1.png';
 
-
-export default function AccountStack() {
-  const router = useRouter();
+export default function ExpenseStack() {
+  const router = useRouter(); // Initialize the router
 
   return (
     <Stack>
       <Stack.Screen
         name="index"
         options={{
+          
           title: 'Account',
           headerTitleAlign: 'center', // Center the title
-          // Account settings button in the header
           headerRight: () => (
             <Pressable
-              onPress={() => router.push('/groupDetails/account/accountSettings')}
+              onPress={() => router.push('/account/accountSettings')}
               accessibilityLabel="Account"
               accessibilityRole="button"
             >
@@ -28,7 +33,6 @@ export default function AccountStack() {
               />
             </Pressable>
           ),
-          // Go back arrow in the header
           headerLeft: () => (
             <Pressable
               onPress={() => router.back()}
@@ -51,7 +55,6 @@ export default function AccountStack() {
         headerRight: () => (
             <Image source={evenmatelogo} style={styles.evenmatelogo} />
           ),
-        // Go back button
         headerLeft: () => (
         <Pressable
             onPress={() => router.back()}

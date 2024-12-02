@@ -1,3 +1,8 @@
+// /app/(user)/groupDetails/_layout.tsx
+// ITU Project, "Evenmate"
+// Author(s): Jakub Lůčný
+// VUT FIT 2024
+
 import React from 'react';
 import { Pressable, Image} from 'react-native';
 import { Stack, useRouter } from 'expo-router';
@@ -21,7 +26,7 @@ export default function GroupsStack() {
           ),
           headerRight: () => (
             <Pressable
-              onPress={() => router.push('/groupDetails/account')}
+              onPress={() => router.push('/account')}
               accessibilityLabel="Account"
               accessibilityRole="button"
               style={{marginRight: 5}}
@@ -40,13 +45,6 @@ export default function GroupsStack() {
         name="group"
         options={{
           headerShown: false,
-        }}
-      />
-      <Stack.Screen
-        name="account"
-        options={{
-          headerShown : false,
-          title: 'Account',
         }}
       />
       <Stack.Screen

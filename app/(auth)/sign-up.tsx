@@ -1,4 +1,8 @@
-// app/(auth)/sign-up.tsx
+// /app/(auth)/sign-up.tsx
+// ITU Project, "Evenmate"
+// Author(s): Jakub Lůčný
+// VUT FIT 2024
+
 import { View, Text, TextInput, StyleSheet, Alert, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { useState } from 'react';
 import Button from '../../components/Button';

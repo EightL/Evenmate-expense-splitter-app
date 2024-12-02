@@ -1,4 +1,8 @@
-// api/profiles/index.ts
+// /api/profiles/index.ts
+// ITU Project, "Evenmate"
+// Author(s): Martin Ševčík, Jakub Lůčný
+// VUT FIT 2024
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { v4 as uuidv4 } from 'uuid';
@@ -31,24 +35,25 @@ type UpdateUserProfileParams = {
     username: string;
     bankAccount: string;
     avatar_url: string;
-  };
-  
-  export const useUpdateProfile = async ({ id, username, bankAccount, avatar_url }: UpdateUserProfileParams): Promise<void> => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .update({
-        username: username,
-        bank_account: bankAccount,
-        avatar_url: avatar_url,
-      })
-      .eq('id', id);
-      
-      console.log("avatar_url", avatar_url);
-    if (error) {
-      throw new Error(`Error updating profile: ${error.message}`);
-    }
-    console.log("dataAAAAAAAA", data);
-  };
+};
+
+// Update user profile
+export const useUpdateProfile = async ({ id, username, bankAccount, avatar_url }: UpdateUserProfileParams): Promise<void> => {
+  const { data, error } = await supabase
+    .from('profiles')
+    .update({
+      username: username,
+      bank_account: bankAccount,
+      avatar_url: avatar_url,
+    })
+    .eq('id', id);
+    
+    console.log("avatar_url", avatar_url);
+  if (error) {
+    throw new Error(`Error updating profile: ${error.message}`);
+  }
+  console.log("dataAAAAAAAA", data);
+};
 
 
 // Fetch the image blob
@@ -69,7 +74,6 @@ export const fetchBlob = async (uri: string): Promise<Uint8Array> => {
     xhr.send(null);
   });
 };
-
 
 
 // Upload the image to Supabase
@@ -104,6 +108,7 @@ export const uploadImageToStorage = async (fileName: string, currentUserId: stri
     return publicURL;
   }
 
+// Upload the group image to Supabase
 export const uploadGroupImage = async (fileName: string, currentUserId: string, selectedImage) => {
   const uint8Array = await fetchBlob(selectedImage);
   if (uint8Array.length === 0) {

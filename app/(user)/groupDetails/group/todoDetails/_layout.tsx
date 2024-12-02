@@ -1,3 +1,8 @@
+// /app/(user)/groupDetails/group/todoDetails/_layout.tsx
+// ITU Project, "Evenmate"
+// Author(s): Jakub Lůčný
+// VUT FIT 2024
+
 import { Stack } from 'expo-router';
 import { Image, TouchableOpacity } from 'react-native';
 import evenmatelogo from '@/assets/images/Evenmatelogo_1.png';

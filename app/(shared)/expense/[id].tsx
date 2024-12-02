@@ -1,48 +1,31 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, FlatList, ActivityIndicator, Alert } from 'react-native';
+// /app/(shared)/expense/[id].tsx
+// ITU Project, "Evenmate"
+// Author(s): Martin Ševčík
+// VUT FIT 2024
+
+import { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Pressable, ActivityIndicator } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { fetchExpenseDetails } from '@/api/involvedUsers';
 import { useUserInfo } from '@/api/profiles';
 import { useExpenseInfo } from '@/api/expenses';
-import { FontAwesome5 } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-
-type Expense = {
-  id: string;
-  name: string;
-  amount: number;
-  paid_by: string;
-  created_at: string;
-  in_group: string;
-  involved_people: number;
-};
-
-type User = {
-  id: string;
-  username: string;
-  bank_account: string;
-  email: string;
-};
 
 export default function ExpenseDetailScreenInMates() {
   const router = useRouter();
   const { id: expenseId, mateid } = useLocalSearchParams();
-  // const [expense, setExpense] = useState<Expense | null>(null);
   const [splitDetails, setSplitDetails] = useState<{ username: string; share: number }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { data: expense} = useExpenseInfo(expenseId);
+  const { data: User} = useUserInfo(expense?.paid_by);
 
-  const { data: expense, error: error10 } = useExpenseInfo(expenseId);
-  const { data: User, error : error2 } = useUserInfo(expense?.paid_by);
-  // const { expenseData, splitDetails } = await fetchExpenseDetails(expenseId as string);
-
+  // Fetch the expense details
   useEffect(() => {
     const fetchDetails = async () => {
       try {
-        // setIsLoading(true);
-        const { expenseData, splitDetails } = await fetchExpenseDetails(expenseId as string);
+        const { splitDetails } = await fetchExpenseDetails(expenseId as string);
 
-        // setExpense(expenseData);
         setSplitDetails(splitDetails);
       } catch (error: any) {
         console.error('Error fetching expense details:', error.message);
@@ -71,9 +54,10 @@ export default function ExpenseDetailScreenInMates() {
     <View style={styles.container}>
       <View style={styles.container2}>
         <View style={styles.iconContainer}>
-          {/* You can use any icon library or image */}
+          {/* Icon */}
           <MaterialCommunityIcons name={expense.icon} size={40} color="black" />
         </View>
+        {/* Expense details */}
         <View style={styles.infoContainer}>
           <Text style={styles.title}>{expense.name}</Text>
           <Text style={styles.price}>{(expense.amount).toFixed(2)} CZK</Text>
@@ -82,6 +66,7 @@ export default function ExpenseDetailScreenInMates() {
           </Text>
         </View>
       </View>
+      {/* Split details */}
       <Text style={styles.sectionTitle}>Split Details</Text>
       <View>
         {splitDetails.map((item, index) => (
@@ -91,11 +76,12 @@ export default function ExpenseDetailScreenInMates() {
           </View>
         ))}
       </View>
+      {/* Edit expense button */}
       <Pressable
         style={styles.editButton}
         onPress={() =>
           router.push({
-            pathname: `/friendDetails/expense/editExpense/${expenseId}`,
+            pathname: `/expense/editExpense/${expenseId}`,
             params: { mateId: mateid },
           })
         }
@@ -107,10 +93,6 @@ export default function ExpenseDetailScreenInMates() {
 }
 
 const styles = StyleSheet.create({
-  loader: {
-    flex: 1,
-    justifyContent: 'center',
-  },
   container: {
     flex: 1,
     padding: 20,
@@ -120,10 +102,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     
-  },
-  detail: {
-    fontSize: 18,
-    marginBottom: 5,
   },
   sectionTitle: {
     fontSize: 20,

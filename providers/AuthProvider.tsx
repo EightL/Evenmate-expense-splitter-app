@@ -1,4 +1,8 @@
-// providers/AuthProvider.tsx
+// /providers/AuthProvider.ts
+// ITU Project, "Evenmate"
+// Author(s): Jakub Lůčný, Martin Ševčík
+// VUT FIT 2024
+
 import { supabase } from "@/lib/supabase";
 import { Session } from "@supabase/supabase-js";
 import { createContext, PropsWithChildren, useEffect, useState, useContext } from "react";

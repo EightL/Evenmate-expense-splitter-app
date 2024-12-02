@@ -1,44 +1,31 @@
+// /app/(shared)/expense/editExpense/[id].tsx
+// ITU Project, "Evenmate"
+// Author(s): Martin Ševčík
+// VUT FIT 2024
+
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  TextInput,
-  Text,
-  Pressable,
-  StyleSheet,
-  ScrollView,
-  Alert,
-  ActivityIndicator,
-} from 'react-native';
+import { View, TextInput, Text, Pressable, StyleSheet, ScrollView, Alert, ActivityIndicator,} from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
 import { useExpenseInfo, updateExpense, deleteExpense } from '@/api/expenses';
 import { useGetCurrentUserId } from '@/api/getCurrentUserId';
 import { handleUpdateBalances } from '@/api/updateBalances';
 import { useInvolvedPeople } from '@/api/involvedUsers';
 
-type Expense = {
-  id: string;
-  name: string;
-  amount: number;
-  paid_by: string;
-  created_at: string;
-};
-
 export default function EditExpenseScreen() {
+  // States
   const router = useRouter();
-  const queryClient = useQueryClient();
-  const { id, mateid } = useLocalSearchParams<{ id: string }>();
-
+  const { id } = useLocalSearchParams<{ id: string }>();
   const [expenseName, setExpenseName] = useState('');
   const [cost, setCost] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-
+  const queryClient = useQueryClient();
   const { data: currentUserId } = useGetCurrentUserId();
   const { data: mateIds } = useInvolvedPeople(id);
   const { data: expense, isLoading: isExpenseLoading, error } = useExpenseInfo(id);
 
+  // Update the expense details
   useEffect(() => {
     if (expense) {
       setExpenseName(expense.name);
@@ -46,7 +33,7 @@ export default function EditExpenseScreen() {
     }
   }, [expense]);
 
-  // Handeling of deleting expense
+  // Handle the deletion of the expense
   const handleDeleteExpense = async () => {
     Alert.alert(
       'Confirm Deletion',
@@ -92,19 +79,21 @@ export default function EditExpenseScreen() {
     );
   };
 
-  // Handeling expense update information
+  // Handle the update of the expense
   const handleUpdateExpense = async () => {
     if (!expenseName.trim() || !cost.trim()) {
       Alert.alert('Validation Error', 'Please enter both name and cost.');
       return;
     }
 
+    // Validate the cost
     const numericCost = parseFloat(cost);
     if (isNaN(numericCost) || numericCost <= 0) {
       Alert.alert('Validation Error', 'Please enter a valid cost.');
       return;
     }
 
+    // Update the expense
     try {
       setIsUpdating(true);
 
@@ -136,6 +125,7 @@ export default function EditExpenseScreen() {
     }
   };
 
+  // Render the screen
   if (isExpenseLoading) {
     return (
       <View style={styles.loaderContainer}>
@@ -143,7 +133,6 @@ export default function EditExpenseScreen() {
       </View>
     );
   }
-
   if (error) {
     return (
       <View style={styles.errorContainer}>
@@ -153,7 +142,8 @@ export default function EditExpenseScreen() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <View style={styles.container}>
+      {/* Render the expense details */}
       <Text style={styles.title}>Edit Expense Details</Text>
       <TextInput
         style={styles.input}
@@ -169,38 +159,26 @@ export default function EditExpenseScreen() {
         keyboardType="numeric"
       />
 
-      <Pressable
-        style={[
-          styles.updateButton,
-          (isUpdating || isDeleting) && styles.buttonDisabled,
-        ]}
+      {/* Update expense button */}
+      <Pressable 
+        style={[styles.updateButton, (isUpdating || isDeleting) && styles.buttonDisabled,]}
         onPress={handleUpdateExpense}
         disabled={isUpdating || isDeleting}
       >
-        {isUpdating ? (
-          <ActivityIndicator/>
-        ) : (
-          <Text style={styles.updateButtonText}>Update Expense</Text>
-        )}
+        {isUpdating ? ( <ActivityIndicator/> ) : ( <Text style={styles.updateButtonText}>Update Expense</Text>)}
       </Pressable>
 
       <View style={styles.spacer} />
-
+        
+      {/* Delete expense button */}
       <Pressable
-        style={[
-          styles.deleteButton,
-          (isUpdating || isDeleting) && styles.buttonDisabled,
-        ]}
+        style={[styles.deleteButton, (isUpdating || isDeleting) && styles.buttonDisabled,]}
         onPress={handleDeleteExpense}
         disabled={isUpdating || isDeleting}
       >
-        {isDeleting ? (
-          <ActivityIndicator/>
-        ) : (
-          <Text style={styles.deleteButtonText}>Delete Expense</Text>
-        )}
+        {isDeleting ? ( <ActivityIndicator/> ) : (<Text style={styles.deleteButtonText}>Delete Expense</Text>)}
       </Pressable>
-    </ScrollView>
+    </View>
   );
 }
 
@@ -209,8 +187,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  loader: {
   },
   errorContainer: {
     flex: 1,
@@ -237,6 +213,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 25,
     borderRadius: 10,
     alignItems: 'center',
+    marginBottom: 10,
   },
   deleteButtonText: {
     color: '#fff',

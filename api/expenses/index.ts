@@ -1,8 +1,11 @@
+// /api/expenses/index.ts
+// ITU Project, "Evenmate"
+// Author(s): Martin Ševčík, Jakub Lůčný
+// VUT FIT 2024
 import { supabase } from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
 
-
-// Retrieve all info of specific expense
+// Returns the expense information
 export const useExpenseInfo = (expenseId: string | null) => {
   return useQuery({
       queryKey: ['expenseinfo', expenseId],
@@ -21,6 +24,7 @@ export const useExpenseInfo = (expenseId: string | null) => {
   });
 }
 
+// Deletes the expense
 export const deleteExpense = async (id: string) => {
   const { error } = await supabase
   .from('Rel_owesFor')
@@ -40,6 +44,7 @@ export const deleteExpense = async (id: string) => {
   return true;
 }
 
+// Updates the expense
 export const updateExpense = async (id: string, expenseName: string, numericCost: number) => {
   try {
     const { error } = await supabase
@@ -61,7 +66,7 @@ export const updateExpense = async (id: string, expenseName: string, numericCost
   }
 };
 
-
+// Returns expenses in a group
 export const useGroupExpensesList = (groupId: string) => {
   return useQuery({
       queryKey: ['groupExpenses', groupId],
@@ -73,20 +78,19 @@ export const useGroupExpensesList = (groupId: string) => {
           if(error) {
               throw new Error(error.message);
           }
-          // console.log("UseGroupExpense data:", data);
+          
           return data;
       },
       enabled: !!groupId,
   });
 }
 
+// Returns expenses for a mate
 export const useMateExpenses = (currentUserId: string, mateId: string) => {
     return useQuery({
       queryKey: ['mateExpenses', currentUserId, mateId],
       queryFn: async () => {
         try {
-
-              // kinda sus, if anything is broken look here
             if (!currentUserId || !mateId) {
               return null;
             }
@@ -100,8 +104,6 @@ export const useMateExpenses = (currentUserId: string, mateId: string) => {
             `)
             .or(`userid.eq.${currentUserId},userid.eq.${mateId}`);
   
-          // console.log("UserExpenses: ", userExpenses);
-  
           if (userError) {
             throw new Error(userError.message);
           }
@@ -112,8 +114,6 @@ export const useMateExpenses = (currentUserId: string, mateId: string) => {
             .select('*')
             .or(`paid_by.eq.${currentUserId},paid_by.eq.${mateId}`);
   
-          // console.log("paidByExpenses: ", paidByExpenses);
-  
           if (paidByError) {
             throw new Error(paidByError.message);
           }
@@ -121,8 +121,6 @@ export const useMateExpenses = (currentUserId: string, mateId: string) => {
           // Find intersection of the two results based on expenseid
           const userExpenseIds = new Set(userExpenses.map(exp => exp.expenseid));
           const intersection = paidByExpenses.filter(exp => userExpenseIds.has(exp.id));
-  
-          // console.log("intersection: ", intersection);
           
           return intersection;
         } catch (error) {
@@ -142,6 +140,7 @@ export const useMateExpenses = (currentUserId: string, mateId: string) => {
     icon: string;
   };
   
+  // Creates a new expense
   export const createExpense = async ({
     expenseName,
     numericCost,
@@ -173,6 +172,7 @@ export const useMateExpenses = (currentUserId: string, mateId: string) => {
     return data.id;
   };
   
+  // Inserts the relationship between the expense and the mates
   export const insertRelOwesFor = async (expenseId: string, mateIds: string[]) => {
     const { error } = await supabase
       .from('Rel_owesFor')

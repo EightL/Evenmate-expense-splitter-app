@@ -1,8 +1,13 @@
+// /app/(user)/expenseDetails/_layout.tsx
+// ITU Project, "Evenmate"
+// Author(s): Martin Ševčík
+// VUT FIT 2024
+
+
 import React, { useState } from 'react';
 import { Pressable, Image, Modal, View, TouchableWithoutFeedback, StyleSheet } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
-import { handleLogout } from '@/lib/auth'; // Import the functions
 import { styles } from '@/constants/styles';
 import evenmatelogo from '@/assets/images/Evenmatelogo_1.png'; // Import the Evenmate logo
 import catImage from '@/assets/images/cat-png-40358.png'; // Import a cat image
@@ -46,7 +51,7 @@ export default function ExpenseStack() {
             ),
             headerRight: () => (
               <Pressable
-                onPress={() => router.push('/expenseDetails/account')}
+                onPress={() => router.push('/account')}
                 accessibilityLabel="Account"
                 accessibilityRole="button"
                 style={{marginRight: 5}}
@@ -88,13 +93,13 @@ export default function ExpenseStack() {
 const catStyles = StyleSheet.create({
   modalBackground: {
     flex: 1,
-    justifyContent: 'flex-end', // Align content to the bottom
+    justifyContent: 'flex-end',
     alignItems: 'center',
   },
   catContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20, // Adjust as needed for spacing from the bottom
+    marginBottom: 20,
   },
   catImage: {
     width: 200,

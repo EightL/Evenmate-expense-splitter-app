@@ -1,3 +1,8 @@
+// /app/(user)/groupDetails/index.tsx
+// ITU Project, "Evenmate"
+// Author(s): Jakub Lůčný
+// VUT FIT 2024
+
 import React, { useState, useMemo } from 'react';
 import { StyleSheet, ActivityIndicator, FlatList, View, Text, Pressable, Image, RefreshControl, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';

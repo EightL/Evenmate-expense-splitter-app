@@ -1,3 +1,8 @@
+// /app/(user)/groupDetails/group/todoDetails/[id].tsx
+// ITU Project, "Evenmate"
+// Author(s): Jakub Lůčný
+// VUT FIT 2024
+
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -125,7 +130,7 @@ export default function EditTodoScreen() {
         onChangeText={setTodoDescription}
         multiline
       />
-
+      <View style={styles.flexContainer} />
       <View style={styles.buttonContainer}>
         <Pressable
           style={[
@@ -196,9 +201,9 @@ const styles = StyleSheet.create({
   },
   updateButton: {
     backgroundColor: '#5AC07C',
-    marginBottom: 10,
     paddingVertical: 15,
     borderRadius: 10,
+    flex: 1,
     alignItems: 'center',
   },
   updateButtonText: {
@@ -226,11 +231,10 @@ const styles = StyleSheet.create({
     height: 130,
     textAlignVertical: 'top',
   },
+  flexContainer:{
+    flex: 1,
+  },
   buttonContainer: {
-    position: 'absolute',
-    bottom: 20,
-    left: 20,
-    right: 20,
     flexDirection: 'row',
     justifyContent: 'space-between',
   },

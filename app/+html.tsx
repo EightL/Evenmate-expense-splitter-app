@@ -1,4 +1,9 @@
-// app/+html.tsx
+// /app/+html.tsx
+// ITU Project, "Evenmate"
+// Author(s): Generated as a part of the Expo init
+// VUT FIT 2024
+
+
 import { ScrollViewStyleReset } from 'expo-router/html';
 import React from 'react';
 // This file is web-only and used to configure the root HTML for every

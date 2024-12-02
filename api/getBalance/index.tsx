@@ -1,3 +1,7 @@
+// /api/getBalance/index.ts
+// ITU Project, "Evenmate"
+// Author(s): Martin Ševčík, Jakub Lůčný
+// VUT FIT 2024
 import { supabase } from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
 

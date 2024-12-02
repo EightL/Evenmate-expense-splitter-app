@@ -1,20 +1,11 @@
-// app/(user)/friendDetails/addNewMate.tsx
+// /app/(user)/friendDetails/addNewMate.tsx
+// ITU Project, "Evenmate"
+// Author(s): Martin Ševčík
+// VUT FIT 2024
 
-import React, { useState, useEffect, useRef } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  Pressable,
-  Alert,
-  ActivityIndicator,
-  Modal,
-  ScrollView,
-  Image,
-} from 'react-native';
+import { useState, useEffect, useRef } from 'react';
+import {View, Text, TextInput, StyleSheet, Pressable, Alert, ActivityIndicator, Modal, Image } from 'react-native';
 import { useRouter, Stack } from 'expo-router';
-import { supabase } from '@/lib/supabase';
 import { useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { CameraView, Camera } from "expo-camera";
@@ -28,18 +19,16 @@ import { useNavigation } from 'expo-router';
 export default function AddNewMateScreen() {
   const router = useRouter();
   const queryClient = useQueryClient(); // Initialize the query client
-
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
-  // QR Scanner States
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [isScannerVisible, setScannerVisible] = useState(false);
   const [scanned, setScanned] = useState(false);
   const { data: currentUserId, error } = useGetCurrentUserId();
-
   const cameraRef = useRef<CameraView | null>(null);
 
+  // Request camera permissions
   useEffect(() => {
     const getCameraPermissions = async () => {
       const { status } = await Camera.requestCameraPermissionsAsync();
@@ -49,6 +38,7 @@ export default function AddNewMateScreen() {
     getCameraPermissions();
   }, []);
 
+  // Header options
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -70,10 +60,10 @@ export default function AddNewMateScreen() {
     });
   }, [navigation]);  
 
+  // Function to handle adding a new mate
   const handleAddMate = async () => {
     // Input Validation
     if (!email.trim()) {
-      // Alert.alert('Validation Error', 'Please enter an email address.');
       return;
     }
 
@@ -83,9 +73,9 @@ export default function AddNewMateScreen() {
       Alert.alert('Validation Error', 'Please enter a valid email address.');
       return;
     }
-
     setLoading(true);
 
+    // Add the mate
     try {
       // Check if the email already exists in profiles
       const existingProfile = await getProfileByEmail(email);
@@ -117,6 +107,7 @@ export default function AddNewMateScreen() {
     }
   };
 
+  // Function to handle barcode scanning
   const handleBarcodeScanned = ({ type, data }: { type: string; data: string }) => {
     if (scanned) return; // Prevent multiple handles
 
@@ -130,11 +121,13 @@ export default function AddNewMateScreen() {
     ]);
   };
 
+  // Function to handle the scan button press
   const handleScanPress = () => {
     setScannerVisible(true);
     setScanned(false); // Allow scanning again
   };
 
+  // Camera permission handling
   if (hasPermission === null) {
     return (
       <View style={styles.centered}>
@@ -144,6 +137,7 @@ export default function AddNewMateScreen() {
     );
   }
 
+  // No camera access
   if (hasPermission === false) {
     return (
       <View style={styles.centered}>
@@ -159,6 +153,7 @@ export default function AddNewMateScreen() {
       <Stack.Screen options={{ title: 'New Contact' }} />
       <Text style={styles.title}>Add Mate</Text>
 
+      {/* Email input */}
       <TextInput
         style={styles.input}
         placeholder="Email Address"
@@ -167,7 +162,7 @@ export default function AddNewMateScreen() {
         keyboardType="email-address"
         autoCapitalize="none"
       />
-
+      {/* Add Mate Button */}
       {loading ? (
         <ActivityIndicator />
       ) : (
@@ -175,7 +170,8 @@ export default function AddNewMateScreen() {
           <Text style={styles.buttonText}>Add</Text>
         </Pressable>
       )}
-
+  
+      {/* Scan QR Code Button */}
       <Pressable style={styles.scanButton} onPress={handleScanPress}>
         <Ionicons name="qr-code" size={24} color="#fff" />
         <Text style={styles.scanButtonText}>Scan QR Code</Text>
@@ -184,6 +180,7 @@ export default function AddNewMateScreen() {
       {/* QR Code Scanner Modal */}
       <Modal visible={isScannerVisible} animationType="slide">
         <View style={styles.scannerContainer}>
+          {/* Camera View */}
           <CameraView
             ref={cameraRef}
             style={StyleSheet.absoluteFillObject}
@@ -192,6 +189,7 @@ export default function AddNewMateScreen() {
               barcodeTypes: ["qr", "pdf417"],
             }}
           />
+          {/* Cancel Button */}
           <Pressable style={styles.cancelButton} onPress={() => setScannerVisible(false)}>
             <Text style={styles.buttonText}>Cancel</Text>
           </Pressable>

@@ -1,23 +1,12 @@
-// app/(user)/expenseDetails/index.tsx
+// /app/(user)/expenseDetails/index.tsx
+// ITU Project, "Evenmate"
+// Author(s): Martin Ševčík
+// VUT FIT 2024
+
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  TextInput,
-  Text,
-  Pressable,
-  StyleSheet,
-  ScrollView,
-  Alert,
-  ActivityIndicator,
-  TouchableOpacity,
-  Keyboard,
-  TouchableWithoutFeedback,
-  Modal,
-  FlatList,
-} from 'react-native';
+import { View, TextInput, Text, StyleSheet, Alert, ActivityIndicator, TouchableOpacity, Keyboard, TouchableWithoutFeedback, Modal, FlatList, } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { handleUpdateBalances } from '@/api/updateBalances';
-import { supabase } from '@/lib/supabase';
 import { useQueryClient } from '@tanstack/react-query';
 import { useGetCurrentUserId } from '@/api/getCurrentUserId';
 import { createExpense, insertRelOwesFor } from '@/api/expenses';
@@ -27,42 +16,38 @@ export default function AddExpenseScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const queryClient = useQueryClient();
-  
-  
-  // Initialize state with params if available
+
+  // State variables
   const [expenseName, setExpenseName] = useState(params.expenseName || '');
   const [cost, setCost] = useState(params.cost || '');
-  const [selectedMates, setSelectedMates] = useState<
-    { id: string; name: string }[]
-  >([]);
+  const [selectedMates, setSelectedMates] = useState<{ id: string; name: string }[] >([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedIcon, setSelectedIcon] = useState('tree');
+  const [selectedIcon, setSelectedIcon] = useState('cart');
+  const { data: currentUserId, error } = useGetCurrentUserId(); // Get the current user ID
 
+  // Icon options
   const iconOptions = [
     'tree',
     'star',
     'heart',
     'gift',
     'bell',
-    'silverware-fork-knife', // Food & Dining
-    'cup',                    // Food & Dining
-    'car',                    // Transportation
-    'bus',                    // Transportation
-    'movie',                  // Entertainment
-    'gamepad',                // Entertainment
-    'lightbulb',              // Utilities & Bills
-    'heart-pulse',            // Health & Fitness
-    'cart',                   // Shopping
-    'airplane',               // Travel
-    'book',                   // Education
-    'wallet',                 // Miscellaneous
-    'toolbox',                // Miscellaneous
-    'brush',                  // Miscellaneous
+    'silverware-fork-knife', 
+    'cup',                    
+    'car',                    
+    'bus',                    
+    'movie',                 
+    'gamepad',               
+    'lightbulb',             
+    'heart-pulse',        
+    'cart',                   
+    'airplane',
+    'book',
+    'wallet',
+    'toolbox',
+    'brush',
   ];
-
-  // Get current user ID
-  const { data: currentUserId, error } = useGetCurrentUserId();
 
   useEffect(() => {
     // Handle mateIds and mateNames
@@ -86,19 +71,12 @@ export default function AddExpenseScreen() {
       const newSelectedIcon = params.icon; // Default icon
       // Prevent setting state if mates are already selected
       const isSameLength = mates.length === selectedMates.length;
-      const isSameMates =
-        isSameLength &&
-        mates.every(
-          (mate, idx) =>
-            mate.id === selectedMates[idx]?.id &&
-            mate.name === selectedMates[idx]?.name
-        );
+      const isSameMates = isSameLength && mates.every((mate, idx) => mate.id === selectedMates[idx]?.id && mate.name === selectedMates[idx]?.name );
       if (!isSameMates) {
         setSelectedMates(mates);
       }
     }
     
-
     // Handle icon
     if (params.icon && params.icon !== selectedIcon) {
       setSelectedIcon(params.icon);
@@ -106,7 +84,6 @@ export default function AddExpenseScreen() {
   }, [params.mateIds, params.mateNames, params.icon]);
 
   const handleAddMates = () => {
-    // Navigate to selectMates screen and pass current params
     router.push({
       pathname: '/expenseDetails/selectMates',
       params: {
@@ -117,20 +94,19 @@ export default function AddExpenseScreen() {
     });
   };
 
-  // Updated handleSubmitExpense function with ActivityIndicator in the button
   const handleSubmitExpense = async () => {
     // Input validation
     if (!expenseName.trim() || !cost.trim()) {
       Alert.alert('Validation Error', 'Please enter both expense name and cost.');
       return;
     }
-    
     const numericCost = parseFloat(cost);
     if (isNaN(numericCost) || numericCost <= 0) {
       Alert.alert('Validation Error', 'Please enter a valid cost.');
       return;
     }
     
+    // Submit the expense
     try {
       setIsSubmitting(true);
 
@@ -152,7 +128,7 @@ export default function AddExpenseScreen() {
         currentUserId,
         groupId: params.groupId,
         participantCount,
-        icon: selectedIcon, // Passing the selectedIcon
+        icon: selectedIcon,
       });
 
       // Insert into Rel_owesFor for each mate
@@ -161,7 +137,6 @@ export default function AddExpenseScreen() {
       // Reset query keys
       queryClient.invalidateQueries({ queryKey: ['mates', currentUserId] });
       queryClient.invalidateQueries({ queryKey: ['groupExpenses', params.groupId] });
-
       for (const mate of selectedMates) {
         queryClient.invalidateQueries({ queryKey: ['mateExpenses', currentUserId, mate] });
       }
@@ -171,6 +146,7 @@ export default function AddExpenseScreen() {
       setCost('');
       setSelectedMates([]);
 
+      
       Alert.alert('Success', 'Expense added successfully.');
       if (params.groupId) {
         router.push({
@@ -188,13 +164,15 @@ export default function AddExpenseScreen() {
       console.error('Error submitting expense:', error.message);
       Alert.alert('Error', error.message);
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false); // Reset the state
     }
   };
   
   
   return (
+    // Dismiss the keyboard when tapping outside the input
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      {/* Main container */}
       <View style={styles.container}>
         <Text style={styles.title}>Add Expense</Text>
         <View style={styles.mainContainer}>
@@ -288,7 +266,7 @@ export default function AddExpenseScreen() {
           disabled={!expenseName || !cost || selectedMates.length === 0 || isSubmitting}
         >
           {isSubmitting ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color="#fff"/>
           ) : (
             <Text style={styles.submitButtonText}>Submit Expense</Text>
           )}

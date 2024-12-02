@@ -1,3 +1,8 @@
+// /api/todo/index.ts
+// ITU Project, "Evenmate"
+// Author(s): Martin Ševčík, Jakub Lůčný
+// VUT FIT 2024
+
 import { supabase } from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
 
@@ -55,48 +60,50 @@ export const deleteTodo = async (todoId: string) => {
 
 // Creates new Todo with given name in given group
 export const createTodo = async (todoName: string, groupId: string) => {
-    const { data: newGroup, error } = await supabase
-      .from('todo')
-      .insert({
-        name: todoName,
-        created_at: new Date().toISOString(),
-        description: null,
-        in_group: groupId,
-        done: false,
-      })
-      .select()
-      .single();
-  
-    if (error) {
-        throw new Error(`Error creating Todo: ${error.message}`);
-    }
-  
-    return newGroup;
+  const { data: newGroup, error } = await supabase
+    .from('todo')
+    .insert({
+      name: todoName,
+      created_at: new Date().toISOString(),
+      description: null,
+      in_group: groupId,
+      done: false,
+    })
+    .select()
+    .single();
+
+  if (error) {
+      throw new Error(`Error creating Todo: ${error.message}`);
+  }
+
+  return newGroup;
 };
 
+// Updates specified Todo
 export const updateTodo = async (todoId: string, name: string, description: string) => {
-    const { error } = await supabase
-      .from('todo')
-      .update({
-        name: name,
-        description: description,
-    })
-      .eq('id', todoId);
-  
-    if (error) {
-      throw new Error(error.message || 'Failed to update todo');
-    }
-  };
+  const { error } = await supabase
+    .from('todo')
+    .update({
+      name: name,
+      description: description,
+  })
+    .eq('id', todoId);
 
-  export const changeTodoStatus = async (todoId: string, done: boolean) => {
-    const { error } = await supabase
-      .from('todo')
-      .update({
-        done: done,
-    })
-      .eq('id', todoId);
-  
-    if (error) {
-      throw new Error(error.message || 'Failed to update todo');
-    }
-  };
+  if (error) {
+    throw new Error(error.message || 'Failed to update todo');
+  }
+};
+
+// Changes status of specified Todo
+export const changeTodoStatus = async (todoId: string, done: boolean) => {
+  const { error } = await supabase
+    .from('todo')
+    .update({
+      done: done,
+  })
+    .eq('id', todoId);
+
+  if (error) {
+    throw new Error(error.message || 'Failed to update todo');
+  }
+};

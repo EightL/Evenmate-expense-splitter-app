@@ -1,4 +1,8 @@
-// app/index.tsx
+// /app/index.tsx
+// ITU Project, "Evenmate"
+// Author(s): Jakub Lůčný, Martin Ševčík
+// VUT FIT 2024
+
 import { View, Text, ActivityIndicator } from 'react-native';
 import React from 'react';
 import Button from '../components/Button';

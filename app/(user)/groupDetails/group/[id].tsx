@@ -1,3 +1,8 @@
+// /app/(user)/groupDetails/group/[id].tsx
+// ITU Project, "Evenmate"
+// Author(s): Jakub Lůčný
+// VUT FIT 2024
+
 import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, FlatList, Image, Modal, TouchableOpacity } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -149,7 +154,7 @@ export default function GroupDetailScreen() {
         style={styles.mainContainer2}
         onPress={() =>
           router.push({
-            pathname: `/groupDetails/group/expense/${encodeURIComponent(item.id)}`,
+            pathname: `/(shared)/expense/${encodeURIComponent(item.id)}`,
             params: {
               expid: item.id,
               name: item.name,

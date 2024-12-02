@@ -1,17 +1,18 @@
-// app/(user)/friendDetails/getEvenMate.tsx
+// /app/(user)/friendDetails/getEvenMate.tsx
+// ITU Project, "Evenmate"
+// Author(s): Martin Ševčík
+// VUT FIT 2024
 
-import React, { useEffect, useState } from 'react';
+import  { useEffect, useState } from 'react';
 import { View, TextInput, Text, Pressable, StyleSheet, Alert, Image, Keyboard, TouchableWithoutFeedback, TouchableOpacity } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { handleUpdateBalances } from '@/api/updateBalances';
 import { useQueryClient } from '@tanstack/react-query';
-import { useGetCurrentUserId } from '@/api/getCurrentUserId';
-import defaultProfilePic from '@/assets/images/defaultProfilePic.png';
 import { FontAwesome6 } from '@expo/vector-icons';
-import { useUserInfo } from '@/api/profiles';
 import { Ionicons } from '@expo/vector-icons';
 import { useLayoutEffect } from 'react';
 import { useNavigation } from 'expo-router';
+import defaultProfilePic from '@/assets/images/defaultProfilePic.png';
 import evenmatelogo from '@/assets/images/Evenmatelogo_1.png';
 
 export default function GetEvenInput() {
@@ -22,12 +23,14 @@ export default function GetEvenInput() {
   const queryClient = useQueryClient();
   const [isImageLoading, setImageLoading] = useState(true);
 
+  // Update the amount when the balance changes
   useEffect(() => {
     if (balance) {
-      setAmount((-parseFloat(balance)).toString()); // Invert the balance sign here
+      setAmount((-parseFloat(balance)).toString()); // Invert the balance sign
     }
   }, [balance]);
 
+  // Header options
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -49,6 +52,7 @@ export default function GetEvenInput() {
     });
   }, [navigation]);
 
+  // Handle the addition of the amount
   const handleAdd = async () => {
     if (amount.trim() !== '') {
       const numericAmount = parseFloat(amount);
@@ -57,6 +61,7 @@ export default function GetEvenInput() {
         return;
       }
 
+      // Update the balances
       try {
         await handleUpdateBalances({
           currentUserId: currentUserId!,
@@ -81,8 +86,8 @@ export default function GetEvenInput() {
         Get Even with: <Text style={styles.boldText}>{name}</Text>
       </Text>
 
+      {/* Left Profile */}
       <View style={styles.balanceContainer}>
-        {/* Left Profile */}
         <View style={styles.profileContainer}>
         <Image
             source={
@@ -183,12 +188,12 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: '#4CAF50',
-    padding: 15, // Increased padding
+    padding: 15, 
     borderRadius: 10,
-    width: 205, // Increased width
+    width: 205, 
     textAlign: 'center',
     marginRight: 10,
-    fontSize: 18, // Increased font size
+    fontSize: 18, 
   },
   currencyContainer: {
     paddingHorizontal: 15,
@@ -197,19 +202,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#D4F0DD',
   },
   currencyText: {
-    fontSize: 18, // Increased font size
+    fontSize: 18,
     fontWeight: 'bold',
   },
   button: {
     backgroundColor: '#4CAF50',
-    paddingVertical: 20, // Increased vertical padding
-    paddingHorizontal: 100, // Increased horizontal padding
+    paddingVertical: 20, 
+    paddingHorizontal: 100,
     borderRadius: 10,
     alignItems: 'center',
   },
   buttonText: {
     color: '#fff',
-    fontSize: 20, // Increased font size
+    fontSize: 20,
     fontWeight: 'bold',
   },
   evenmatelogo: {

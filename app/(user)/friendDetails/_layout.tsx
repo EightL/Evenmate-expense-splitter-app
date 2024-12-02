@@ -1,10 +1,11 @@
-// app/(user)/friendDetails/_layout.tsx
-import React from 'react';
-import { Pressable, Alert, StyleSheet, Image } from 'react-native';
+// /app/(user)/friendDetails/_layout.tsx
+// ITU Project, "Evenmate"
+// Author(s): Martin Ševčík
+// VUT FIT 2024
+
+import { Pressable, Image } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
-import { supabase } from '@/lib/supabase'; // Ensure this path is correct
-import { handleLogout, handleAccount } from '@/lib/auth'; // Import the functions
 import evenmatelogo from '@/assets/images/Evenmatelogo_1.png'; // Import the Evenmate logo
 import { styles } from '@/constants/styles';
 
@@ -23,7 +24,7 @@ export default function MatesStack() {
           ),
           headerRight: () => (
             <Pressable
-              onPress={() => router.push('/friendDetails/account')} // Navigate to the account screen
+              onPress={() => router.push('/account')} // Navigate to the account screen
               accessibilityLabel="Account"
               accessibilityRole="button"
               style={{marginRight: 5}}
@@ -43,18 +44,6 @@ export default function MatesStack() {
           title: 'Get Even',
         }}
       />
-      <Stack.Screen
-        name="expense"
-        options={{
-          headerShown: false,
-        }}
-      />
-      <Stack.Screen
-      name="account"
-      options={{
-        headerShown : false,
-        title: 'Account',
-      }}/>
       <Stack.Screen
       name="[id]"
       options={{

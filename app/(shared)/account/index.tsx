@@ -1,19 +1,11 @@
-// app/(user)/account.tsx
+// /app/(shared)/account/index.tsx
+// ITU Project, "Evenmate"
+// Author(s): Martin Ševčík
+// VUT FIT 2024
 
 import { useState } from 'react';
-import {
-  View,
-  Text,
-  Pressable,
-  ActivityIndicator,
-  Alert,
-  Image,
-  Dimensions,
-  Modal,
-  TouchableOpacity,
-} from 'react-native';
-import { useUserInfo, useUpdateProfile } from '@/api/profiles';
-import { supabase } from '@/lib/supabase';
+import { View, Text, ActivityIndicator, Alert, Image, Dimensions, Modal, TouchableOpacity,} from 'react-native';
+import { useUserInfo} from '@/api/profiles';
 import { useGroupsList } from '@/api/groups';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -23,11 +15,12 @@ import defaultProfilePic from '@/assets/images/defaultProfilePic.png';
 import * as Clipboard from 'expo-clipboard';
 import { styles } from '@/constants/styles';
 
-type GroupItem = {
+// Group item interface
+interface GroupItem {
   id: string;
   name: string;
   notes: string;
-};
+}
 
 // Copy text to clipboard
 const copyToClipboard = async (text: string) => {
@@ -54,10 +47,12 @@ const AccountScreen = () => {
   // Fetch user groups data
   const {
     data: groupsDataRaw,
-  } = useGroupsList(currentUserId || null);
+  } = useGroupsList(currentUserId || null) as { data: { groups: { id: string; name: string; notes: string } }[] };
 
+  // const { groupsData } = map_groupsData(groupsDataRaw);
+  
   // Update user profile
-  const groupsData: GroupItem[] | undefined = groupsDataRaw?.map(item => ({
+  const groupsData: GroupItem[] | undefined = groupsDataRaw?.map((item) => ({
     id: item.groups.id,
     name: item.groups.name,
     notes: item.groups.notes,

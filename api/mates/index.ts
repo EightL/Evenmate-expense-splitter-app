@@ -1,8 +1,12 @@
-// api/mates/index.ts
+// /api/mates/index.ts
+// ITU Project, "Evenmate"
+// Author(s): Martin Ševčík, Jakub Lůčný
+// VUT FIT 2024
+
 import { supabase } from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
-// import { useGetCurrentUserId } from '@/api/getCurrentUserId';
 
+// Retrieve all mates and balances of specific user
 export const useMatesList = (currentUserId: string | null) => {
   return useQuery({
     queryKey: ['mates', currentUserId],
@@ -35,36 +39,35 @@ export const useMatesList = (currentUserId: string | null) => {
   });
 };
 
+// Retrieve all info by email
 export const getProfileByEmail = async (email: string) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('email', email.trim())
-      .single();
-  
-    if (error && error.code !== 'PGRST116') { // PGRST116: No rows found
-      throw error;
-    }
-  
-    return data;
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('email', email.trim())
+    .single();
+
+  return data;
 };
 
-  export const getExistingRelationship = async (userId: string, mateId: string) => {
-    const { data, error } = await supabase
-      .from('rel_uubalance')
-      .select('*')
-      .or(`user1.eq.${userId},user2.eq.${userId}`)
-      .eq('user1', mateId)
-      .or(`user2.eq.${mateId}`)
-      .maybeSingle();
-  
-    if (error && error.code !== 'PGRST116') {
-      throw error;
-    }
-  
-    return data;
+// Retrieves the relationship between two users
+export const getExistingRelationship = async (userId: string, mateId: string) => {
+  const { data, error } = await supabase
+    .from('rel_uubalance')
+    .select('*')
+    .or(`user1.eq.${userId},user2.eq.${userId}`)
+    .eq('user1', mateId)
+    .or(`user2.eq.${mateId}`)
+    .maybeSingle();
+
+  if (error && error.code !== 'PGRST116') {
+    throw error;
+  }
+
+  return data;
 };
-  
+
+// Create a new mate relationship
 export const createMateRelationship = async (mateId: string, userId: string) => {
     // Insert a new row into the mates relationship table
     const { error } = await supabase
@@ -94,6 +97,7 @@ export const createMateRelationship = async (mateId: string, userId: string) => 
     }
 };
 
+// Delete a mate relationship
 export const deleteMateRelationship = async (mateId: string, userId: string) => {
   const { error } = await supabase
   .from('rel_uubalance')

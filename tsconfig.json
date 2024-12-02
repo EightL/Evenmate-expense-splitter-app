@@ -17,9 +17,7 @@
       "@/*": ["./*"]
     },
     "strict": false,
-    "noImplicitAny": false
-
-    
+    "noImplicitAny": false,
   },
   "include": [
     "**/*.ts",

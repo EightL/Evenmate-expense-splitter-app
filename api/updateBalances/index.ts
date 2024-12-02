@@ -1,8 +1,10 @@
-// api/expenses/updateBalances.ts
+// /api/updateBalances/index.ts
+// ITU Project, "Evenmate"
+// Author(s): Martin Ševčík, Jakub Lůčný
+// VUT FIT 2024
+
 import { supabase } from '@/lib/supabase';
 import { Alert } from 'react-native';
-import { useQuery, QueryClient } from '@tanstack/react-query';
-
 
 type UpdateBalancesParams = {
   currentUserId: string;
@@ -10,18 +12,16 @@ type UpdateBalancesParams = {
   share: number;
 };
 
+// Update balances for all mates
 export const handleUpdateBalances = async ({
   currentUserId,
   mateIds,
   share,
 }: UpdateBalancesParams) => {
   try {
-    // console.log("MAte ids", mateIds);
-    // console.log("CurrentUserId", currentUserId);
 
     for (const mateId of mateIds) {
       if (mateId === currentUserId) {
-        // console.log(`Skipping update for mateId ${mateId} as it matches currentUserId`);
         continue;
       }
       // Fetch existing balance
@@ -37,7 +37,6 @@ export const handleUpdateBalances = async ({
       }
 
       if (data && data.length > 0) {
-        // console.log('Updating balances');
         // Relationship exists, update each balance record
         for (const balanceRecord of data) {
           if (balanceRecord.user1 === currentUserId && balanceRecord.user2 === mateId) {
@@ -55,7 +54,6 @@ export const handleUpdateBalances = async ({
           }
         }
       } else {
-        // console.log('Creating new balance records');
         // No existing record, insert both pairs
         const { error: insertError } = await supabase
           .from('rel_uubalance')

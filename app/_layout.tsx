@@ -1,4 +1,8 @@
-// app/_layout.tsx
+// /app/_layout.tsx
+// ITU Project, "Evenmate"
+// Author(s): Jakub Lůčný, Martin Ševčík
+// VUT FIT 2024
+
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
@@ -28,7 +32,7 @@ export const unstable_settings = {
 SplashScreen.preventAutoHideAsync();
 
 
-LogBox.ignoreAllLogs(true); // Ignoruje všechna varování
+LogBox.ignoreAllLogs(true);
 
 
 export default function RootLayout() {
@@ -71,6 +75,8 @@ function RootLayoutNav() {
         <Stack>
           <Stack.Screen name="(user)" options={{ headerShown: false }} />
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          <Stack.Screen name="(shared)/account" options={{ headerShown: false }} />
+          <Stack.Screen name="(shared)/expense" options={{ headerShown: false }} />
           <Stack.Screen name="index" options={{ headerShown: false }} />
         </Stack>
         </QueryProvider>

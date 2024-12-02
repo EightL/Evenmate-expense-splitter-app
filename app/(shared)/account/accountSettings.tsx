@@ -1,33 +1,20 @@
-import 'react-native-get-random-values'; // Import the polyfill first
+// /app/(shared)/account/accountSettings.tsx
+// ITU Project, "Evenmate"
+// Author(s): Martin Ševčík
+// VUT FIT 2024
+
+import 'react-native-get-random-values';
 import { Buffer } from 'buffer';
-
-// Set up Buffer globally
-// @ts-ignore
 global.Buffer = Buffer;
-
-import { useEffect, useRef, useState, useLayoutEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  Pressable,
-  Alert,
-  Image,
-  ActivityIndicator,
-  Keyboard,
-  TouchableWithoutFeedback,
-  TouchableOpacity,
-} from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { View, Text, StyleSheet, TextInput, Alert, Image, ActivityIndicator, Keyboard, TouchableWithoutFeedback, TouchableOpacity, } from 'react-native';
 import { useUserInfo, useUpdateProfile } from '@/api/profiles';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'expo-router';
 import { useGetCurrentUserId } from '@/api/getCurrentUserId';
 import * as ImagePicker from 'expo-image-picker';
 import defaultProfilePic from '@/assets/images/defaultProfilePic.png';
-import { fetchBlob, uploadImageToStorage } from '@/api/profiles';
-
-
+import { uploadImageToStorage } from '@/api/profiles';
 import { v4 as uuidv4 } from 'uuid'; // Import the UUID generator
 
 const AccountSettings = () => {
@@ -36,7 +23,6 @@ const AccountSettings = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [isImageLoading, setImageLoading] = useState(true);
-  // Get the current user ID
   const { data: currentUserId, error } = useGetCurrentUserId();
 
   // Fetch the user's profile data
@@ -139,6 +125,7 @@ const AccountSettings = () => {
       const fileName = `avatars/${currentUserId}/profile_${uuidv4()}.jpg`;
       console.log('Uploading to Supabase:', fileName);
   
+      // Calls a backend function to upload the image
       const publicURL = await uploadImageToStorage(fileName, currentUserId, selectedImage);
 
       if (!publicURL) {
@@ -231,7 +218,7 @@ const AccountSettings = () => {
         <Text style={styles.mainHeading}>Edit account info</Text>
       </View>
   
-      {/*/ Display the user's name and bank account number*/}
+      {/* Name and bank account number */}
       <View style={styles.container2}>
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Name:</Text>
@@ -243,7 +230,7 @@ const AccountSettings = () => {
             placeholderTextColor="#999"
           />
         </View>
-  
+
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Bank Account:</Text>
           <TextInput
@@ -255,7 +242,7 @@ const AccountSettings = () => {
           />
         </View>
 
-        {/* Display the user's profile image */}
+        {/* Profile Image */}
         <View style={styles.headerContainer}>
           <TouchableOpacity onPress={pickImage}>
             <Image
@@ -268,7 +255,7 @@ const AccountSettings = () => {
           <Text style={styles.pfpheading}>Profile picture:</Text>
         </View>
   
-        {/* Display the save button */}
+        {/* Save button */}
         <TouchableOpacity
           style={[
             styles.saveButton,
@@ -284,6 +271,7 @@ const AccountSettings = () => {
         </TouchableOpacity>
         </View>
         <View style={{flex: 1}}/>
+          {/* Logout button */}
           <TouchableOpacity onPress={handleLogout}>
             <Text style={styles.logoutText}>Log out</Text>
           </TouchableOpacity>
@@ -300,8 +288,6 @@ const styles = StyleSheet.create({
     },
     container2: {
       borderRadius: 15,
-      
-      
       marginBottom: 20,
     },
     headerContainer: {
@@ -363,13 +349,6 @@ const styles = StyleSheet.create({
       borderColor: '#4CAF50',
       borderWidth: 2,
     },
-    evenmatelogo: {
-      width: 33,
-      height: 27,
-      marginRight: 0,
-      resizeMode: 'cover',
-      overflow: 'hidden',
-    },
     saveButton: {
       marginTop: 10,
       paddingVertical: 15,
@@ -391,23 +370,6 @@ const styles = StyleSheet.create({
       color: 'red',
       fontSize: 16,
       textAlign: 'center',
-    },
-    debugImageContainer: {
-      marginTop: 20,
-      alignItems: 'center',
-    },
-    debugText: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      marginBottom: 10,
-    },
-    debugImage: {
-      width: 150,
-      height: 150,
-      borderRadius: 75,
-      borderColor: '#ccc',
-      borderWidth: 1,
-      resizeMode: 'cover',
     },
   });
 

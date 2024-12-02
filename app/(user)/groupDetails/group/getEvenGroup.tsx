@@ -1,3 +1,8 @@
+// /app/(user)/groupDetails/group/getEvenGroup.tsx
+// ITU Project, "Evenmate"
+// Author(s): Jakub Lůčný
+// VUT FIT 2024
+
 import React from 'react';
 import { View, Text, StyleSheet, FlatList, Pressable, Image, TouchableOpacity } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';

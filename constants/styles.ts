@@ -1,3 +1,8 @@
+// /constants/styles.ts
+// ITU Project, "Evenmate"
+// Author(s): Martin Ševčík, Jakub Lůčný
+// VUT FIT 2024
+
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({

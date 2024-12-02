@@ -1,3 +1,8 @@
+// /app/(user)/groupDetails/group/_layout.tsx
+// ITU Project, "Evenmate"
+// Author(s): Jakub Lůčný
+// VUT FIT 2024
+
 import React from 'react';
 import { Pressable, Alert, StyleSheet } from 'react-native';
 import { Stack, usePathname } from 'expo-router';
@@ -66,12 +71,6 @@ export default function UserLayout() {
         }}
       />
       {/* Other screens, some hidden headers, some just renamed */}
-      <Stack.Screen
-        name="expense"
-        options={{
-          headerShown: false,
-        }}
-      />
       <Stack.Screen
         name="getEvenGroup"
         options={{

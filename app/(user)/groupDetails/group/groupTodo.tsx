@@ -1,3 +1,8 @@
+// /app/(user)/groupDetails/group/groupTodo.tsx
+// ITU Project, "Evenmate"
+// Author(s): Jakub Lůčný
+// VUT FIT 2024
+
 import React, { useState } from 'react';
 import {
   StyleSheet,

@@ -1,4 +1,8 @@
-// lib/supabase.ts
+// /lib/supabase.ts
+// ITU Project, "Evenmate"
+// Author(s): Jakub Lůčný, Martin Ševčík
+// VUT FIT 2024
+
 import 'react-native-url-polyfill/auto';
 import * as SecureStore from 'expo-secure-store';
 import { createClient } from '@supabase/supabase-js';

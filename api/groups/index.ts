@@ -1,7 +1,10 @@
-// api/mates/index.ts
+// /api/groups/index.ts
+// ITU Project, "Evenmate"
+// Author(s): Martin Ševčík, Jakub Lůčný
+// VUT FIT 2024
+
 import { supabase } from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
-
 
 // Retrieve all info of specific group
 export const useGroupInfo = (groupId: string | null) => {
@@ -23,6 +26,7 @@ export const useGroupInfo = (groupId: string | null) => {
   });
 }
 
+// Retrieve all groups of specific user
 export const useGroupsList = (currentUserId: string | null) => {
     return useQuery({
         queryKey: ['groupslist', currentUserId],
@@ -48,6 +52,7 @@ export const useGroupsList = (currentUserId: string | null) => {
     });
 }
 
+// Retrieve all group members of specific group
 export const useGroupMembers = (currentGroupId : string) => {
     return useQuery({
         queryKey: ['groupMembers', currentGroupId],
@@ -79,7 +84,7 @@ export const useGroupMembers = (currentGroupId : string) => {
     });
 }
 
-
+// Retrieve total balance of specific group
 export const useGroupsTotalBalances = (groupIds: string[]) => {
   return useQuery<number[], Error>({
     queryKey: ['groupsTotalBalances', groupIds],
@@ -104,12 +109,6 @@ export const useGroupsTotalBalances = (groupIds: string[]) => {
         throw new Error('User is not authenticated.');
       }
 
-      /**
-       * Fetches the total balance for a single group.
-       *
-       * @param groupId - The ID of the group.
-       * @returns The total balance for the group.
-       */
       const fetchGroupBalance = async (groupId: string): Promise<number> => {
         // Get group members excluding the current user
         const { data: groupMembers, error: groupError } = await supabase
@@ -164,9 +163,7 @@ export const useGroupsTotalBalances = (groupIds: string[]) => {
   });
 };
 
-
-
-
+// Retrieve group members with their balances
 export const useGroupMembersWithBalance = (currentGroupId: string) => {
   return useQuery({
     queryKey: ['groupMembersWithBalance', currentGroupId],
@@ -227,6 +224,7 @@ export const useGroupMembersWithBalance = (currentGroupId: string) => {
   });
 };
 
+// Retrieves the group notes
 export const fetchGroupNotes = async (groupId: string) => {
   const { data, error } = await supabase
     .from('groups')
@@ -241,6 +239,7 @@ export const fetchGroupNotes = async (groupId: string) => {
   return data.notes || '';
 };
 
+// Updates the group notes
 export const updateGroupNotes = async (groupId: string, notes: string) => {
   const { error } = await supabase
     .from('groups')
@@ -252,6 +251,7 @@ export const updateGroupNotes = async (groupId: string, notes: string) => {
   }
 };
 
+// Create a new group
 export const createGroup = async (groupName: string, userId: string) => {
   const { data: newGroup, error: groupError } = await supabase
     .from('groups')
@@ -270,6 +270,7 @@ export const createGroup = async (groupName: string, userId: string) => {
   return newGroup;
 };
 
+// Adds a user to a group
 export const addUserToGroup = async (groupId: string, userId: string) => {
   const { error: membershipError } = await supabase
     .from('rel_ingroup')
@@ -284,6 +285,7 @@ export const addUserToGroup = async (groupId: string, userId: string) => {
   }
 };
 
+// Returns the id of the group that the user is a member of
 export const checkUserMembership = async (userId: string, groupId: string) => {
   const { data, error } = await supabase
     .from('rel_ingroup')
@@ -292,10 +294,6 @@ export const checkUserMembership = async (userId: string, groupId: string) => {
     .eq('groupid', groupId)
     .single();
 
-  if (error && error.code === 'PGRST116') { // PGRST116: No rows found
-    return null;
-  }
-
   if (error) {
     throw error;
   }
@@ -303,6 +301,7 @@ export const checkUserMembership = async (userId: string, groupId: string) => {
   return data;
 };
 
+// Handle the user leaving a group
 export const leaveGroup = async (currentUserId: string, groupId: string) => {
   const { error } = await supabase
   .from('rel_ingroup')
@@ -317,6 +316,7 @@ export const leaveGroup = async (currentUserId: string, groupId: string) => {
   return true;
 }
 
+// Update the group settings
 export const updateGroupSetting = async (groupId: string, groupName : string, avatar_url: string) => {
   const { error } = await supabase
   .from('groups')

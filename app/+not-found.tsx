@@ -1,4 +1,8 @@
-// app/+not-found.tsx
+// /app/+not_found.tsx
+// ITU Project, "Evenmate"
+// Author(s): Generated as a part of the Expo init
+// VUT FIT 2024
+
 import { Link, Stack } from 'expo-router';
 import { StyleSheet } from 'react-native';
 import React from 'react';

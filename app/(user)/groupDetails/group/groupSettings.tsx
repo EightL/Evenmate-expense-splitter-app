@@ -1,3 +1,8 @@
+// /app/(user)/groupDetails/group/groupSettings.tsx
+// ITU Project, "Evenmate"
+// Author(s): Jakub Lůčný
+// VUT FIT 2024
+
 import 'react-native-get-random-values'
 import { Buffer } from 'buffer';
 global.Buffer = Buffer;
