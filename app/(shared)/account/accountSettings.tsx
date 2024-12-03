@@ -176,13 +176,13 @@ const AccountSettings = () => {
 
   // Handle user logout
   const handleLogout = async () => {
-    // const { error } = await supabase.auth.signOut();
-    // if (error) {
-    //   Alert.alert('Error', error.message);
-    // }
-    // else {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      Alert.alert('Error', error.message);
+    }
+    else {
       router.replace('/(auth)/sign-in'); // Navigate to login screen
-    // }
+    }
   };
 
   if (isProfileLoading || loading) {
