@@ -69,7 +69,7 @@ export const fetchExpenseDetails = async (id: string) => {
     }
 
     const { data: users, error: usersError } = await supabase
-      .from('profiles') // Assuming you have a 'profiles' table
+      .from('profiles')
       .select('username')
       .in('id', userIds);
 

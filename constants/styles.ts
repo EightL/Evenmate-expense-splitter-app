@@ -211,4 +211,7 @@ export const styles = StyleSheet.create({
       resizeMode: 'cover',
       overflow: 'hidden',
     },
+    iconhitbox:{
+      padding: 10,
+    },
   });

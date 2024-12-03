@@ -6,12 +6,11 @@
 import { supabase } from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
 
-// Retrieve all info of specific group
+// Returns all informations about specified group
 export const useGroupInfo = (groupId: string | null) => {
   return useQuery({
       queryKey: ['groupinfo', groupId],
       queryFn: async () => {
-
           const { data, error } = await supabase
           .from('groups')
           .select('*')
@@ -26,14 +25,11 @@ export const useGroupInfo = (groupId: string | null) => {
   });
 }
 
-// Retrieve all groups of specific user
+// Returns all groups of specified user
 export const useGroupsList = (currentUserId: string | null) => {
     return useQuery({
         queryKey: ['groupslist', currentUserId],
         queryFn: async () => {
-
-            // console.log("USERID in API function: ", currentUser);
-
             const { data, error } = await supabase
             .from('rel_ingroup')
             .select(`
@@ -52,12 +48,12 @@ export const useGroupsList = (currentUserId: string | null) => {
     });
 }
 
-// Retrieve all group members of specific group
+// Returns all group members of specified group
 export const useGroupMembers = (currentGroupId : string) => {
     return useQuery({
+        // Retrieve the current user session
         queryKey: ['groupMembers', currentGroupId],
         queryFn: async () => {
-            // Retrieve the current user ID
             const {
                 data: { session },
                 error: sessionError,
@@ -84,7 +80,7 @@ export const useGroupMembers = (currentGroupId : string) => {
     });
 }
 
-// Retrieve total balance of specific group
+// Returns total balance of specified group
 export const useGroupsTotalBalances = (groupIds: string[]) => {
   return useQuery<number[], Error>({
     queryKey: ['groupsTotalBalances', groupIds],
@@ -150,9 +146,9 @@ export const useGroupsTotalBalances = (groupIds: string[]) => {
       try {
         // Await all balance fetches
         const balances = await Promise.all(balancePromises);
-        return balances; // Returns an array like [100, 300, 400]
-      } catch (error) {
-        // Handle any errors that occurred during the balance fetches
+        return balances;
+      } 
+      catch (error) {
         console.error('Error fetching group balances:', error);
         throw error;
       }
@@ -163,12 +159,12 @@ export const useGroupsTotalBalances = (groupIds: string[]) => {
   });
 };
 
-// Retrieve group members with their balances
+// Returns all group members with their balances
 export const useGroupMembersWithBalance = (currentGroupId: string) => {
   return useQuery({
     queryKey: ['groupMembersWithBalance', currentGroupId],
     queryFn: async () => {
-      // Retrieve the current user ID
+      // Retrieve the current user session and ID
       const {
         data: { session },
         error: sessionError,
@@ -180,7 +176,7 @@ export const useGroupMembersWithBalance = (currentGroupId: string) => {
 
       const currentUserId = session?.user.id;
 
-      // First query: Get group members excluding the current user
+      // Get group members excluding the current user
       const { data: groupMembers, error: groupError } = await supabase
         .from('rel_ingroup')
         .select(`
@@ -197,7 +193,7 @@ export const useGroupMembersWithBalance = (currentGroupId: string) => {
       // Extract userids from the group members
       const userIds = groupMembers.map((member) => member.userid);
 
-      // Second query: Find balances between current user and each group member
+      // Find balances between current user and each group member
       const { data: balances, error: balanceError } = await supabase
         .from('rel_uubalance')
         .select('*')
@@ -217,14 +213,12 @@ export const useGroupMembersWithBalance = (currentGroupId: string) => {
         };
       });
 
-      // console.log("Returned data:", membersWithBalances);
-
       return membersWithBalances;
     },
   });
 };
 
-// Retrieves the group notes
+// Returns the group notes
 export const fetchGroupNotes = async (groupId: string) => {
   const { data, error } = await supabase
     .from('groups')
@@ -251,7 +245,7 @@ export const updateGroupNotes = async (groupId: string, notes: string) => {
   }
 };
 
-// Create a new group
+// Creates a new group
 export const createGroup = async (groupName: string, userId: string) => {
   const { data: newGroup, error: groupError } = await supabase
     .from('groups')
@@ -285,14 +279,14 @@ export const addUserToGroup = async (groupId: string, userId: string) => {
   }
 };
 
-// Returns the id of the group that the user is a member of
+// Returns info about the group if the user is already member of the group
 export const checkUserMembership = async (userId: string, groupId: string) => {
   const { data, error } = await supabase
     .from('rel_ingroup')
     .select('*')
     .eq('userid', userId)
     .eq('groupid', groupId)
-    .single();
+    .maybeSingle();
 
   if (error) {
     throw error;
@@ -301,7 +295,7 @@ export const checkUserMembership = async (userId: string, groupId: string) => {
   return data;
 };
 
-// Handle the user leaving a group
+// Handles the user leaving a group
 export const leaveGroup = async (currentUserId: string, groupId: string) => {
   const { error } = await supabase
   .from('rel_ingroup')
@@ -316,7 +310,7 @@ export const leaveGroup = async (currentUserId: string, groupId: string) => {
   return true;
 }
 
-// Update the group settings
+// Updates the group settings
 export const updateGroupSetting = async (groupId: string, groupName : string, avatar_url: string) => {
   const { error } = await supabase
   .from('groups')

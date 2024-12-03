@@ -57,6 +57,7 @@ export default function MatesScreen() {
         <Image source={evenmatelogo} style={styles.evenmatelogo}></Image>
       ),
       headerLeft: () => (
+        // go back button
         <TouchableOpacity
             onPress={() => router.back()}
             accessibilityLabel="Go Back"
@@ -65,7 +66,7 @@ export default function MatesScreen() {
             <Ionicons
             name='arrow-back'
             size={30}
-            color="#4CAF50" // Blue color for back button
+            color="#4CAF50" // Blue color
             />
         </TouchableOpacity>
       ),

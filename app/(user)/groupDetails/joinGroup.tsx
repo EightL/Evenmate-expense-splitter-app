@@ -70,38 +70,34 @@ export default function JoinGroup() {
   }, []);
 
   // Join entered group
-  const handleJoinGroup = async (enteredGroupId: string) => {
-    const finalGroupId = enteredGroupId ?? groupId;
-
-    if (!finalGroupId.trim()) {
-      Alert.alert('Validation Error', 'Please enter a Group ID.');
+  const handleJoinGroup = async () => {
+    if (!groupId.trim()) {
       return;
     }
-
+    
     setLoading(true);
     try {
       // Check if user is already member of the group
-      const existingMembership = await checkUserMembership(currentUserId, finalGroupId);
-
+      const existingMembership = await checkUserMembership(currentUserId, groupId);
+      
       if (existingMembership) {
         Alert.alert('Already a Member', 'You are already a member of this group.');
         return;
       }
       // Add user to the group
       else {
-        await addUserToGroup(finalGroupId.trim(), currentUserId);
+        await addUserToGroup(groupId, currentUserId);
 
         queryClient.invalidateQueries({ queryKey: ['groupslist', currentUserId] });
       }
-      router.back();
-
     }
     catch (error: any) {
       console.error('Error joining group:', error.message);
-      Alert.alert('Error joining group, please check you entered correct group ID');
+      Alert.alert('Error joining group, please check if you entered correct group ID');
     }
     finally {
       setLoading(false);
+      router.back();
     }
   };
 
@@ -110,10 +106,7 @@ export default function JoinGroup() {
 
     setScanned(true);
     setScannerVisible(false);
-    setGroupId(data);
-    Alert.alert('Group ID Scanned', [
-      { text: 'OK', onPress: () => handleJoinGroup(data) },
-    ]);
+    setGroupId(data.trim());
   };
 
   const handleScanPress = () => {
@@ -150,11 +143,11 @@ export default function JoinGroup() {
         keyboardType="default"
         autoCapitalize="none"
       />
-      
+      {/* Confiramation ADD button */}
       {loading ? (
         <ActivityIndicator/>
       ) : (
-        <Pressable style={styles.button} onPress={() => handleJoinGroup(groupId)}>
+        <Pressable style={styles.button} onPress={() => handleJoinGroup()}>
           <Text style={styles.buttonText}>Add</Text>
         </Pressable>
       )}

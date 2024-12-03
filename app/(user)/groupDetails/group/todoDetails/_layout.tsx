@@ -34,7 +34,7 @@ export default function TodoStack() {
               <Ionicons
               name='arrow-back'
               size={30}
-              color="#4CAF50" // Blue color
+              color="#4CAF50"
               />
           </TouchableOpacity>
           ),

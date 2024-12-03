@@ -3,7 +3,7 @@
 // Author(s): Jakub Lůčný
 // VUT FIT 2024
 
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, FlatList, Image, Modal, TouchableOpacity } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useGroupExpensesList } from '@/api/expenses';
@@ -20,6 +20,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 export default function GroupDetailScreen() {
   const THRESHOLD = 0.01; // Define threshold for treating values close to zero as zero (when showing balances)
 
+  // Defining states
   const router = useRouter();
   const { id: groupId, name } = useLocalSearchParams();
   const { data: groupData, error: groupError } = useGroupInfo(groupId);
@@ -34,6 +35,7 @@ export default function GroupDetailScreen() {
     setModalVisible(!isModalVisible);
   };
 
+  // Screen to select which mate to get even with
   const myAvatar = currentUserData?.avatar_url;
   const handleGetEven = () => {
     router.push({
@@ -46,6 +48,7 @@ export default function GroupDetailScreen() {
     });
   };
 
+  // Handeling notes button pressed
   const handleNotes = () => {
     router.push({
       pathname: '/groupDetails/group/groupNotes',
@@ -56,6 +59,7 @@ export default function GroupDetailScreen() {
     });
   };
 
+  // Handeling overview button pressed
   const handleOverview = () => {
     router.push({
       pathname: '/groupDetails/group/groupOverview',
@@ -67,6 +71,7 @@ export default function GroupDetailScreen() {
     });
   };
 
+  // Handeling ToDo button pressed
   const handleToDo = () => {
     router.push({
       pathname: '/groupDetails/group/groupTodo',
@@ -76,9 +81,11 @@ export default function GroupDetailScreen() {
     });
   };
 
+  // Fetch data from database
   const { data: expensesData, error, isLoading: isLoadingExpenses } = useGroupExpensesList(groupId);
   const { data: groupMembers, error: error2, isLoading: isLoadingBalances } = useGroupMembersWithBalance(groupId);
 
+  // calculate total balance
   const totalBalance = useMemo(() => {
     const balanceSum = groupMembers?.reduce((sum, item) => sum + item.balance, 0) || 0;
     return Math.abs(balanceSum) < THRESHOLD ? 0 : balanceSum; // Normalize small values
@@ -136,6 +143,7 @@ export default function GroupDetailScreen() {
 
   };
 
+  // sort expenses by the newest added
   const sortedExpensesData = expensesData?.slice().sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   // Render list of expenses
@@ -257,6 +265,7 @@ export default function GroupDetailScreen() {
         </View>
       </View>
 
+      {/* Enlarge group image */}
       <Modal visible={isModalVisible} transparent={true} animationType="none">
         <View style={styles.modalContainer}>
           <TouchableOpacity style={styles.modalCloseButton} onPress={toggleModal}>
@@ -269,6 +278,7 @@ export default function GroupDetailScreen() {
         </View>
       </Modal>
 
+      {/* Balances section */}
       <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 10 }}>
         <Text style={styles.sectionTitle}>Your balance: </Text>
         <Text style={totalBalance >= 0 ? styles.positiveBalanceTitle : styles.negativeBalanceTitle}>
@@ -288,6 +298,7 @@ export default function GroupDetailScreen() {
         )}
       </TouchableOpacity>
       <Text style={styles.sectionTitle}>Expenses</Text>
+      {/* Flatlist with expenses */}
       <FlatList
         data={sortedExpensesData}
         keyExtractor={(item) => String(item.id)}

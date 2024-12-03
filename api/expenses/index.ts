@@ -5,7 +5,7 @@
 import { supabase } from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
 
-// Returns the expense information
+// Returns all informations about expenseId
 export const useExpenseInfo = (expenseId: string | null) => {
   return useQuery({
       queryKey: ['expenseinfo', expenseId],
@@ -24,7 +24,7 @@ export const useExpenseInfo = (expenseId: string | null) => {
   });
 }
 
-// Deletes the expense
+// Deletes the expense specified by id
 export const deleteExpense = async (id: string) => {
   const { error } = await supabase
   .from('Rel_owesFor')
@@ -44,7 +44,7 @@ export const deleteExpense = async (id: string) => {
   return true;
 }
 
-// Updates the expense
+// Updates the expense name and cost
 export const updateExpense = async (id: string, expenseName: string, numericCost: number) => {
   try {
     const { error } = await supabase
@@ -66,7 +66,7 @@ export const updateExpense = async (id: string, expenseName: string, numericCost
   }
 };
 
-// Returns expenses in a group
+// Returns all expenses in a specific group
 export const useGroupExpensesList = (groupId: string) => {
   return useQuery({
       queryKey: ['groupExpenses', groupId],
@@ -85,7 +85,7 @@ export const useGroupExpensesList = (groupId: string) => {
   });
 }
 
-// Returns expenses for a mate
+// Returns all expenses for a mate and currentUser
 export const useMateExpenses = (currentUserId: string, mateId: string) => {
     return useQuery({
       queryKey: ['mateExpenses', currentUserId, mateId],

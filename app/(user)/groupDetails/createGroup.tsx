@@ -88,6 +88,7 @@ export default function CreateGroupScreen() {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Create New Group</Text>
+      {/* Text input for neww group name */}
       <TextInput
         style={styles.input}
         placeholder="Group Name"

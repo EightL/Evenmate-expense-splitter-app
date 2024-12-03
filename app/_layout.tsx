@@ -1,6 +1,6 @@
 // /app/_layout.tsx
 // ITU Project, "Evenmate"
-// Author(s): Jakub Lůčný, Martin Ševčík
+// Author(s): Jakub Lůčný, Martin Ševčík, Predefined from Expo
 // VUT FIT 2024
 
 import FontAwesome from '@expo/vector-icons/FontAwesome';
@@ -13,9 +13,6 @@ import 'react-native-reanimated';
 import AuthProvider from '@/providers/AuthProvider';
 import QueryProvider from '@/providers/QueryProvider';
 import { useColorScheme } from '@/components/useColorScheme';
-import { StatusBar } from 'expo-status-bar';
-import Platform from 'react-native';
-import React from 'react';
 import { LogBox } from 'react-native';
 
 export {

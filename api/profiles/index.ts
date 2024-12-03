@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useGetCurrentUserId } from '@/api/getCurrentUserId';
 
 
-// Retrieve all info of specific user
+// Returns all informations about a specified user
 export const useUserInfo = (userId: string | null) => {
     return useQuery({
         queryKey: ['userinfo', userId],
@@ -37,7 +37,7 @@ type UpdateUserProfileParams = {
     avatar_url: string;
 };
 
-// Update user profile
+// Updates user profile informations
 export const useUpdateProfile = async ({ id, username, bankAccount, avatar_url }: UpdateUserProfileParams): Promise<void> => {
   const { data, error } = await supabase
     .from('profiles')
@@ -48,11 +48,9 @@ export const useUpdateProfile = async ({ id, username, bankAccount, avatar_url }
     })
     .eq('id', id);
     
-    console.log("avatar_url", avatar_url);
   if (error) {
     throw new Error(`Error updating profile: ${error.message}`);
   }
-  console.log("dataAAAAAAAA", data);
 };
 
 
@@ -76,16 +74,12 @@ export const fetchBlob = async (uri: string): Promise<Uint8Array> => {
 };
 
 
-// Upload the image to Supabase
+// Uploads avatar image to Supabase
 export const uploadImageToStorage = async (fileName: string, currentUserId: string, selectedImage) => {
     const uint8Array = await fetchBlob(selectedImage);
     if (uint8Array.length === 0) {
       throw new Error('Blob is empty.');
     }
-  
-    // Generate a unique file name
-    console.log('Uploading to Supabase:', fileName);
-
     
     // Upload the image to Supabase
     const { data, error } = await supabase
@@ -108,15 +102,12 @@ export const uploadImageToStorage = async (fileName: string, currentUserId: stri
     return publicURL;
   }
 
-// Upload the group image to Supabase
+// Uploads the group image to Supabase
 export const uploadGroupImage = async (fileName: string, currentUserId: string, selectedImage) => {
   const uint8Array = await fetchBlob(selectedImage);
   if (uint8Array.length === 0) {
     throw new Error('Blob is empty.');
   }
-
-  // Generate a unique file name
-  console.log('Uploading to Supabase:', fileName);
 
   const { data, error: uploadError } = await supabase
     .storage
@@ -131,8 +122,6 @@ export const uploadGroupImage = async (fileName: string, currentUserId: string, 
     console.error('Upload Error:', uploadError);
     throw uploadError;
   }
-
-  console.log('Upload successful:', data);
 
   const publicURL = `https://fcxvtpbbexwjimojbbcy.supabase.co/storage/v1/object/public/group-images/${data.path}`;
   

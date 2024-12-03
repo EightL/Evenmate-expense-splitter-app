@@ -3,8 +3,7 @@
 // Author(s): Jakub Lůčný
 // VUT FIT 2024
 
-import React from 'react';
-import { Pressable, Alert, StyleSheet } from 'react-native';
+import { Alert, StyleSheet } from 'react-native';
 import { Stack, usePathname } from 'expo-router';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -35,9 +34,6 @@ export default function UserLayout() {
       },
     });
   };
-  const handleGoBack = () => {
-    router.back();
-  };
 
   return (
     <Stack>
@@ -45,7 +41,7 @@ export default function UserLayout() {
         name="[id]"
         options={{
           title: 'Groups',
-          headerTitleAlign: 'center', // Center the title
+          headerTitleAlign: 'center',
           headerLeft: () => (
             <TouchableOpacity
                 onPress={() => router.back()}
@@ -55,7 +51,7 @@ export default function UserLayout() {
                 <Ionicons
                 name='arrow-back'
                 size={30}
-                color="#4CAF50" // Blue color
+                color="#4CAF50" // green
                 />
             </TouchableOpacity>
           ),
@@ -75,32 +71,38 @@ export default function UserLayout() {
         name="getEvenGroup"
         options={{
           title: 'Get Even',
+          headerTitleAlign: 'center',
         }}
       />
       <Stack.Screen
         name="groupNotes"
         options={{
           title: 'Group Notes',
+          headerTitleAlign: 'center',
       }}/>
       <Stack.Screen
         name="groupOverview"
         options={{
           title: 'Group Overview',
+          headerTitleAlign: 'center',
       }}/>
       <Stack.Screen
         name="groupSettings"
         options={{
           title: 'Group Settings',
+          headerTitleAlign: 'center',
       }}/>
       <Stack.Screen
         name="getEvenMate"
         options={{
           title: 'Get Even',
+          headerTitleAlign: 'center',
       }}/>
       <Stack.Screen
         name="groupTodo"
         options={{
           title: 'To-Do',
+          headerTitleAlign: 'center',
       }}/>
       <Stack.Screen
         name="todoDetails"

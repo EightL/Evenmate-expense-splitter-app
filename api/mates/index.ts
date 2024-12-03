@@ -6,17 +6,14 @@
 import { supabase } from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
 
-// Retrieve all mates and balances of specific user
+// Returns all mates and their balances with specified User
 export const useMatesList = (currentUserId: string | null) => {
   return useQuery({
     queryKey: ['mates', currentUserId],
     queryFn: async () => {
       if (!currentUserId) {
-        console.log("No currentUserId provided");
         return [];
       }
-
-      console.log("Fetching mates for user:", currentUserId);
 
       const { data, error } = await supabase
         .from('rel_uubalance')
@@ -35,11 +32,11 @@ export const useMatesList = (currentUserId: string | null) => {
 
       return data;
     },
-    refetchOnMount: 'always', // Ensures query refetches on each mount
+    refetchOnMount: 'always', 
   });
 };
 
-// Retrieve all info by email
+// Returns all info about a user specified by his email
 export const getProfileByEmail = async (email: string) => {
   const { data, error } = await supabase
     .from('profiles')
@@ -50,24 +47,28 @@ export const getProfileByEmail = async (email: string) => {
   return data;
 };
 
-// Retrieves the relationship between two users
+// Returns the relationship between two users, if it already exists
 export const getExistingRelationship = async (userId: string, mateId: string) => {
   const { data, error } = await supabase
     .from('rel_uubalance')
     .select('*')
-    .or(`user1.eq.${userId},user2.eq.${userId}`)
-    .eq('user1', mateId)
-    .or(`user2.eq.${mateId}`)
+    .eq('user1', userId)
+    .eq('user2', mateId)
     .maybeSingle();
 
   if (error && error.code !== 'PGRST116') {
     throw error;
   }
 
-  return data;
+  if (data){
+    return true;
+  }
+  else{
+    return false;
+  }
 };
 
-// Create a new mate relationship
+// Creates a new mate relationship
 export const createMateRelationship = async (mateId: string, userId: string) => {
     // Insert a new row into the mates relationship table
     const { error } = await supabase
@@ -76,7 +77,7 @@ export const createMateRelationship = async (mateId: string, userId: string) => 
         {
           user1: userId,
           user2: mateId,
-          balance: 0, // Initialize balance as needed
+          balance: 0, // Initialize default balances to 0
         },
       ]);
     if (error) {
@@ -89,7 +90,7 @@ export const createMateRelationship = async (mateId: string, userId: string) => 
         {
           user1: mateId,
           user2: userId,
-          balance: 0, // Initialize balance as needed
+          balance: 0,
         },
       ]);
     if (error2) {
@@ -97,7 +98,7 @@ export const createMateRelationship = async (mateId: string, userId: string) => 
     }
 };
 
-// Delete a mate relationship
+// Deletes a mate relationship
 export const deleteMateRelationship = async (mateId: string, userId: string) => {
   const { error } = await supabase
   .from('rel_uubalance')

@@ -25,10 +25,12 @@ export default function AuthProvider({ children }: PropsWithChildren) {
     const [profile, setProfile] = useState(null);
 
     useEffect(() => {
+        // Fetch current user session
         const fetchSession = async () => {
             const { data: { session } } = await supabase.auth.getSession();
             setSession(session);
             
+            // Get user info from database
             if (session){ 
                 const { data: profileData, error: profileError } = await supabase
                     .from('profiles')
@@ -76,7 +78,6 @@ export default function AuthProvider({ children }: PropsWithChildren) {
         };
     }, []);
 
-    // console.log('User Profile:', profile);
     return (
         <AuthContext.Provider value={{ session, loading, profile }}>
             {children}

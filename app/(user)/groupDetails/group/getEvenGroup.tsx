@@ -4,7 +4,7 @@
 // VUT FIT 2024
 
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, Pressable, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useGroupMembers } from '@/api/groups';
 import defaultProfilePic from '@/assets/images/defaultProfilePic.png';
@@ -28,6 +28,7 @@ export default function GetEvenGroupScreen() {
     return <Text style={styles.errorText}>Failed to load group members</Text>;
   }
 
+  // Header
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -94,7 +95,7 @@ export default function GetEvenGroupScreen() {
     <View style={styles.container}>
       <Text style={styles.groupName}>Get Even for Group</Text>
       <Text style={styles.title}>{groupName}</Text>
-
+      {/* List with all group members */}
       <FlatList
         data={groupMembers}
         keyExtractor={(item) => item.userid}

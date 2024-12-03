@@ -98,6 +98,7 @@ export default function TodoScreen() {
       }
     };
   
+    // Modal for adding new todo
     const openModal = () => {
       setModalVisible(true);
       Animated.timing(slideAnim, {
@@ -107,6 +108,7 @@ export default function TodoScreen() {
       }).start();
     };
   
+    // closing modal for adding new todo
     const closeModal = () => {
       Animated.timing(slideAnim, {
         toValue: 0,
@@ -151,14 +153,14 @@ export default function TodoScreen() {
     return (
       <View style={styles.container}>
         <Text style={styles.title}>To-Do List</Text>
-  
+        {/* List with all ToDos */}
         <FlatList
           data={todos}
           keyExtractor={(item) => item.id}
           renderItem={renderTodoItem}
           contentContainerStyle={styles.listContainer}
         />
-  
+        {/* Add new To-Do button */}
         {!isModalVisible && (
           <TouchableOpacity style={styles.addButton} onPress={openModal}>
             <Text style={styles.addButtonText}>Add New To-Do</Text>
@@ -187,6 +189,7 @@ export default function TodoScreen() {
                   },
                 ]}
               >
+                {/* Text input for new ToDo name */}
                 <Text style={styles.modalTitle}>New To-Do</Text>
                 <TextInput
                   style={styles.input}
@@ -194,6 +197,7 @@ export default function TodoScreen() {
                   value={newTodoText}
                   onChangeText={setNewTodoText}
                 />
+                {/* Add button and cancel button */}
                 <View style={styles.modalButtonsContainer}>
                   <TouchableOpacity style={styles.modalButton} onPress={addTodo}>
                     <Text style={styles.modalButtonText}>Add</Text>
@@ -244,7 +248,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#f9f9f9',
     padding: 15,
-    borderRadius: 8,
+    borderRadius: 10,
     marginBottom: 10,
     borderColor: '#ccc',
     borderWidth: 1,
@@ -272,7 +276,7 @@ const styles = StyleSheet.create({
     color: '#999',
   },
   modalOverlay: {
-    flex: 0.8,
+    flex: 0.6,
     justifyContent: 'flex-end',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },

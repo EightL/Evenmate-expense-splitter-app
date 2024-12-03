@@ -125,21 +125,30 @@ export default function GroupsScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Your groups</Text>
-      {groupsData && groupsData.length > 0 ? (
+      {/* Fixed header for the groups title */}
+      <View>
+        <Text style={styles.title}>Your groups</Text>
+      </View>
+  
+      {/* Scrollable content below the title */}
       <FlatList
         data={groupsData}
         keyExtractor={(item) => item.groups.id}
         renderItem={renderGroups}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.listContainer}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        ListEmptyComponent={
+          <Text style={styles.noGroupsText}>
+            Looks like you aren't in any group yet! Create a new group and share a QR code from group settings or join a group with a QR code.
+          </Text>
+        }
+        contentContainerStyle={[
+          styles.listContainer,
+          { flexGrow: groupsData && groupsData.length === 0 ? 1 : undefined }, // Center empty state
+        ]}
       />
-      ) : (
-      <Text style={styles.noGroupsText}>
-        Looks like you aren't in any group yet! Create new group and share QR code from group settings or join a group with QR code.
-      </Text>
-      )}
+  
+      {/* Buttons for creating and joining groups */}
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.button} onPress={handleCreateNewGroup}>
           <Text style={styles.buttonText}>Create New Group</Text>

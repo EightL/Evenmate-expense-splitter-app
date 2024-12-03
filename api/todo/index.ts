@@ -25,7 +25,7 @@ return useQuery({
 });
 }
 
-// Retrieve all info about specific ToDo
+// Retrieve all info about specified ToDo
 export const useTodoInfo = (todoId: string | null) => {
 return useQuery({
     queryKey: ['todoInfo', todoId],

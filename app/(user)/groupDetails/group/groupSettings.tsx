@@ -7,7 +7,7 @@ import 'react-native-get-random-values'
 import { Buffer } from 'buffer';
 global.Buffer = Buffer;
 
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -34,6 +34,8 @@ import { useGetCurrentUserId } from '@/api/getCurrentUserId';
 import { leaveGroup, updateGroupSetting } from '@/api/groups';
 import { useGroupInfo } from '@/api/groups';
 import { uploadGroupImage } from '@/api/profiles';
+import * as Clipboard from 'expo-clipboard';
+
 
 
 export default function groupSettings() {
@@ -58,6 +60,7 @@ export default function groupSettings() {
     }
   }, [groupData]);
 
+  // Header buttons
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -105,7 +108,7 @@ export default function groupSettings() {
     }
   };
 
-
+  // Handles uploading of group image
   const uploadImage = async (): Promise<string | null> => {
     if (!selectedImage) {
       Alert.alert("No Image Selected", "Please select an image first.");
@@ -114,29 +117,28 @@ export default function groupSettings() {
 
     try {
       setLoading(true);
-      console.log('Starting image upload...');
-
       // Ensure that group and group.id exist
       if (!groupData || !groupData.id) {
         throw new Error('Group data is missing.');
       }
 
       const fileName = `group-images/${groupData.id}/group_${uuidv4()}.jpg`;
-      console.log('Uploading to Supabase:', fileName);
 
       const publicURL = await uploadGroupImage(fileName, currentUserId, selectedImage);
 
       return publicURL;
-    } catch (err: any) {
+    }
+    catch (err: any) {
       console.error('Error uploading image:', err);
       Alert.alert('Error', err.message || 'An unknown error occurred.');
       return null;
-    } finally {
+    }
+    finally {
       setLoading(false);
     }
   };
 
-  // Handeling leaving a group
+  // Handling leaving a group
   const handleLeaveGroup = () => {
     Alert.alert(
       'Leave Group',
@@ -156,7 +158,8 @@ export default function groupSettings() {
               Alert.alert('Success', 'You have left the group.');
               router.back();
               router.back();
-            } catch (error: any) {
+            }
+            catch (error: any) {
               console.error('Error leaving group:', error.message);
               Alert.alert('Error', error.message);
             }
@@ -167,10 +170,12 @@ export default function groupSettings() {
     );
   };
 
+  // State for changing group name
   const handleGroupNameChange = (text: string) => {
     setGroupName(text);
   };
 
+// Handling save details
 const handleSaveDetails = async () => {
   if (groupName.trim() === '') {
     Alert.alert('Validation Error', 'Group name cannot be empty.');
@@ -181,16 +186,11 @@ const handleSaveDetails = async () => {
     setLoading(true);
 
     let imageUrl = groupData.avatar_url || '';
-    console.log('Initial imageUrl:', imageUrl);
 
     if (selectedImage) {
-      console.log('Selected group image URI:', selectedImage);
-
       const uploadedURL = await uploadImage();
-      console.log('Uploaded group image URL:', uploadedURL);
       if (uploadedURL) {
         imageUrl = uploadedURL;
-        console.log('Uploaded group image URL:', imageUrl);
       } else {
         throw new Error('Failed to upload group image.');
       }
@@ -218,6 +218,17 @@ const handleSaveDetails = async () => {
 
   const qrData = groupId;
 
+  // Handling copying of group id
+  const handleCopyId = async () => {
+    try {
+      await Clipboard.setStringAsync(groupId);
+      Alert.alert('Group ID Copied', 'Group ID has been copied to the clipboard.');
+    } catch (error) {
+      console.error('Error copying group ID:', error);
+      Alert.alert('Error', 'Failed to copy group ID to the clipboard.');
+    }
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       {/* Edit Group Info Section */}
@@ -229,6 +240,7 @@ const handleSaveDetails = async () => {
         onChangeText={handleGroupNameChange}
         autoCapitalize="none"
       />
+      {/* Group picture */}
       <View>
         {isGroupImageUploading ? (
           <ActivityIndicator size="large" color="#4CAF50" />
@@ -249,6 +261,7 @@ const handleSaveDetails = async () => {
           </TouchableOpacity>
         )}
       </View>
+      {/* Save button */}
       <TouchableOpacity style={styles.saveButton} onPress={handleSaveDetails}>
         <Text style={styles.saveButtonText}>Save Details</Text>
       </TouchableOpacity>
@@ -265,6 +278,10 @@ const handleSaveDetails = async () => {
         />
       </View>
 
+      <TouchableOpacity onPress={() => handleCopyId()}>
+        <Text style={styles.editHeader}>Copy Group ID:</Text>
+        <Text style={styles.subtitle}>{groupId}</Text>
+      </TouchableOpacity>  
       {/* Leave Group Button */}
       <TouchableOpacity style={styles.leaveButton} onPress={handleLeaveGroup}>
         <Text style={styles.leaveButtonText}>Leave Group</Text>
@@ -319,9 +336,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#FF3B30',
     padding: 15,
     borderRadius: 10,
+    marginTop: 20,
     alignItems: 'center',
     width: '100%',
-    marginTop: 10,
   },
   leaveButtonText: {
     color: '#fff',

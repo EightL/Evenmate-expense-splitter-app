@@ -11,6 +11,8 @@ import { useGetCurrentUserId } from '@/api/getCurrentUserId';
 import defaultProfilePic from '@/assets/images/defaultProfilePic.png';
 import { useQueryClient } from '@tanstack/react-query';
 
+import { ScrollView } from 'react-native';
+
 export default function MatesScreen() {
   const THRESHOLD = 0.01; // Threshold to determine if the balance is zero
   const router = useRouter();
@@ -24,7 +26,7 @@ export default function MatesScreen() {
   }, [matesData]);
 
   // Normalize the balance to convert small values close to zero to zero
-  const displayBalance = (Math.abs(totalBalance) < THRESHOLD ? 0 : totalBalance);
+  const displayBalance = Math.abs(totalBalance) < THRESHOLD ? 0 : totalBalance;
 
   // Function to handle adding a new mate
   const handleAddNewMate = () => {
@@ -38,8 +40,8 @@ export default function MatesScreen() {
     setRefreshing(false);
   };
 
-  // Render the list of mates
-  const renderItem = ({ item }: { item: Mate }) => {
+  // Renders list of mates
+  const renderItem = ({ item }: { item: any }) => {
     const normalizedBalance = Math.abs(item.balance) < THRESHOLD ? 0 : item.balance;
 
     return (
@@ -59,20 +61,20 @@ export default function MatesScreen() {
           })
         }
       >
-        {/* Display the mate information */}
         <View style={styles.mateContainer}>
+          {/* profile picture */}
           <Image
             source={item.profiles.avatar_url && !isImageLoading ? { uri: item.profiles.avatar_url } : defaultProfilePic}
             style={styles.profileImage}
             onLoadEnd={() => setImageLoading(false)}
             onError={() => setImageLoading(false)}
           />
-          {/* Display the mate's name and balance */}
           <Text style={styles.name}>{item.profiles.username}</Text>
           <View style={styles.balanceContainer}>
             <Text style={normalizedBalance >= 0 ? styles.positiveBalance : styles.negativeBalance}>
               {normalizedBalance >= 0 ? 'You lent:' : 'You owe:'}
             </Text>
+            {/* balance */}
             <Text style={normalizedBalance >= 0 ? styles.positiveBalance : styles.negativeBalance}>
               {normalizedBalance.toFixed(2)} CZK
             </Text>
@@ -81,34 +83,37 @@ export default function MatesScreen() {
       </TouchableOpacity>
     );
   };
-  
+
   return (
     <View style={styles.container}>
-      {/* Display the total balance */}
-      <Text style={styles.title}>Balance: {Number(displayBalance) >= 0 ? (
-          <>
+      {/* Fixed header for the balance */}
+      <View>
+        <Text style={styles.title}>
+          Balance: {Number(displayBalance) >= 0 ? (
             <Text style={styles.numberPositive}>{Number(displayBalance).toFixed(2)} CZK</Text>
-          </>
-        ) : (
-          <>
+          ) : (
             <Text style={styles.numberNegative}>{Number(displayBalance).toFixed(2)} CZK</Text>
-          </>
-        )}</Text>
-      {matesData && matesData.length > 0 ? (
-        // Display the list of mates
-        <FlatList
-          data={matesData}
-          keyExtractor={(item) => item.profiles.username}
-          renderItem={renderItem}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.listContainer}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        />
-      ) : (
-          // Display a message if there are no mates
+          )}
+        </Text>
+      </View>
+  
+      {/* Scrollable content below the balance */}
+      <FlatList
+        data={matesData}
+        keyExtractor={(item) => item.profiles.username}
+        renderItem={renderItem}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        ListEmptyComponent={
           <Text style={styles.lessTitle}>Looks like you have no mates! Click 'Add new mate' and start getting even!</Text>
-      )}
-      {/* Add new mate button */}
+        }
+        contentContainerStyle={[
+          styles.listContainer,
+          { flexGrow: matesData && matesData.length === 0 ? 1 : undefined }, // Center empty state
+        ]}
+      />
+  
+      {/* Add New Mate Button */}
       <TouchableOpacity style={styles.button} onPress={handleAddNewMate}>
         <Text style={styles.buttonText}>Add new mate</Text>
       </TouchableOpacity>
@@ -117,6 +122,7 @@ export default function MatesScreen() {
 }
 
 const styles = StyleSheet.create({
+  
   container: {
     flex: 1,
     padding: 20,

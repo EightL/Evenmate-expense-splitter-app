@@ -18,6 +18,7 @@ export default function ExpenseDetailsStack() {
       name="[id]"
       options={{
         title: 'Edit Expense',
+        headerTitleAlign: 'center', // Center the title
         headerRight: () => (
             <Image source={evenmatelogo} style={styles.evenmatelogo} />
           ),

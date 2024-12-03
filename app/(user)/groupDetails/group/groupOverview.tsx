@@ -1,18 +1,11 @@
-// /app/(user)/groupDetails/group/groupOverview.tsx
-// ITU Project, "Evenmate"
-// Author(s): Jakub Lůčný
-// VUT FIT 2024
-
-import React, { useMemo, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, Alert, TouchableOpacity, Image } from 'react-native';
+import { useMemo } from 'react';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, Image } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { supabase } from '@/lib/supabase'; 
 import { useNavigation } from 'expo-router';
 import { useLayoutEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import evenmatelogo from '@/assets/images/Evenmatelogo_1.png';
 import { useGroupMembersWithBalance } from '@/api/groups';
-
 
 type GroupMember = {
   userid: string;
@@ -25,95 +18,31 @@ type GroupMember = {
 export default function GroupOverviewScreen() {
   const router = useRouter();
   const navigation = useNavigation();
-  const { id: groupId, name: groupName, totalBalance } = useLocalSearchParams<{ id: string; name: string; totalBalance: number }>();
-
-  const [session, setSession] = useState<{ user: { id: string } } | null>(null);
-  const [isSessionLoading, setIsSessionLoading] = useState<boolean>(true);
+  const { id: groupId, name: groupName, totalBalance } = useLocalSearchParams();
 
   // Header buttons
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerRight: () => (
-        <Image source={evenmatelogo} style={styles.evenmatelogo}></Image>
-      ),
+      headerRight: () => <Image source={evenmatelogo} style={styles.evenmatelogo}></Image>,
       headerLeft: () => (
         <TouchableOpacity
-            onPress={() => router.back()}
-            accessibilityLabel="Go Back"
-            accessibilityRole="button"
+          onPress={() => router.back()}
+          accessibilityLabel="Go Back"
+          accessibilityRole="button"
         >
-            <Ionicons
-            name='arrow-back'
-            size={30}
-            color="#4CAF50" 
-            />
+          <Ionicons name="arrow-back" size={30} color="#4CAF50" />
         </TouchableOpacity>
       ),
     });
   }, [navigation]);
 
-  // Get current user session
-  useEffect(() => {
-    const fetchSession = async () => {
-      setIsSessionLoading(true);
-      try {
-        const { data, error } = await supabase.auth.getSession();
-        if (error) {
-          console.error('Error fetching session:', error.message);
-          Alert.alert('Authentication Error', 'Failed to retrieve user session.');
-          router.replace('/(auth)/sign-in');         // Navigate to the sign-in screen
-          setIsSessionLoading(false);
-          return;
-        }
-
-        if (data.session) {
-          setSession(data.session);
-        } else {
-          Alert.alert('Not Authenticated', 'Please log in to view group details.');
-          router.replace('/(auth)/sign-in');
-        }
-      } catch (err: any) {
-        console.error('Unexpected error fetching session:', err);
-        Alert.alert('Error', 'An unexpected error occurred.');
-      } finally {
-        setIsSessionLoading(false);
-      }
-    };
-
-    fetchSession();
-
-    // Listen for auth state changes
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, newSession) => {
-      setSession(newSession);
-      if (!newSession) {
-        Alert.alert('Session Ended', 'You have been logged out.');
-        router.replace('/(auth)/sign-in');
-      }
-    });
-
-    // Cleanup listener on unmount
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, [router]);
-
-  // Fetch group members with balance once session is available
+  // Fetch group members with balance
   const { data: groupMembers, error, isLoading } = useGroupMembersWithBalance(groupId);
 
-  // Sort members, placing the current user first
-  const sortedMembers = useMemo(() => {
-    if (!groupMembers) return [];
-    return [...groupMembers].sort((a, b) => {
-      if (a.userid === session?.user.id) return -1;
-      if (b.userid === session?.user.id) return 1;
-      return 0;
-    });
-  }, [groupMembers, session?.user.id]);
-
-  if (isSessionLoading || isLoading) {
+  if (isLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator/>
+        <ActivityIndicator />
       </View>
     );
   }
@@ -126,14 +55,16 @@ export default function GroupOverviewScreen() {
     );
   }
 
-  // Extract current user and other members
-  const currentUser = sortedMembers.find(member => member.userid === session?.user.id);
-  const otherMembers = sortedMembers.filter(member => member.userid !== session?.user.id);
-
+  // Renders group members with balances
   const renderMember = ({ item }: { item: GroupMember }) => (
     <View style={styles.memberContainer}>
       <Text style={styles.username}>{item.profiles.username}</Text>
-      <Text style={[styles.balanceText, item.balance < 0 ? styles.negativeBalance : styles.positiveBalance]}>
+      <Text
+        style={[
+          styles.balanceText,
+          item.balance < 0 ? styles.negativeBalance : styles.positiveBalance,
+        ]}
+      >
         {item.balance >= 0
           ? `You lent: ${Number(item.balance).toFixed(2)} CZK`
           : `You owe: ${Number(item.balance).toFixed(2)} CZK`}
@@ -145,26 +76,29 @@ export default function GroupOverviewScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>Group Members Overview</Text>
 
-      {/* Current User Container */}
-      {session?.user.id && (
-        <View style={styles.currentUserContainer}>
-          <Text style={styles.currentUserTitle}>Your Balance</Text>
-          <Text style={[styles.totalBalance, totalBalance < 0 ? styles.negativeBalance : styles.positiveBalance]}>
-            {totalBalance >= 0 ? `${Number(totalBalance).toFixed(2)} CZK` : `${Number(totalBalance).toFixed(2)} CZK`}
-          </Text>
-        </View>
-      )}
+      {/* Total Balance Container */}
+      <View style={styles.currentUserContainer}>
+        <Text style={styles.currentUserTitle}>Group Balance</Text>
+        <Text
+          style={[
+            styles.totalBalance,
+            totalBalance < 0 ? styles.negativeBalance : styles.positiveBalance,
+          ]}
+        >
+          {totalBalance >= 0 ? `${Number(totalBalance).toFixed(2)} CZK` : `${Number(totalBalance).toFixed(2)} CZK`}
+        </Text>
+      </View>
 
-      {/* Other Members List */}
+      {/* Members List */}
       <Text style={styles.subTitle}>Members</Text>
       <FlatList
-        data={otherMembers}
+        data={groupMembers}
         keyExtractor={(item) => item.userid}
         renderItem={renderMember}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
-          <Text style={styles.noMembersText}>No other members in the group.</Text>
+          <Text style={styles.noMembersText}>No members in the group.</Text>
         }
       />
     </View>

@@ -24,6 +24,7 @@ export default function EditTodoScreen() {
   const { id: todoId } = useLocalSearchParams();
   const queryClient = useQueryClient();
 
+  // States
   const [todoName, setTodoName] = useState('');
   const [todoDescription, setTodoDescription] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
@@ -38,8 +39,9 @@ export default function EditTodoScreen() {
     }
   }, [todo]);
 
-  // handeling of when user presses delete
+  // handeling of when user presses delete todo
   const handleDeleteTodo = async () => {
+    // confirmation pop-up
     Alert.alert(
       'Confirm Deletion',
       'Are you sure you want to delete this to-do?',
@@ -58,7 +60,6 @@ export default function EditTodoScreen() {
 
               // Refresh data
               queryClient.invalidateQueries();
-              router.back();
             }
             catch (error: any) {
               console.error('Error deleting to-do:', error.message);
@@ -66,6 +67,7 @@ export default function EditTodoScreen() {
             }
             finally {
               setIsDeleting(false);
+              router.back();
             }
           },
         },
@@ -80,7 +82,8 @@ export default function EditTodoScreen() {
       Alert.alert('Validation Error', 'Please enter both name and description.');
       return;
     }
-
+    
+    // Update the to-do
     try {
       setIsUpdating(true);
       await updateTodo(todoId, todoName, todoDescription);
@@ -117,12 +120,14 @@ export default function EditTodoScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Edit To-Do Details</Text>
+      {/* text input for name */}
       <TextInput
         style={styles.input}
         placeholder="To-Do Name"
         value={todoName}
         onChangeText={setTodoName}
       />
+      {/* text input with description */}
       <TextInput
         style={styles.descriptionInput}
         placeholder="To-Do Description"
@@ -132,6 +137,7 @@ export default function EditTodoScreen() {
       />
       <View style={styles.flexContainer} />
       <View style={styles.buttonContainer}>
+        {/* update button */}
         <Pressable
           style={[
             styles.updateButton,
@@ -145,7 +151,8 @@ export default function EditTodoScreen() {
             <Text style={styles.updateButtonText}>Update To-Do</Text>
           )}
         </Pressable>
-    
+
+        {/* delete button */}
         <Pressable
           style={[
             styles.deleteButton,

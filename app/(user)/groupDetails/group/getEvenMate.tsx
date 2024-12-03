@@ -3,7 +3,7 @@
 // Author(s): Jakub Lůčný
 // VUT FIT 2024
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View, TextInput, Text, StyleSheet, Alert, Keyboard, TouchableWithoutFeedback, Image, TouchableOpacity } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
@@ -27,11 +27,13 @@ export default function GetEvenInput() {
   const [isImageLoading, setImageLoading] = useState(true);
   const [amount, setAmount] = useState('');
 
+  // fetch data
   const { data: currentUserId, error: currentUserError } = useGetCurrentUserId();
   const { data: balance } = useGetBalance(currentUserId, mateId);
 
   const avatar_url = null;
 
+  // header
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -81,7 +83,8 @@ export default function GetEvenInput() {
 
         router.back();
         router.back();
-      } catch (error: any) {
+      }
+      catch (error: any) {
         console.error('Error updating balance:', error.message);
         Alert.alert('Error', error.message);
       }

@@ -12,7 +12,7 @@ type UpdateBalancesParams = {
   share: number;
 };
 
-// Update balances for all mates
+// Updates balances for all specified mates
 export const handleUpdateBalances = async ({
   currentUserId,
   mateIds,
@@ -37,7 +37,7 @@ export const handleUpdateBalances = async ({
       }
 
       if (data && data.length > 0) {
-        // Relationship exists, update each balance record
+        // Relationship exists, update each balance
         for (const balanceRecord of data) {
           if (balanceRecord.user1 === currentUserId && balanceRecord.user2 === mateId) {
             const newBalance = balanceRecord.balance + share;
@@ -45,7 +45,8 @@ export const handleUpdateBalances = async ({
               .from('rel_uubalance')
               .update({ balance: newBalance })
               .eq('id', balanceRecord.id);
-          } else if (balanceRecord.user1 === mateId && balanceRecord.user2 === currentUserId) {
+          }
+          else if (balanceRecord.user1 === mateId && balanceRecord.user2 === currentUserId) {
             const newBalance = balanceRecord.balance - share;
             await supabase
               .from('rel_uubalance')
@@ -53,7 +54,8 @@ export const handleUpdateBalances = async ({
               .eq('id', balanceRecord.id);
           }
         }
-      } else {
+      }
+      else {
         // No existing record, insert both pairs
         const { error: insertError } = await supabase
           .from('rel_uubalance')
@@ -68,8 +70,8 @@ export const handleUpdateBalances = async ({
       }
     }
 
-    // Alert.alert('Success', 'Balances updated successfully.')
-  } catch (err: any) {
+  }
+  catch (err: any) {
     Alert.alert('Error', err.message);
     throw err;
   }

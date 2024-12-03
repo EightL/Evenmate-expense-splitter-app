@@ -118,12 +118,9 @@ const AccountSettings = () => {
     }
   
     try {
-      setLoading(true);
-      console.log('Starting image upload...');
-  
+      setLoading(true);  
       // Generate a unique file name
       const fileName = `avatars/${currentUserId}/profile_${uuidv4()}.jpg`;
-      console.log('Uploading to Supabase:', fileName);
   
       // Calls a backend function to upload the image
       const publicURL = await uploadImageToStorage(fileName, currentUserId, selectedImage);
@@ -131,8 +128,6 @@ const AccountSettings = () => {
       if (!publicURL) {
         throw new Error('Failed to retrieve public URL after upload.');
       }
-
-      console.log('Image uploaded successfully:', publicURL);
 
       return publicURL;
     } catch (err: any) {
@@ -150,23 +145,17 @@ const AccountSettings = () => {
       setLoading(true);
   
       let imageUrl = user.avatar_url || profile.avatar_url;
-      console.log('Initial imageUrl:', imageUrl);
   
-      if (selectedImage) {
-        console.log('Selected image URI:', selectedImage);
-        
+      if (selectedImage) {        
         // Upload the image and get the URL
         const uploadedURL = await uploadImage();
         if (uploadedURL) {
           imageUrl = uploadedURL;
-          console.log('Uploaded image URL:', imageUrl);
         } else {
           throw new Error('Failed to obtain uploaded image URL.');
         }
       }
-  
-      console.log('Updating profile with imageUrl:', imageUrl);
-      
+
       // Update the user's profile
       await useUpdateProfile({
         id: profile.id,
@@ -187,12 +176,13 @@ const AccountSettings = () => {
 
   // Handle user logout
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      Alert.alert('Error', error.message);
-    } else {
+    // const { error } = await supabase.auth.signOut();
+    // if (error) {
+    //   Alert.alert('Error', error.message);
+    // }
+    // else {
       router.replace('/(auth)/sign-in'); // Navigate to login screen
-    }
+    // }
   };
 
   if (isProfileLoading || loading) {
@@ -365,6 +355,7 @@ const styles = StyleSheet.create({
       fontSize: 20,
       fontWeight: '600',
       textAlign: 'center',
+      marginBottom: 20,
     },
     errorText: {
       color: 'red',

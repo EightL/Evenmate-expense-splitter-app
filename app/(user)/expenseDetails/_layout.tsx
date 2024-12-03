@@ -45,7 +45,7 @@ export default function ExpenseStack() {
             title: 'Add expense',
             headerTitleAlign: 'center', // Center the title
             headerLeft: () => (
-              <Pressable onPress={() => setCatModalVisible(true)}> {/* Cat easter egg trigger */}
+              <Pressable style={styles.iconhitbox} onPress={() => setCatModalVisible(true)}> {/* Cat easter egg trigger */}
                 <Image source={evenmatelogo} style={styles.evenmatelogo} />
               </Pressable>
             ),
@@ -54,7 +54,7 @@ export default function ExpenseStack() {
                 onPress={() => router.push('/account')}
                 accessibilityLabel="Account"
                 accessibilityRole="button"
-                style={{marginRight: 5}}
+                style={styles.iconhitbox}
               >
                 <FontAwesome
                   name="user"
@@ -72,16 +72,9 @@ export default function ExpenseStack() {
             headerTitleAlign: 'center', // Center the title
            }}
         />
-        <Stack.Screen
-          name="account"
-          options={{
-            headerShown: false,
-            title: 'Account',
-          }}
-        />
       </Stack>
 
-      {/* Cat Easter Egg Modal */}
+      {/* EvenCat Easter Egg Modal */}
       <CatEasterEgg
         visible={catModalVisible}
         onClose={() => setCatModalVisible(false)}

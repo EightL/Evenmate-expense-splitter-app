@@ -14,7 +14,7 @@ const { error } = await supabase.auth.signUp({
     password,
     options: {
     data: {
-        username, // Include username in the sign-up data
+        username,
     },
     },
 });

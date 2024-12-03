@@ -5,7 +5,7 @@
 import { supabase } from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
 
-// Retrieve balance between specified users
+// Returns balance between specified users
 export const useGetBalance = (currentUserId, mateId) => {
     return useQuery({
         queryKey: ['uubalance', currentUserId, mateId],

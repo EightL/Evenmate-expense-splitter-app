@@ -6,7 +6,6 @@
 import { Pressable, StyleSheet, Image } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { FontAwesome, Ionicons } from '@expo/vector-icons';
-// Import the Evenmate logo
 import evenmatelogo from '@/assets/images/Evenmatelogo_1.png';
 
 export default function ExpenseStack() {
@@ -17,7 +16,6 @@ export default function ExpenseStack() {
       <Stack.Screen
         name="index"
         options={{
-          
           title: 'Account',
           headerTitleAlign: 'center', // Center the title
           headerRight: () => (
@@ -25,6 +23,7 @@ export default function ExpenseStack() {
               onPress={() => router.push('/account/accountSettings')}
               accessibilityLabel="Account"
               accessibilityRole="button"
+              style={{padding: 10}}
             >
               <Ionicons
                 name="settings"
@@ -38,6 +37,7 @@ export default function ExpenseStack() {
               onPress={() => router.back()}
               accessibilityLabel="Go Back"
               accessibilityRole="button"
+              style={{padding: 10}}
             >
               <Ionicons
                 name='arrow-back'
@@ -52,6 +52,7 @@ export default function ExpenseStack() {
       name="accountSettings"
       options={{
         title: 'Account Settings',
+        headerTitleAlign: 'center', // Center the title
         headerRight: () => (
             <Image source={evenmatelogo} style={styles.evenmatelogo} />
           ),

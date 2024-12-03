@@ -21,6 +21,7 @@ export default function ExpenseDetailsStack() {
       name="[id]"
       options={{
         title: 'Expense',
+        headerTitleAlign: 'center', // Center the title
         headerRight: () => (
             <Image source={evenmatelogo} style={styles.evenmatelogo} />
           ),
@@ -28,6 +29,7 @@ export default function ExpenseDetailsStack() {
         <TouchableOpacity
             onPress={() => router.back()}
             accessibilityLabel="Go Back"
+            style={{padding: 10}}
             accessibilityRole="button"
         >
             <Ionicons

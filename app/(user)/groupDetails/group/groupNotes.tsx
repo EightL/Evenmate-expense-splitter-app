@@ -86,7 +86,7 @@ const GroupNotes: React.FC<GroupNotesProps> = () => {
     try {
       await updateGroupNotes(id as string, notes);
       Alert.alert('Success', 'Notes have been updated.');
-      router.back(); // Navigate back to the previous screen
+      router.back();
     } catch (err: any) {
       setError(err.message || 'Failed to update notes.');
       Alert.alert('Error', err.message || 'Failed to update notes.');
@@ -104,19 +104,13 @@ const GroupNotes: React.FC<GroupNotesProps> = () => {
   }
 
   if (error) {
-    return (
-      <View style={styles.centered}>
-        <Text style={styles.errorText}>{error}</Text>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Text style={styles.backButtonText}>Go Back</Text>
-        </TouchableOpacity>
-      </View>
-    );
+    return;
   }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.heading}>Group Notes</Text>
+      <Text style={styles.heading}>Notes</Text>
+      {/* Box with notes */}
       <TextInput
         style={styles.textInput}
         multiline
@@ -127,6 +121,7 @@ const GroupNotes: React.FC<GroupNotesProps> = () => {
         placeholderTextColor="#999"
         editable={!isSaving}
       />
+      {/* Save button */}
       <TouchableOpacity
         style={[styles.saveButton, { backgroundColor: isSaving ? '#ccc' : '#4CAF50' }]}
         onPress={handleSaveNotes}

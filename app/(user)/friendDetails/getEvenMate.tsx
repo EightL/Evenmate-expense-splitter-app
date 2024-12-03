@@ -68,6 +68,7 @@ export default function GetEvenInput() {
           mateIds: [mateId],
           share: numericAmount,
         });
+        // reset fetched data
         queryClient.invalidateQueries({ queryKey: ['mates', currentUserId] });
         queryClient.invalidateQueries({ queryKey: ['mates', mateId] });
 

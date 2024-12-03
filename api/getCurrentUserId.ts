@@ -25,6 +25,6 @@ export const useGetCurrentUserId = () => {
 
       return session.user.id;
     },
-    refetchOnMount: 'always', // Ensures query refetches on each mount
+    refetchOnMount: 'always',
   });
 };

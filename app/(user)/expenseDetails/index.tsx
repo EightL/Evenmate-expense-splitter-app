@@ -62,6 +62,7 @@ export default function AddExpenseScreen() {
           ? params.mateNames.split(',')
           : params.mateNames;
 
+      // Create an array of mates
       const mates = mateIdsArray.map((id: string, index: number) => ({
         id,
         name: mateNamesArray[index],
@@ -83,6 +84,7 @@ export default function AddExpenseScreen() {
     }
   }, [params.mateIds, params.mateNames, params.icon]);
 
+  // Split with button redirection
   const handleAddMates = () => {
     router.push({
       pathname: '/expenseDetails/selectMates',
@@ -94,6 +96,7 @@ export default function AddExpenseScreen() {
     });
   };
 
+  // Handeling final submit of expense with all balance updates,...
   const handleSubmitExpense = async () => {
     // Input validation
     if (!expenseName.trim() || !cost.trim()) {
@@ -174,7 +177,7 @@ export default function AddExpenseScreen() {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       {/* Main container */}
       <View style={styles.container}>
-        <Text style={styles.title}>Add Expense</Text>
+        <Text style={styles.title}>Add New Expense</Text>
         <View style={styles.mainContainer}>
           {/* First container */}
           <View style={styles.rowContainer}>
@@ -184,6 +187,7 @@ export default function AddExpenseScreen() {
               value={expenseName}
               onChangeText={setExpenseName}
             />
+            {/* Icon selector */}
             <TouchableOpacity style={styles.iconContainer} onPress={() => setModalVisible(true)}>
               <MaterialCommunityIcons name={selectedIcon} size={30} color="black" />
             </TouchableOpacity>

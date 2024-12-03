@@ -18,7 +18,7 @@ import { useNavigation } from 'expo-router';
 
 export default function AddNewMateScreen() {
   const router = useRouter();
-  const queryClient = useQueryClient(); // Initialize the query client
+  const queryClient = useQueryClient();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
@@ -44,6 +44,7 @@ export default function AddNewMateScreen() {
       headerRight: () => (
         <Image source={evenmatelogo} style={styles.evenmatelogo}></Image>
       ),
+      // go back button
       headerLeft: () => (
         <TouchableOpacity
             onPress={() => router.back()}
@@ -83,26 +84,29 @@ export default function AddNewMateScreen() {
       if (existingProfile) {
         // Check if the relationship already exists to prevent duplicates
         const existingRelationship = await getExistingRelationship(currentUserId, existingProfile.id);
-
+        console.log("EXISTINGGG",existingRelationship); // returns null ??
         if (existingRelationship) {
           Alert.alert('Info', 'You are already mates with this user.');
-        } else {
+        }
+        else {
           // Create a new mate relationship
           await createMateRelationship(existingProfile.id, currentUserId);
           // Update queries
           queryClient.invalidateQueries({ queryKey: ['mates', currentUserId] });
           queryClient.invalidateQueries({ queryKey: ['mates', existingProfile.id] });
-          queryClient.invalidateQueries();
         }
-      } else {
+      }
+      else {
         Alert.alert('Not Found', 'No user found with this email address.');
       }
       // Navigate back to the Mates screen after adding
       router.back();
-    } catch (error: any) {
+    }
+    catch (error: any) {
       console.error('Error adding mate:', error.message);
       Alert.alert('Error', error.message);
-    } finally {
+    }
+    finally {
       setLoading(false);
     }
   };
@@ -114,11 +118,6 @@ export default function AddNewMateScreen() {
     setScanned(true);
     setScannerVisible(false);
     setEmail(data.trim());
-
-    Alert.alert('Mate Scanned', `Email: ${data.trim()}`, [
-      { text: 'Cancel', style: 'cancel', onPress: () => setScanned(false) },
-      { text: 'Add New Mate', onPress: () => handleAddMate() },
-    ]);
   };
 
   // Function to handle the scan button press
@@ -166,13 +165,13 @@ export default function AddNewMateScreen() {
       {loading ? (
         <ActivityIndicator />
       ) : (
-        <Pressable style={styles.button} onPress={handleAddMate}>
+        <Pressable style={styles.button} onPress={() => handleAddMate()}>
           <Text style={styles.buttonText}>Add</Text>
         </Pressable>
       )}
   
       {/* Scan QR Code Button */}
-      <Pressable style={styles.scanButton} onPress={handleScanPress}>
+      <Pressable style={styles.scanButton} onPress={() => handleScanPress()}>
         <Ionicons name="qr-code" size={24} color="#fff" />
         <Text style={styles.scanButtonText}>Scan QR Code</Text>
       </Pressable>
@@ -182,9 +181,8 @@ export default function AddNewMateScreen() {
         <View style={styles.scannerContainer}>
           {/* Camera View */}
           <CameraView
-            ref={cameraRef}
             style={StyleSheet.absoluteFillObject}
-            onBarcodeScanned={scanned ? undefined :  handleBarcodeScanned}
+            onBarcodeScanned={scanned ? undefined : handleBarcodeScanned}
             barcodeScannerSettings={{
               barcodeTypes: ["qr", "pdf417"],
             }}

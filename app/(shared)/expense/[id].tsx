@@ -42,6 +42,7 @@ export default function ExpenseDetailScreenInMates() {
     return <ActivityIndicator/>;
   }
 
+  // Check for errors
   if (error) {
     return <Text style={styles.errorText}>{`Error: ${error}`}</Text>;
   }
@@ -62,7 +63,7 @@ export default function ExpenseDetailScreenInMates() {
           <Text style={styles.title}>{expense.name}</Text>
           <Text style={styles.price}>{(expense.amount).toFixed(2)} CZK</Text>
           <Text style={styles.details}>
-            Paid by: <Text style={{ fontWeight: 'bold' }}>{User.username}</Text>on <Text style={{fontWeight: 'bold'}}>{new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(new Date(expense.created_at))}</Text>
+            Paid by: <Text style={{ fontWeight: 'bold' }}>{User.username}</Text> on <Text style={{fontWeight: 'bold'}}>{new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(new Date(expense.created_at))}</Text>
           </Text>
         </View>
       </View>

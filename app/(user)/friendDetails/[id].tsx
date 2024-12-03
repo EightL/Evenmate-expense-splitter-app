@@ -37,6 +37,7 @@ export default function FriendDetailScreen() {
   // Header
   useLayoutEffect(() => {
     navigation.setOptions({
+      // remove friend button
       headerRight: () => (
         <TouchableOpacity
           onPress={() => { handleRemoveFriend() }}
@@ -45,6 +46,7 @@ export default function FriendDetailScreen() {
           <Ionicons name="trash" size={24} color="#000" />
         </TouchableOpacity>
       ),
+      // go back button
       headerLeft: () => (
         <TouchableOpacity
             onPress={() => router.back()}
@@ -54,7 +56,7 @@ export default function FriendDetailScreen() {
             <Ionicons
             name='arrow-back'
             size={30}
-            color="#4CAF50" // Blue color for back button
+            color="#4CAF50" // Blue color
             />
         </TouchableOpacity>
       ),
@@ -113,7 +115,6 @@ export default function FriendDetailScreen() {
     );
   }
 
-
   type Expense = {
     id: string;
     name: string;
@@ -124,6 +125,7 @@ export default function FriendDetailScreen() {
     involved_people: number;
   };
 
+  // Sort expenses by newest
   const sortedExpensesData = expensesList?.slice().sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   // Rendering each expense
@@ -195,7 +197,7 @@ export default function FriendDetailScreen() {
         <View>
           <Text style={styles.name}>{name}</Text>
           <Text style={styles.balance}>
-            {Number(balance) >= 0 ? ( <> You lent: <Text style={styles.numberPositive}>{Number(balance).toFixed(2)} CZK</Text> </> ) : ( <> You owe: <Text style={styles.numberNegative}>{Number(balance).toFixed(2)} CZK</Text> </> )}
+            {Number(balance) >= 0 ? ( <>You lent: <Text style={styles.numberPositive}>{Number(balance).toFixed(2)} CZK</Text> </> ) : ( <>You owe: <Text style={styles.numberNegative}>{Number(balance).toFixed(2)} CZK</Text> </> )}
           </Text>
         {/* Profile Image */}
         </View>
@@ -386,12 +388,12 @@ const styles = StyleSheet.create({
   numberPositive: {
     color: 'green',
     fontWeight: 'bold',
-    fontSize: 18,
+    fontSize: 20,
   },
   numberNegative: {
     color: 'red',
     fontWeight: 'bold',
-    fontSize: 18,
+    fontSize: 20,
   },
   mainContainer2: {
     flexDirection: 'row',
