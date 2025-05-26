@@ -5,6 +5,8 @@
 - **Jakub Lůčný**  
 - *VUT FIT 2024/2025*
 
+![Logo](screenshots/image)
+
 ---
 # Evenmate – Split-&-Settle Expenses with Friends
 
@@ -32,6 +34,17 @@
 | **QR onboarding** | Join a group or add a mate by scanning a QR code – no e-mail search needed. |
 | **Notes & To-Do** | Shared whiteboard and task list inside every group for packing lists or chores. Drag to complete. |
 | **Realtime sync** | Supabase channel broadcasts instantly update all open devices. |
+
+## Design
+
+### Groups
+![1](screenshots/Evenmate_groups)
+### Get Even, Expenses
+![2](screenshots/Evenmate_Geteven_expenses)
+### Auth, Group
+![3](screenshots/Evenmate_authentication_group)
+### Account, Mates
+![4](screenshots/Evenmate_Account_Mates)
 
 ---
 
