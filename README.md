@@ -6,71 +6,83 @@
 - *VUT FIT 2024/2025*
 
 ---
+# Evenmate – Split-&-Settle Expenses with Friends
 
-# Evenmate – Mobile Expense-Sharing App
-
-A cross-platform (iOS / Android) application that helps friends **track, split and settle shared costs** in real time.  
-Built during the *Mobile Applications* course (FIT VUT, 2024/25).
+> **Cross-platform mobile app (React Native + Expo, TypeScript) that lets friends keep a shared ledger, optimise repayments and plan events – backed by Supabase (PostgreSQL, Auth, Realtime).**  
 
 ---
 
-## ✨ Key Features
-| Area | Highlights |
-|------|------------|
-| **Expense tracking** | Add expenses to friends or groups, auto-split by shares or custom amounts, view who owes whom. :contentReference[oaicite:0]{index=0} |
-| **Groups & friends** | Create / join groups via QR code, keep personal friend lists with running balances. :contentReference[oaicite:1]{index=1} |
-| **Settle debts** | One-tap **“Get Even”** button optimises repayments between users. :contentReference[oaicite:2]{index=2} |
-| **Notes & To-do** | Group whiteboard and task list (CRUD, drag to complete) for event planning. :contentReference[oaicite:3]{index=3} |
-| **User profile** | Avatar, bank account, editable bio, share profile as QR. :contentReference[oaicite:4]{index=4} |
+## 📑 Contents
+1. [Key features](#key-features)  
+2. [Tech stack](#tech-stack)  
+3. [System architecture](#system-architecture)  
+4. [Database & API highlights](#database--api-highlights)  
+5. [UX research & testing](#ux-research--testing)  
+6. [Directory Structure](#directory-structure)  
 
 ---
 
-## 🏗️ Tech Stack
-- **React Native + Expo** for a single-codebase mobile UI :contentReference[oaicite:5]{index=5}  
-- **Supabase (PostgreSQL, Auth, Realtime)** as the backend-as-a-service :contentReference[oaicite:6]{index=6}  
-- **React-Query** data layer; TypeScript throughout  
-- E2E tests in **Cypress** / Expo Go device runs
+## Key features
+
+| Domain | Details |
+|--------|---------|
+| **Expense tracking** | Add an expense, pick participants, choose *equal*, *shares* or custom split. The UI always shows *who owes whom* at a glance.|
+| **Multi-group & friends ledger** | Keep personal friend balances and belong to multiple groups at once – each with its own currency and picture. |
+| **Get Even optimiser** | Single-tap algorithm minimises the number of repayments between any two users. |
+| **QR onboarding** | Join a group or add a mate by scanning a QR code – no e-mail search needed. |
+| **Notes & To-Do** | Shared whiteboard and task list inside every group for packing lists or chores. Drag to complete. |
+| **Realtime sync** | Supabase channel broadcasts instantly update all open devices. |
+
+---
+
+## Tech stack
+
+| Layer | Technology | Why |
+|-------|------------|-----|
+| **UI** | React Native + Expo | Single codebase, OTA updates, Expo Go for fast testing. |
+| **State / Data** | React-Query | Typed hooks wrapping Supabase RPC / REST. |
+| **Backend-as-a-Service** | Supabase (PostgreSQL + Auth + Realtime) | Open-source, instant REST endpoints, row-level security. |
+---
+
+## System architecture
 
 ```
 
-client ↔ REST API / Realtime ↔ Supabase
+┌──────────────┐        HTTPS / Realtime WS        ┌──────────────┐
+│   Expo app   │  ───────────────────────────────► │  Supabase    │
+│ (React Native│                                   │  (PostgreSQL │
+│   + TypeScript)◄───────────────────────────────  │   + Auth)    │
+└──────────────┘   Row Level Security + RPC       └──────────────┘
 
 ````
-Architecture cleanly separates front-end and backend services :contentReference[oaicite:7]{index=7}.
 
-### Selected API End-points
-| Function | Purpose |
-|----------|---------|
-| `useExpenseInfo(id)` | fetch complete expense detail |
-| `createMateRelationship(mateId)` | mutual friendship + zero balance |
-| `useGroupMembersWithBalance(groupId)` | members & current debts | :contentReference[oaicite:8]{index=8} |
+Front-end and back-end are completely decoupled. All data flows through typed
+hooks (React-Query) that wrap Supabase RPC functions such as
+`useGroupMembersWithBalance(groupId)` and `createMateRelationship(mateId)`.
 
 ---
 
-## 👤 My Contribution (Martin Ševčík)
-- **User account module** – profile edit, authentication hooks, QR share   
-- **Friends dashboard** – list with per-friend balance, add / accept requests :contentReference[oaicite:10]{index=10}  
-- **Expense CRUD** – dialogs, custom split logic, *Get Even* settlement :contentReference[oaicite:11]{index=11}  
-- Unit & UX tests; peer usability study and iteration after feedback :contentReference[oaicite:12]{index=12}  
+## Database & API highlights
+
+| Table / RPC | Purpose |
+|-------------|---------|
+| **`users`** | profile, avatar URL, IBAN, created_at |
+| **`mates`** | mutual friendships with running balance |
+| **`groups`** | name, currency, picture, owner_id |
+| **`expenses`** | title, amount, group_id (nullable), payer_id, created_at |
+| **`rel_owes`** | *n:m* bridge ⇒ who owes how much on each expense |
+| **`createExpense()`** | inserts expense + bulk `rel_owes`, returns new balance snapshot |
+| **`getEvenMate()`** | returns minimal repayment graph between two users  |
+
+
+## UX research & testing
+
+* Comparative analyses (Splitwise, Tricount, SettleUp) uncovered pain-points like hidden debt
+overview and pay-walled features.  
+* Hallway tests (1 × tech-savvy, 3 × average user) praised simplicity but flagged profile-edit
+discoverability; button prominence fixed in v1.1.  
 
 ---
-
-## 🚀 Running Locally
-```bash
-# prerequisites: Node 20+, Expo CLI
-npm install
-expo start         # QR-launch on device or run in emulator
-````
-
-> Supabase keys are stored in `.env.example` – create `.env` with your own project keys.
-
----
-
-## ✅ Testing
-
-* **Cypress** workflows validate happy paths + edge cases (QR join, debt settle).
-* Two hallway-tests uncovered navigation pain-points; moving the QR button to the
-  group header improved discoverability .
 
 ## Directory Structure
 The following is the structure of the Evenmate project:
