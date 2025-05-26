@@ -5,7 +5,7 @@
 - **Jakub Lůčný**  
 - *VUT FIT 2024/2025*
 
-![Logo](/screenshots/image)
+![Logo](/screenshots/image.png)
 
 ---
 # Evenmate – Split-&-Settle Expenses with Friends
@@ -38,13 +38,13 @@
 ## Design
 
 ### Groups
-![1](/screenshots/Evenmate_groups)
+![1](/screenshots/Evenmate_groups.png)
 ### Get Even, Expenses
-![2](/screenshots/Evenmate_Geteven_expenses)
+![2](/screenshots/Evenmate_Geteven_expenses.png)
 ### Auth, Group
-![3](/screenshots/Evenmate_authentication_group)
+![3](/screenshots/Evenmate_authentication_group.png)
 ### Account, Mates
-![4](/screenshots/Evenmate_Account_Mates)
+![4](/screenshots/Evenmate_Account_Mates.png)
 
 ---
 
